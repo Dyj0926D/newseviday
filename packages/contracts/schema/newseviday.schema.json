@@ -1,0 +1,396 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://newseviday.dev/schema/newseviday-v1.json",
+  "title": "NewsEviday shared data contracts",
+  "type": "object",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "isoDateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generatedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "titleZh",
+        "summaryZh",
+        "keyPoints",
+        "provider",
+        "model",
+        "promptVersion",
+        "generatedAt"
+      ],
+      "properties": {
+        "titleZh": { "type": ["string", "null"] },
+        "summaryZh": { "type": ["string", "null"] },
+        "keyPoints": { "type": "array", "items": { "type": "string" } },
+        "provider": { "const": "deepseek" },
+        "model": { "type": "string", "minLength": 1 },
+        "promptVersion": { "type": "string", "minLength": 1 },
+        "generatedAt": { "$ref": "#/$defs/isoDateTime" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "name",
+        "kind",
+        "homepageUrl",
+        "feedUrl",
+        "language",
+        "region",
+        "active",
+        "usageScope"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["atom", "rss", "json", "html", "manual"] },
+        "homepageUrl": { "type": "string", "format": "uri" },
+        "feedUrl": { "type": ["string", "null"], "format": "uri" },
+        "language": { "type": "string", "minLength": 2 },
+        "region": { "type": "string", "minLength": 2 },
+        "active": { "type": "boolean" },
+        "usageScope": { "type": "string", "minLength": 1 }
+      }
+    },
+    "article": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "sourceId",
+        "canonicalUrl",
+        "language",
+        "publishedAt",
+        "collectedAt",
+        "facts",
+        "ai",
+        "evidenceIds",
+        "topicScores",
+        "contentHash"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "sourceId": { "$ref": "#/$defs/id" },
+        "canonicalUrl": { "type": "string", "format": "uri" },
+        "language": { "type": "string", "minLength": 2 },
+        "publishedAt": { "oneOf": [{ "$ref": "#/$defs/isoDateTime" }, { "type": "null" }] },
+        "collectedAt": { "$ref": "#/$defs/isoDateTime" },
+        "facts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["title", "authors", "abstract"],
+          "properties": {
+            "title": { "type": "string", "minLength": 1 },
+            "authors": { "type": "array", "items": { "type": "string" } },
+            "abstract": { "type": ["string", "null"] }
+          }
+        },
+        "ai": { "oneOf": [{ "$ref": "#/$defs/generatedText" }, { "type": "null" }] },
+        "evidenceIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "topicScores": {
+          "type": "object",
+          "additionalProperties": { "type": "number", "minimum": 0 }
+        },
+        "contentHash": { "type": "string", "minLength": 16 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "id", "articleId", "sourceId", "url", "excerpt", "retrievedAt"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "articleId": { "$ref": "#/$defs/id" },
+        "sourceId": { "$ref": "#/$defs/id" },
+        "url": { "type": "string", "format": "uri" },
+        "excerpt": { "type": "string" },
+        "retrievedAt": { "$ref": "#/$defs/isoDateTime" }
+      }
+    },
+    "chunk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "articleId",
+        "position",
+        "text",
+        "language",
+        "tokenEstimate",
+        "contentHash"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "articleId": { "$ref": "#/$defs/id" },
+        "position": { "type": "integer", "minimum": 0 },
+        "text": { "type": "string", "minLength": 1 },
+        "language": { "type": "string", "minLength": 2 },
+        "tokenEstimate": { "type": "integer", "minimum": 0 },
+        "contentHash": { "type": "string", "minLength": 16 }
+      }
+    },
+    "pipelineRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "startedAt",
+        "finishedAt",
+        "status",
+        "configVersion",
+        "sourceIds",
+        "stages",
+        "errorCode"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "startedAt": { "$ref": "#/$defs/isoDateTime" },
+        "finishedAt": { "oneOf": [{ "$ref": "#/$defs/isoDateTime" }, { "type": "null" }] },
+        "status": { "enum": ["running", "succeeded", "failed"] },
+        "configVersion": { "type": "integer", "minimum": 1 },
+        "sourceIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["stage", "status", "inputCount", "outputCount", "durationMs", "reason"],
+            "properties": {
+              "stage": {
+                "enum": [
+                  "fetch",
+                  "extract",
+                  "normalize",
+                  "exact_dedup",
+                  "fuzzy_dedup",
+                  "select",
+                  "snapshot"
+                ]
+              },
+              "status": { "enum": ["succeeded", "skipped", "failed"] },
+              "inputCount": { "type": "integer", "minimum": 0 },
+              "outputCount": { "type": "integer", "minimum": 0 },
+              "durationMs": { "type": "integer", "minimum": 0 },
+              "reason": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "errorCode": { "type": ["string", "null"] }
+      }
+    },
+    "brief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "title",
+        "periodStart",
+        "periodEnd",
+        "sections",
+        "generatedBy",
+        "publishedAt"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "periodStart": { "$ref": "#/$defs/isoDateTime" },
+        "periodEnd": { "$ref": "#/$defs/isoDateTime" },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["heading", "body", "evidenceIds"],
+            "properties": {
+              "heading": { "type": "string" },
+              "body": { "type": "string" },
+              "evidenceIds": { "type": "array", "items": { "$ref": "#/$defs/id" } }
+            }
+          }
+        },
+        "generatedBy": { "oneOf": [{ "$ref": "#/$defs/generatedText" }, { "type": "null" }] },
+        "publishedAt": { "$ref": "#/$defs/isoDateTime" }
+      }
+    },
+    "ragTrace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "createdAt",
+        "queryFingerprint",
+        "retrievalMode",
+        "rankedCandidates",
+        "injectedChunkIds",
+        "answerId",
+        "fallbackReason",
+        "latencyMs"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "createdAt": { "$ref": "#/$defs/isoDateTime" },
+        "queryFingerprint": { "type": "string", "minLength": 16 },
+        "retrievalMode": { "enum": ["chunk_dense", "article_dense", "hybrid_rerank"] },
+        "rankedCandidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["chunkId", "rank", "score"],
+            "properties": {
+              "chunkId": { "$ref": "#/$defs/id" },
+              "rank": { "type": "integer", "minimum": 1 },
+              "score": { "type": "number" }
+            }
+          }
+        },
+        "injectedChunkIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "answerId": { "type": ["string", "null"] },
+        "fallbackReason": { "type": ["string", "null"] },
+        "latencyMs": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "evalRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "createdAt",
+        "datasetVersion",
+        "retrievalMode",
+        "sampleCount",
+        "metrics",
+        "gate"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "createdAt": { "$ref": "#/$defs/isoDateTime" },
+        "datasetVersion": { "type": "string", "minLength": 1 },
+        "retrievalMode": { "enum": ["chunk_dense", "article_dense", "hybrid_rerank"] },
+        "sampleCount": { "type": "integer", "minimum": 1 },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "recallAt5",
+            "recallAt10",
+            "mrr",
+            "ndcgAt10",
+            "hitAt5",
+            "p50LatencyMs",
+            "p95LatencyMs"
+          ],
+          "properties": {
+            "recallAt5": { "type": "number", "minimum": 0, "maximum": 1 },
+            "recallAt10": { "type": "number", "minimum": 0, "maximum": 1 },
+            "mrr": { "type": "number", "minimum": 0, "maximum": 1 },
+            "ndcgAt10": { "type": "number", "minimum": 0, "maximum": 1 },
+            "hitAt5": { "type": "number", "minimum": 0, "maximum": 1 },
+            "p50LatencyMs": { "type": "integer", "minimum": 0 },
+            "p95LatencyMs": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "gate": { "enum": ["pass", "fail", "observe"] }
+      }
+    },
+    "runtimeConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "version", "mode", "features", "limits", "ai"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "version": { "type": "integer", "minimum": 1 },
+        "mode": { "enum": ["archive", "warmup", "interview"] },
+        "features": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ingestion", "aiSummary", "rag", "trendBrief"],
+          "properties": {
+            "ingestion": { "type": "boolean" },
+            "aiSummary": { "type": "boolean" },
+            "rag": { "type": "boolean" },
+            "trendBrief": { "type": "boolean" }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "dailyQuestionsPerIp",
+            "monthlyBudgetCny",
+            "hardBudgetCny",
+            "requestBodyBytes",
+            "upstreamTimeoutMs"
+          ],
+          "properties": {
+            "dailyQuestionsPerIp": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "monthlyBudgetCny": { "type": "integer", "minimum": 0, "maximum": 50 },
+            "hardBudgetCny": { "type": "integer", "minimum": 0, "maximum": 50 },
+            "requestBodyBytes": { "type": "integer", "minimum": 1024 },
+            "upstreamTimeoutMs": { "type": "integer", "minimum": 1000 }
+          }
+        },
+        "ai": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "provider", "model"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "provider": { "const": "deepseek" },
+            "model": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "contentSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "snapshotId",
+        "generatedAt",
+        "pipelineRunId",
+        "state",
+        "sourceCount",
+        "articles",
+        "evidence",
+        "briefs"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "snapshotId": { "$ref": "#/$defs/id" },
+        "generatedAt": { "$ref": "#/$defs/isoDateTime" },
+        "pipelineRunId": { "$ref": "#/$defs/id" },
+        "state": { "enum": ["empty", "ready", "stale"] },
+        "sourceCount": { "type": "integer", "minimum": 0 },
+        "articles": { "type": "array", "items": { "$ref": "#/$defs/article" } },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+        "briefs": { "type": "array", "items": { "$ref": "#/$defs/brief" } }
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
-# Only used by the standalone API fallback config in this directory.
+# Copy to .dev.vars for local Worker development. Never commit the real file.
+# Keep AI_ENABLED=false until a minimal, explicit paid-call test is approved.
 DEEPSEEK_API_KEY=replace_with_personal_key
 DEEPSEEK_MODEL=replace_with_provider_exact_model_id
 IP_HASH_SECRET=generate_a_random_value_with_at_least_32_characters

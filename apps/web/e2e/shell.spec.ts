@@ -22,9 +22,10 @@ test('worker exposes the cost-safe archive status', async ({ request }) => {
   expect(response.ok()).toBe(true);
 
   const payload = await response.json();
-  expect(payload.mode).toBe('archive');
-  expect(payload.content.sourceCount).toBe(0);
-  expect(payload.ai.state).toBe('static-only');
+  expect(payload.ok).toBe(true);
+  expect(payload.data.mode).toBe('archive');
+  expect(payload.data.content.sourceCount).toBe(0);
+  expect(payload.data.ai.state).toBe('static-only');
 });
 
 for (const path of publicPaths) {

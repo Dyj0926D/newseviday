@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "snapshotId": "snapshot-bootstrap-v1",
+  "generatedAt": "2026-08-01T00:00:00Z",
+  "pipelineRunId": "pipeline-bootstrap-v1",
+  "state": "empty",
+  "sourceCount": 0,
+  "articles": [],
+  "evidence": [],
+  "briefs": []
+}

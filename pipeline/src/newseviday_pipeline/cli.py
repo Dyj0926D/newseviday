@@ -1,15 +1,19 @@
 import argparse
 import json
 from collections.abc import Sequence
+from pathlib import Path
 
 from newseviday_pipeline import __version__
+from newseviday_pipeline.runner import run_fixture_pipeline
 from newseviday_pipeline.settings import load_project_config
+from newseviday_pipeline.snapshot import load_snapshot
 
 PIPELINE_STAGES = (
     "fetch",
     "extract",
     "normalize",
-    "deduplicate",
+    "exact_dedup",
+    "fuzzy_dedup",
     "select",
     "snapshot",
 )
@@ -27,6 +31,17 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print the planned stages without network access or file publication",
     )
+    run_parser.add_argument(
+        "--fixture",
+        type=Path,
+        help="Read one local Atom/RSS fixture. Network access remains disabled.",
+    )
+    run_parser.add_argument("--output", type=Path, default=Path("data/snapshots"))
+    run_parser.add_argument("--source-id", default="fixture-source")
+    run_parser.add_argument("--language", default="en")
+
+    validate_parser = subparsers.add_parser("validate-snapshot", help="Validate a snapshot JSON")
+    validate_parser.add_argument("path", type=Path)
     return parser
 
 
@@ -59,12 +74,56 @@ def dry_run() -> int:
     return 0
 
 
+def run_fixture(args: argparse.Namespace) -> int:
+    runtime, _sources, topics = load_project_config()
+    run, snapshot = run_fixture_pipeline(
+        args.fixture,
+        args.output,
+        source_id=args.source_id,
+        language=args.language,
+        topics=topics.topics,
+        config_version=runtime.version,
+    )
+    payload = {
+        "ok": True,
+        "runId": run.id,
+        "snapshotId": snapshot.snapshot_id,
+        "articleCount": len(snapshot.articles),
+        "output": str(args.output / "current.json"),
+        "networkAccess": False,
+        "modelCalls": False,
+    }
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    return 0
+
+
+def validate_snapshot(path: Path) -> int:
+    snapshot = load_snapshot(path)
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "schemaVersion": snapshot.schema_version,
+                "snapshotId": snapshot.snapshot_id,
+                "articleCount": len(snapshot.articles),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "doctor":
         return doctor()
+    if args.command == "validate-snapshot":
+        return validate_snapshot(args.path)
     if args.command == "run" and args.dry_run:
         return dry_run()
+    if args.command == "run" and args.fixture:
+        return run_fixture(args)
 
-    print("Actual pipeline execution is not enabled in the engineering skeleton.")
+    print("Network collection is disabled. Pass --fixture or --dry-run.")
     return 2

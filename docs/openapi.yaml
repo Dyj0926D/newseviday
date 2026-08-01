@@ -1,0 +1,121 @@
+openapi: 3.1.0
+info:
+  title: NewsEviday Public API
+  version: 0.1.0
+  description: Current read-only API. RAG question endpoints are intentionally not published yet.
+servers:
+  - url: /
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      responses:
+        '200':
+          description: Worker is healthy.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/status:
+    get:
+      operationId: getStatus
+      responses:
+        '200':
+          description: Public content and AI capability status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+  /api/runtime-config:
+    get:
+      operationId: getRuntimeConfig
+      responses:
+        '200':
+          description: Public switches and limits; never includes secrets.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuntimeConfigResponse'
+components:
+  schemas:
+    Meta:
+      type: object
+      additionalProperties: false
+      required: [requestId, generatedAt, version, durationMs]
+      properties:
+        requestId: { type: string }
+        generatedAt: { type: string, format: date-time }
+        version: { type: string }
+        durationMs: { type: integer, minimum: 0 }
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data, meta]
+      properties:
+        ok: { const: true }
+        data:
+          type: object
+          additionalProperties: false
+          required: [service, status]
+          properties:
+            service: { const: newseviday-api }
+            status: { const: ok }
+        meta: { $ref: '#/components/schemas/Meta' }
+    StatusResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data, meta]
+      properties:
+        ok: { const: true }
+        data:
+          type: object
+          required: [product, mode, content, ai]
+          properties:
+            product: { const: NewsEviday }
+            mode: { enum: [archive, warmup, interview] }
+            content:
+              type: object
+              required: [state, updatedAt, sourceCount, snapshotId]
+              properties:
+                state: { enum: [empty, ready, stale] }
+                updatedAt: { type: [string, 'null'], format: date-time }
+                sourceCount: { type: integer, minimum: 0 }
+                snapshotId: { type: [string, 'null'] }
+            ai:
+              type: object
+              required: [state, provider, model]
+              properties:
+                state: { enum: [available, saving-mode, static-only, rate-limited, budget-paused] }
+                provider: { enum: [deepseek, null] }
+                model: { type: [string, 'null'] }
+        meta: { $ref: '#/components/schemas/Meta' }
+    RuntimeConfigResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data, meta]
+      properties:
+        ok: { const: true }
+        data:
+          type: object
+          required: [schemaVersion, mode, features, limits]
+          properties:
+            schemaVersion: { const: 1.0.0 }
+            mode: { enum: [archive, warmup, interview] }
+            features:
+              type: object
+              required: [ingestion, aiSummary, rag, trendBrief]
+              properties:
+                ingestion: { type: boolean }
+                aiSummary: { type: boolean }
+                rag: { type: boolean }
+                trendBrief: { type: boolean }
+            limits:
+              type: object
+              required: [dailyQuestionsPerIp, monthlyBudgetCny, hardBudgetCny, requestBodyBytes, upstreamTimeoutMs]
+              properties:
+                dailyQuestionsPerIp: { type: integer, minimum: 0, maximum: 100 }
+                monthlyBudgetCny: { type: integer, minimum: 0, maximum: 50 }
+                hardBudgetCny: { type: integer, minimum: 0, maximum: 50 }
+                requestBodyBytes: { type: integer, minimum: 1024 }
+                upstreamTimeoutMs: { type: integer, minimum: 1000 }
+        meta: { $ref: '#/components/schemas/Meta' }

@@ -19,6 +19,7 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
+      - run: npm run security:scan
       - run: npm run audit:prod
       - run: npm run check
       - run: npx playwright install --with-deps chromium
