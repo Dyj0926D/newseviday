@@ -1,0 +1,11 @@
+version: 1
+mode: archive
+features:
+  ingestion_enabled: false
+  ai_summary_enabled: false
+  rag_enabled: false
+  trend_brief_enabled: false
+limits:
+  daily_questions_per_ip: 3
+  monthly_budget_cny: 35
+  hard_budget_cny: 50

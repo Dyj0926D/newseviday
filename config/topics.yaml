@@ -1,0 +1,29 @@
+version: 1
+default_profile: general
+topics:
+  - id: data-platform
+    label: 数据中台与企业数据平台
+    weight: 1.0
+    keywords:
+      - 数据中台
+      - data platform
+  - id: data-agent
+    label: Data Agent
+    weight: 1.0
+    keywords:
+      - data agent
+      - analytics agent
+  - id: semantic-layer
+    label: 统一语义与语义层
+    weight: 0.9
+    keywords:
+      - semantic layer
+      - metrics layer
+      - 统一语义
+  - id: intelligent-lakehouse
+    label: 智能数据湖与湖仓
+    weight: 0.9
+    keywords:
+      - intelligent data lake
+      - lakehouse
+      - 智能数据湖

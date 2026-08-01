@@ -1,0 +1,11 @@
+version: 1
+sources:
+  - id: arxiv-cs-ai
+    name: arXiv cs.AI
+    adapter: atom
+    url: https://export.arxiv.org/api/query?search_query=cat:cs.AI
+    language: en
+    region: global
+    enabled: false
+    usage_scope: metadata_and_abstract
+    note: 接入前复核频率、使用条款和失败重试策略

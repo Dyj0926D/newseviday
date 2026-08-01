@@ -1,0 +1,165 @@
+/* NewsEviday Design Tokens v1.0
+ * Status: frozen for MVP light theme
+ * Source of truth: ../设计令牌-Design-Tokens.md
+ */
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Primitive colors */
+  --ne-color-white: #ffffff;
+  --ne-color-black: #000000;
+  --ne-color-purple-50: #f6f3ff;
+  --ne-color-purple-100: #eee9ff;
+  --ne-color-purple-200: #ded4ff;
+  --ne-color-purple-300: #c7b8f5;
+  --ne-color-purple-400: #9e86e8;
+  --ne-color-purple-500: #7257d5;
+  --ne-color-purple-600: #6246c7;
+  --ne-color-purple-700: #5135aa;
+  --ne-color-purple-800: #40298a;
+  --ne-color-purple-900: #32226a;
+
+  /* Semantic colors */
+  --ne-color-bg-page: #f5f3fa;
+  --ne-color-bg-surface: var(--ne-color-white);
+  --ne-color-bg-subtle: #faf9fc;
+  --ne-color-bg-tinted: #f0ecfc;
+  --ne-color-bg-inverse: #1b1824;
+  --ne-color-text-strong: #1b1824;
+  --ne-color-text-default: #312d3d;
+  --ne-color-text-secondary: #625d70;
+  --ne-color-text-muted: #706a7b;
+  --ne-color-text-disabled: #9b96a5;
+  --ne-color-text-inverse: var(--ne-color-white);
+  --ne-color-border-subtle: #e9e5ef;
+  --ne-color-border-default: #d9d4e2;
+  --ne-color-border-strong: #b9b2c5;
+  --ne-color-brand-subtle: var(--ne-color-purple-100);
+  --ne-color-brand-default: var(--ne-color-purple-500);
+  --ne-color-brand-hover: var(--ne-color-purple-600);
+  --ne-color-brand-active: var(--ne-color-purple-700);
+  --ne-color-focus: #8b6fe8;
+  --ne-color-success: #2f7d5a;
+  --ne-color-success-subtle: #eaf6ef;
+  --ne-color-warning: #8a5b12;
+  --ne-color-warning-subtle: #fff5df;
+  --ne-color-danger: #b54858;
+  --ne-color-danger-subtle: #fff0f2;
+  --ne-color-overlay: rgb(27 24 36 / 44%);
+
+  /* Typography */
+  --ne-font-sans:
+    'Geist Sans', 'Noto Sans SC', 'Microsoft YaHei UI', 'PingFang SC', system-ui, sans-serif;
+  --ne-font-mono: 'Geist Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --ne-font-size-display: clamp(2.5rem, 5vw, 4.25rem);
+  --ne-font-size-h1: clamp(2.125rem, 4vw, 3.25rem);
+  --ne-font-size-h2: 2rem;
+  --ne-font-size-h3: 1.5rem;
+  --ne-font-size-title: 1.125rem;
+  --ne-font-size-body-lg: 1rem;
+  --ne-font-size-body: 0.875rem;
+  --ne-font-size-label: 0.8125rem;
+  --ne-font-size-caption: 0.75rem;
+  --ne-line-height-display: 1.04;
+  --ne-line-height-heading: 1.16;
+  --ne-line-height-title: 1.35;
+  --ne-line-height-body: 1.65;
+  --ne-line-height-compact: 1.4;
+  --ne-font-weight-regular: 400;
+  --ne-font-weight-medium: 500;
+  --ne-font-weight-semibold: 600;
+  --ne-font-weight-bold: 700;
+  --ne-letter-spacing-display: -0.035em;
+  --ne-letter-spacing-heading: -0.02em;
+  --ne-letter-spacing-label: 0.01em;
+
+  /* Spacing: 4px base */
+  --ne-space-0: 0;
+  --ne-space-1: 0.25rem;
+  --ne-space-2: 0.5rem;
+  --ne-space-3: 0.75rem;
+  --ne-space-4: 1rem;
+  --ne-space-5: 1.25rem;
+  --ne-space-6: 1.5rem;
+  --ne-space-8: 2rem;
+  --ne-space-10: 2.5rem;
+  --ne-space-12: 3rem;
+  --ne-space-16: 4rem;
+  --ne-space-20: 5rem;
+  --ne-space-24: 6rem;
+  --ne-space-32: 8rem;
+
+  /* Shape and borders */
+  --ne-radius-xs: 0.375rem;
+  --ne-radius-sm: 0.5rem;
+  --ne-radius-md: 0.75rem;
+  --ne-radius-lg: 1rem;
+  --ne-radius-xl: 1.5rem;
+  --ne-radius-pill: 999px;
+  --ne-border-width-hairline: 1px;
+  --ne-border-width-emphasis: 2px;
+
+  /* Elevation */
+  --ne-shadow-xs: 0 1px 2px rgb(27 24 36 / 5%);
+  --ne-shadow-sm: 0 6px 18px rgb(27 24 36 / 7%);
+  --ne-shadow-md: 0 16px 40px rgb(27 24 36 / 10%);
+  --ne-shadow-focus: 0 0 0 3px rgb(139 111 232 / 28%);
+
+  /* Layout */
+  --ne-container-max: 90rem;
+  --ne-content-max: 75rem;
+  --ne-reading-max: 45rem;
+  --ne-gutter-mobile: 1rem;
+  --ne-gutter-tablet: 1.5rem;
+  --ne-gutter-desktop: 2rem;
+  --ne-header-height-mobile: 3.5rem;
+  --ne-header-height-desktop: 4rem;
+  --ne-hero-min-height-desktop: 31rem;
+  --ne-breakpoint-sm: 40rem;
+  --ne-breakpoint-md: 48rem;
+  --ne-breakpoint-lg: 64rem;
+  --ne-breakpoint-xl: 75rem;
+  --ne-breakpoint-2xl: 90rem;
+
+  /* Component sizing */
+  --ne-control-height-sm: 2.25rem;
+  --ne-control-height-md: 2.75rem;
+  --ne-control-height-lg: 3rem;
+  --ne-touch-target-min: 2.75rem;
+  --ne-icon-size-sm: 1rem;
+  --ne-icon-size-md: 1.25rem;
+  --ne-icon-size-lg: 1.5rem;
+  --ne-avatar-size-sm: 1.5rem;
+  --ne-avatar-size-md: 2rem;
+  --ne-avatar-size-lg: 2.5rem;
+
+  /* Motion */
+  --ne-duration-instant: 0ms;
+  --ne-duration-fast: 120ms;
+  --ne-duration-base: 180ms;
+  --ne-duration-slow: 240ms;
+  --ne-duration-emphasis: 360ms;
+  --ne-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ne-ease-enter: cubic-bezier(0, 0, 0, 1);
+  --ne-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Layering */
+  --ne-z-base: 0;
+  --ne-z-sticky: 20;
+  --ne-z-header: 30;
+  --ne-z-drawer: 50;
+  --ne-z-modal: 60;
+  --ne-z-toast: 70;
+  --ne-z-tooltip: 80;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ne-duration-fast: 0ms;
+    --ne-duration-base: 0ms;
+    --ne-duration-slow: 0ms;
+    --ne-duration-emphasis: 0ms;
+  }
+}

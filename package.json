@@ -1,0 +1,41 @@
+{
+  "name": "newseviday",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "有证据的 AI 产品与技术情报",
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "design/tokens"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,worker -c magenta,cyan \"npm:dev:web\" \"npm:dev:worker\"",
+    "dev:web": "npm run dev -w @newseviday/web",
+    "dev:worker": "npm run dev -w @newseviday/worker",
+    "build": "npm run build --workspaces --if-present",
+    "audit:prod": "npm audit --omit=dev --audit-level=high",
+    "lint": "eslint apps packages --max-warnings=0",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "format": "prettier --write \"apps/**/*.{ts,vue,css,html,json}\" \"packages/**/*.{ts,json}\" \"*.{js,json,md}\"",
+    "format:check": "prettier --check \"apps/**/*.{ts,vue,css,html,json}\" \"packages/**/*.{ts,json}\" \"*.{js,json,md}\"",
+    "pipeline:sync": "python -m uv sync --project pipeline",
+    "pipeline:doctor": "python -m uv run --project pipeline newseviday-pipeline doctor",
+    "pipeline:check": "python -m uv run --project pipeline ruff check pipeline && python -m uv run --project pipeline mypy pipeline/src && python -m uv run --project pipeline pytest pipeline/tests"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "concurrently": "^9.2.0",
+    "eslint": "^9.34.0",
+    "eslint-plugin-vue": "^10.4.0",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
+    "typescript-eslint": "^8.40.0"
+  }
+}
