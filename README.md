@@ -10,12 +10,12 @@ NewsEviday 面向产品经理、AI 产品经理和数据产品从业者，整理
 
 - Vue 3、Vite、TypeScript 响应式前端；
 - 8 个公开页面路由和成本安全的归档空状态；
-- Cloudflare Worker `/api/health`、`/api/status`；
+- Cloudflare Worker 同源承载 Vue 静态资源和 `/api/health`、`/api/status`；
 - Python 3.12 配置校验和内容管道 CLI；
 - npm workspaces 共享 API 契约和 Design Tokens；
 - Vitest、Playwright、pytest、Ruff、Mypy；
 - GitHub Actions CI；
-- Cloudflare Pages 安全头和 SPA 路由回退；
+- Cloudflare Workers Static Assets 安全头和 SPA 路由回退；
 - DeepSeek、Cloudflare 和 EdgeOne 均通过个人环境变量或账户接入，仓库不保存密钥。
 
 ## 工程结构
@@ -39,12 +39,19 @@ eviday/
 flowchart LR
     Config["YAML 配置"] --> Pipeline["Python 内容管道"]
     Pipeline --> Snapshot["版本化内容快照"]
-    Snapshot --> Web["Vue Web"]
-    Web --> Worker["Cloudflare Worker API"]
+    Snapshot --> WebBuild["Vue 构建"]
+    WebBuild --> Worker["Cloudflare Worker<br/>Vue Static Assets + /api/*"]
     Worker --> Model["DeepSeek API, 默认关闭"]
-    Contracts["共享 API 契约"] --> Web
+    Contracts["共享 API 契约"] --> WebBuild
     Contracts --> Worker
-    Tokens["Design Tokens"] --> Web
+    Tokens["Design Tokens"] --> WebBuild
+```
+
+生产部署使用仓库根目录的 `wrangler.jsonc`：静态资源优先从 `apps/web/dist` 返回，`/api/*` 进入 Worker 脚本。前端与 API 同源，归档模式不调用大模型。`apps/worker/wrangler.jsonc` 仅保留为 API 独立部署的回滚路径。
+
+```powershell
+npm run cloudflare:check
+npm run deploy:cloudflare
 ```
 
 ## 环境要求

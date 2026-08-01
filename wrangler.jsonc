@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "newseviday",
+  "main": "apps/worker/src/index.ts",
+  "compatibility_date": "2026-08-01",
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": {
+    "enabled": true,
+  },
+  "assets": {
+    "directory": "apps/web/dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"],
+  },
+  "vars": {
+    "APP_VERSION": "0.1.0",
+    "RUNTIME_MODE": "archive",
+    "AI_ENABLED": "false",
+    "ALLOWED_ORIGINS": "http://localhost:5173,http://127.0.0.1:5173",
+  },
+}

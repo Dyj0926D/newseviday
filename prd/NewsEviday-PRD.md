@@ -7,8 +7,8 @@
 |---|---|
 | 产品名称 | NewsEviday |
 | 名称含义 | News + Evidence + Day |
-| 文档版本 | v1.2.1 |
-| 文档状态 | 页面、流转、信息来源和视觉实施规范已固定，待工程实施 |
+| 文档版本 | v1.2.2 |
+| 文档状态 | 页面、流转和视觉规范已固定；工程骨架完成，部署基线进行中 |
 | 更新日期 | 2026-08-01 |
 | 目标岗位 | 产品经理 / AI 产品经理作品集 |
 | 产品形态 | 响应式 Web 网站 |
@@ -1597,23 +1597,22 @@ Corpus health gate 至少检查：
 
 ```mermaid
 flowchart TB
-    Repo["个人 GitHub<br/>代码、文档、静态快照"] --> CFPages["Cloudflare Pages 主站"]
+    Repo["个人 GitHub<br/>代码、文档、静态快照"] --> CFWorker["Cloudflare Worker 主站<br/>Vue Static Assets + /api/*"]
     Repo --> EOPages["EdgeOne Pages 备用站"]
-    User["PC / 手机"] --> CFPages
+    User["PC / 手机"] --> CFWorker
     User --> EOPages
-    CFPages --> Worker["Cloudflare Worker API"]
-    EOPages --> Worker
-    Worker --> D1["D1<br/>内容、配置、额度、Eval"]
-    Worker --> Vectorize["Vectorize<br/>最近 30 天向量"]
-    Worker --> WAI["Workers AI<br/>BGE-M3"]
-    Worker --> DeepSeek["DeepSeek V4 Pro"]
+    EOPages --> CFWorker
+    CFWorker --> D1["D1<br/>内容、配置、额度、Eval"]
+    CFWorker --> Vectorize["Vectorize<br/>最近 30 天向量"]
+    CFWorker --> WAI["Workers AI<br/>BGE-M3"]
+    CFWorker --> DeepSeek["DeepSeek V4 Pro"]
     Actions["GitHub Actions<br/>定时/手动任务"] --> Python["Python 批处理<br/>采集、清洗、去重、Eval"]
     Python --> Sources["国内外 RSS / API / 官方页面"]
     Python --> WAI
     Python --> DeepSeek
-    Python --> Worker
+    Python --> CFWorker
     Python --> Snapshot["content-snapshots 分支"]
-    Snapshot --> CFPages
+    Snapshot --> CFWorker
     Snapshot --> EOPages
 ```
 
@@ -1628,9 +1627,9 @@ flowchart TB
 | 离线批处理 | Python 3.12 | 采集、清洗、去重、静态快照和 Eval |
 | Python 网络与解析 | `httpx`、`feedparser`、`trafilatura` | 异步采集和正文提取 |
 | Python 匹配 | `rapidfuzz`、`scikit-learn` | 近重复与 TF-IDF |
-| 主站 | Cloudflare Pages | GitHub 自动部署 |
+| 主站 | Cloudflare Workers Static Assets | GitHub 自动构建；Vue 静态资源与 `/api/*` 同源 |
 | 备用站 | EdgeOne Pages | 提供第二访问入口 |
-| API | Cloudflare Workers | 密钥、限流、流式输出和统一错误 |
+| API | Cloudflare Worker（与主站同一部署单元） | 密钥、限流、流式输出和统一错误 |
 | 数据 | Cloudflare D1 | 内容、配置、额度和 Eval |
 | 向量 | Cloudflare Vectorize | RAG 检索 |
 | Embedding | Workers AI BGE-M3 | 中英文语义向量 |
@@ -2128,7 +2127,7 @@ MVP 流量较小，数据用于建立基线和发现问题，不进行统计显�
 | RAG 语料 | 最近 30 天 | 符合情报定位并控制免费容量 |
 | 趋势简报 | 公共 7 日简报 | 避免每用户生成带来的成本 |
 | 默认运行 | 归档模式 | 长期接近零模型费用 |
-| 主备部署 | Cloudflare + EdgeOne | 提供两个公开入口 |
+| 主备部署 | Cloudflare Workers Static Assets + EdgeOne | 提供两个公开入口 |
 | 备用站 | 静态只读优先 | 不维护第二套 RAG 后端 |
 | 视觉基准 | C 的大画布框架 + A 的信息流组件 | 兼顾公开产品的品牌感和情报阅读效率 |
 | 首页大标题 | 初始完整保留，滚动后压缩导航与筛选 | 保持首屏大气，同时支持后续高效浏览 |
@@ -2143,7 +2142,8 @@ MVP 流量较小，数据用于建立基线和发现问题，不进行统计显�
 
 以下资料需在正式开发和上线前复核：
 
-- [Cloudflare Pages Git integration](https://developers.cloudflare.com/pages/get-started/git-integration/)
+- [Cloudflare Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)
+- [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/)
 - [Cloudflare Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/)
 - [Cloudflare D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/)
 - [Cloudflare Vectorize pricing](https://developers.cloudflare.com/vectorize/platform/pricing/)

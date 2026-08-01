@@ -12,6 +12,29 @@
 
 ---
 
+## v1.2.2 — 2026-08-01
+
+状态：适配 Cloudflare 2026 年新版 Workers Static Assets 部署路径。
+
+### 部署架构
+
+- 主站从原计划的 Cloudflare Pages 调整为 Workers Static Assets。
+- Vue 静态资源和 `/api/*` 使用同一个 Worker 部署单元，减少跨域配置和部署对象。
+- 新增仓库根目录 `wrangler.jsonc`；`apps/worker/wrangler.jsonc` 保留为 API 独立回滚路径。
+- 使用 Workers Builds 连接私有 GitHub 仓库，并由 `main` 分支自动构建发布。
+- EdgeOne 继续作为静态备用站，主备范围不变。
+
+### 决策原因
+
+- 当前 Cloudflare 控制台已将新建静态应用入口统一到 Workers。
+- Cloudflare 官方 2026 年 7 月迁移指南推荐用 `assets.directory` 和 SPA 显式路由替代 Pages 构建目录配置。
+- 同源部署更适合低成本 MVP，静态资源请求不调用 Worker 脚本，只有 `/api/*` 计入 Worker 请求。
+
+### 影响范围
+
+- PRD 技术架构、工程架构、迁移说明和实施计划同步更新。
+- 前端功能、页面范围、视觉方案、EdgeOne 备用站和模型成本边界不变。
+
 ## v1.2.1 — 2026-08-01
 
 状态：视觉实施规范固定，P1 前端设计准备完成。
