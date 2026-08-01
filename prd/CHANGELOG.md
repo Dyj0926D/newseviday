@@ -22,6 +22,8 @@
 - Vue 静态资源和 `/api/*` 使用同一个 Worker 部署单元，减少跨域配置和部署对象。
 - 新增仓库根目录 `wrangler.jsonc`；`apps/worker/wrangler.jsonc` 保留为 API 独立回滚路径。
 - 使用 Workers Builds 连接私有 GitHub 仓库，并由 `main` 分支自动构建发布。
+- 云端部署统一使用 `npm run deploy:cloudflare`，在同一命令内完成 Vue 构建和 Wrangler 发布。
+- 移除与 Workers SPA 路由冲突的 Pages `_redirects`；EdgeOne 的 SPA 回退改为部署平台配置。
 - EdgeOne 继续作为静态备用站，主备范围不变。
 
 ### 决策原因
