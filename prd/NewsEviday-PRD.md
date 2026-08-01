@@ -7,7 +7,7 @@
 |---|---|
 | 产品名称 | NewsEviday |
 | 名称含义 | News + Evidence + Day |
-| 文档版本 | v1.2.2 |
+| 文档版本 | v1.2.3 |
 | 文档状态 | 页面、流转和视觉规范已固定；工程骨架完成，部署基线进行中 |
 | 更新日期 | 2026-08-01 |
 | 目标岗位 | 产品经理 / AI 产品经理作品集 |
@@ -45,7 +45,7 @@ NewsEviday 会重点追踪海外官方博客、产品发布页、GitHub、arXiv 
 | RAG Eval | 公开检索质量、引用覆盖、延迟和失败案例 |
 | 产品介绍页 | 从产品和技术两个角度展示定位、能力、架构、RAG 与评测 |
 | 运行模式与预算控制 | 可暂停更新和 AI，保留网站与往期内容 |
-| 主备站部署 | Cloudflare 主站，EdgeOne 备用静态访问入口 |
+| 主备站部署 | Cloudflare 主站，EdgeOne Makers 备用静态访问入口 |
 
 ### 0.3 产品亮点
 
@@ -1598,7 +1598,7 @@ Corpus health gate 至少检查：
 ```mermaid
 flowchart TB
     Repo["个人 GitHub<br/>代码、文档、静态快照"] --> CFWorker["Cloudflare Worker 主站<br/>Vue Static Assets + /api/*"]
-    Repo --> EOPages["EdgeOne Pages 备用站"]
+    Repo --> EOPages["EdgeOne Makers 备用站"]
     User["PC / 手机"] --> CFWorker
     User --> EOPages
     EOPages --> CFWorker
@@ -1628,7 +1628,7 @@ flowchart TB
 | Python 网络与解析 | `httpx`、`feedparser`、`trafilatura` | 异步采集和正文提取 |
 | Python 匹配 | `rapidfuzz`、`scikit-learn` | 近重复与 TF-IDF |
 | 主站 | Cloudflare Workers Static Assets | GitHub 自动构建；Vue 静态资源与 `/api/*` 同源 |
-| 备用站 | EdgeOne Pages | 提供第二访问入口 |
+| 备用站 | EdgeOne Makers | Git 自动构建同一份 Vue 静态站，提供备用验证入口 |
 | API | Cloudflare Worker（与主站同一部署单元） | 密钥、限流、流式输出和统一错误 |
 | 数据 | Cloudflare D1 | 内容、配置、额度和 Eval |
 | 向量 | Cloudflare Vectorize | RAG 检索 |
@@ -1640,7 +1640,7 @@ flowchart TB
 
 ### 16.3 备用站能力边界
 
-两个站点部署相同前端和最新静态快照。
+两个站点部署相同前端和最新静态快照。EdgeOne Pages 已于 2026 年 6 月更名为 EdgeOne Makers，账号、项目和域名行为不变。
 
 EdgeOne 备用站可以：
 
@@ -1663,7 +1663,9 @@ Cloudflare API 不可用时，备用站自动进入只读模式。
 MVP 使用平台默认域名，不买域名、不备案。
 
 - Cloudflare 全球网络在中国大陆可能出现延迟和可靠性差异。
-- EdgeOne 备用站需要真实网络测试。
+- EdgeOne Makers 选择中国大陆或全球含大陆加速区时，系统预览链接仅 3 小时有效，可用于临时演示和网络测试。
+- EdgeOne Makers 选择全球不含大陆加速区时，默认项目域名在中国大陆会返回 401。
+- 稳定大陆入口需要自定义域名；选择含大陆加速区时，自定义域名需要工信部备案。
 - 无备案条件下不承诺运营级可用性。
 - 上线前至少使用移动、联通/电信中的两个网络和手机蜂窝网络测试。
 - 简历同时准备主站、备用站、录屏和截图。
@@ -1866,7 +1868,7 @@ MVP 使用平台默认域名，不买域名、不备案。
 | Workers AI | BGE-M3 嵌入量较小 |
 | Vectorize | 约 3,600 × 1024 = 3.69M 存储维度 |
 | Pages | 小型作品集静态流量 |
-| EdgeOne Pages | 备用静态站，以平台当前政策为准 |
+| EdgeOne Makers | 当前提供免费版；作为静态备用部署和临时预览验证，以平台当前政策为准 |
 
 ---
 
@@ -2127,7 +2129,7 @@ MVP 流量较小，数据用于建立基线和发现问题，不进行统计显�
 | RAG 语料 | 最近 30 天 | 符合情报定位并控制免费容量 |
 | 趋势简报 | 公共 7 日简报 | 避免每用户生成带来的成本 |
 | 默认运行 | 归档模式 | 长期接近零模型费用 |
-| 主备部署 | Cloudflare Workers Static Assets + EdgeOne | 提供两个公开入口 |
+| 主备部署 | Cloudflare Workers Static Assets + EdgeOne Makers | 提供主站和备用部署；无域名备案时不承诺永久大陆入口 |
 | 备用站 | 静态只读优先 | 不维护第二套 RAG 后端 |
 | 视觉基准 | C 的大画布框架 + A 的信息流组件 | 兼顾公开产品的品牌感和情报阅读效率 |
 | 首页大标题 | 初始完整保留，滚动后压缩导航与筛选 | 保持首屏大气，同时支持后续高效浏览 |
@@ -2152,8 +2154,10 @@ MVP 流量较小，数据用于建立基线和发现问题，不进行统计显�
 - [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/plans/)
 - [Cloudflare Secrets](https://developers.cloudflare.com/workers/configuration/secrets/)
 - [Cloudflare China Network](https://developers.cloudflare.com/china-network/)
-- [EdgeOne Pages](https://edgeone.cloud.tencent.com/pages/)
-- [EdgeOne 中国大陆加速与备案说明](https://cloud.tencent.com/document/product/1552/104964)
+- [EdgeOne Makers 快速部署](https://cloud.tencent.com/document/product/1552/119338)
+- [EdgeOne Makers 构建指南](https://cloud.tencent.com/document/product/1552/127392)
+- [EdgeOne Makers edgeone.json](https://cloud.tencent.com/document/product/1552/127389)
+- [EdgeOne Makers 域名与大陆访问规则](https://edgeone.cloud.tencent.com/pages/document/175191784523485184)
 - [DeepSeek V4 Pro pricing](https://api-docs.deepseek.com/quick_start/pricing)
 - [Vue Quick Start](https://vuejs.org/guide/quick-start.html)
 - [newnews 参考案例](https://github.com/huiq777/newnews)

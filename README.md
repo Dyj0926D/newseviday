@@ -16,6 +16,7 @@ NewsEviday 面向产品经理、AI 产品经理和数据产品从业者，整理
 - Vitest、Playwright、pytest、Ruff、Mypy；
 - GitHub Actions CI；
 - Cloudflare Workers Static Assets 安全头和 SPA 路由回退；
+- EdgeOne Makers 静态备用站构建、SPA 回退和安全头配置；
 - DeepSeek、Cloudflare 和 EdgeOne 均通过个人环境变量或账户接入，仓库不保存密钥。
 
 ## 工程结构
@@ -41,6 +42,7 @@ flowchart LR
     Pipeline --> Snapshot["版本化内容快照"]
     Snapshot --> WebBuild["Vue 构建"]
     WebBuild --> Worker["Cloudflare Worker<br/>Vue Static Assets + /api/*"]
+    WebBuild --> Makers["EdgeOne Makers<br/>静态备用站"]
     Worker --> Model["DeepSeek API, 默认关闭"]
     Contracts["共享 API 契约"] --> WebBuild
     Contracts --> Worker
@@ -54,12 +56,16 @@ npm run cloudflare:check
 npm run deploy:cloudflare
 ```
 
+Cloudflare 主站：<https://newseviday.dyjnewseviday-worker.workers.dev>。
+
+EdgeOne Makers 使用根目录 `edgeone.json` 构建同一份 Vue 静态站。备用站不保存 DeepSeek Key；Cloudflare API 不可达时自动保留只读页面。当前不购买域名、不备案，因此大陆加速区的系统预览链接仅用于阶段性验证，不能作为永久公开入口。
+
 ## 环境要求
 
 | 环境    | 固定版本                    |
 | ------- | --------------------------- |
-| Node.js | 24.16.0，见 `.node-version` |
-| npm     | 11 或更高                   |
+| Node.js | 24.11.0，见 `.node-version` |
+| npm     | 10 或 11                    |
 | Python  | 3.12，uv 自动安装           |
 | uv      | 0.12 或兼容版本             |
 
@@ -154,10 +160,10 @@ npm run audit:prod
 
 ## 当前边界
 
-- 尚未创建 GitHub 远程仓库，也没有绑定公司或个人 Git 凭据；
-- 尚未部署 Cloudflare 或 EdgeOne；
+- GitHub 私有远程、CI 和 Cloudflare 主站已经建立；Cloudflare Git 自动发布仍需最终验证；
+- EdgeOne Makers 备用站尚未完成首次部署；
 - 尚未启用任何真实内容来源；
-- 尚未配置 DeepSeek API Key；
+- DeepSeek Key 已保存为 Cloudflare Secret，但 AI 总开关关闭，当前不会调用模型；
 - 页面当前是工程骨架，详细信息流、文章、RAG 和产品介绍页面在后续阶段实现。
 
 发布开源仓库前需要单独确认许可证。当前 `package.json` 保持 `private: true`，避免误发布到 npm。

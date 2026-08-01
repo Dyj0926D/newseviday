@@ -6,7 +6,7 @@
   "description": "有证据的 AI 产品与技术情报",
   "engines": {
     "node": ">=24 <25",
-    "npm": ">=11"
+    "npm": ">=10 <12"
   },
   "workspaces": [
     "apps/*",
