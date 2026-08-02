@@ -50,3 +50,34 @@ topics:
       - trustworthy ai
       - 元数据
       - 数据治理
+  - id: foundation-models
+    label: 基础模型与多模态
+    weight: 1.0
+    keywords:
+      - foundation model
+      - large language model
+      - llm
+      - multimodal
+      - gpt
+      - claude
+      - qwen
+      - deepseek
+      - open weights
+      - model release
+      - 基础模型
+      - 大模型
+      - 多模态
+  - id: ai-products-agents
+    label: AI 产品、Agent 与开发工具
+    weight: 1.0
+    keywords:
+      - ai product
+      - ai agent
+      - agentic
+      - coding agent
+      - copilot
+      - chatgpt
+      - claude code
+      - developer platform
+      - 智能体
+      - AI 产品

@@ -67,3 +67,21 @@ def test_topic_selection_sets_explainable_scores() -> None:
 
     assert len(selected) == 1
     assert selected[0].topic_scores == {"semantic-layer": 1.0}
+
+
+def test_topic_selection_does_not_penalize_topics_with_a_larger_vocabulary() -> None:
+    article = normalize_item(
+        item("https://example.com/deepseek", "DeepSeek-V4 release", "Model update"),
+        collected_at=NOW,
+    )[0]
+    topic = TopicConfig(
+        id="foundation-models",
+        label="Foundation Models",
+        weight=1.0,
+        keywords=["foundation model", "llm", "gpt", "claude", "qwen", "deepseek"],
+    )
+
+    selected = select_by_topics([article], [topic])
+
+    assert len(selected) == 1
+    assert selected[0].topic_scores == {"foundation-models": 0.5}

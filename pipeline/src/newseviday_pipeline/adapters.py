@@ -1,5 +1,6 @@
 import json
-from collections.abc import Mapping
+import re
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
@@ -167,14 +168,29 @@ def parse_json_feed(content: bytes, *, source_id: str, language: str) -> list[Ra
 
 
 class _ListingParser(HTMLParser):
-    def __init__(self, base_url: str) -> None:
+    def __init__(self, base_url: str, title_class_patterns: Sequence[str]) -> None:
         super().__init__(convert_charrefs=True)
         self.base_url = base_url
+        self.title_class_patterns = [re.compile(pattern) for pattern in title_class_patterns]
         self.links: list[tuple[str, str]] = []
         self._href: str | None = None
         self._text: list[str] = []
+        self._heading_tag: str | None = None
+        self._heading_text: list[str] = []
+        self._title_tag: str | None = None
+        self._title_text: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if self._href is not None and tag in {"h1", "h2", "h3", "h4"}:
+            self._heading_tag = tag
+            self._heading_text = []
+            return
+        if self._href is not None and self._title_tag is None:
+            class_name = dict(attrs).get("class") or ""
+            if any(pattern.search(class_name) for pattern in self.title_class_patterns):
+                self._title_tag = tag
+                self._title_text = []
+                return
         if tag != "a" or self._href is not None:
             return
         attributes = dict(attrs)
@@ -182,18 +198,72 @@ class _ListingParser(HTMLParser):
         if href:
             self._href = urljoin(self.base_url, href)
             self._text = []
+            self._heading_tag = None
+            self._heading_text = []
+            self._title_tag = None
+            self._title_text = []
 
     def handle_data(self, data: str) -> None:
         if self._href is not None:
             self._text.append(data)
+            if self._heading_tag is not None:
+                self._heading_text.append(data)
+            if self._title_tag is not None:
+                self._title_text.append(data)
 
     def handle_endtag(self, tag: str) -> None:
+        if tag == self._heading_tag:
+            self._heading_tag = None
+            return
+        if tag == self._title_tag:
+            self._title_tag = None
+            return
         if tag != "a" or self._href is None:
             return
-        title = " ".join("".join(self._text).split())
+        heading_title = " ".join("".join(self._heading_text).split())
+        class_title = " ".join("".join(self._title_text).split())
+        title = heading_title or class_title or " ".join("".join(self._text).split())
         if len(title) >= 12 and self._href.startswith(("http://", "https://")):
             self.links.append((self._href, title))
         self._href = None
+        self._text = []
+        self._heading_tag = None
+        self._heading_text = []
+        self._title_tag = None
+        self._title_text = []
+
+
+class _HeadingParser(HTMLParser):
+    def __init__(self, base_url: str, heading_tags: set[str]) -> None:
+        super().__init__(convert_charrefs=True)
+        self.base_url = base_url
+        self.heading_tags = heading_tags
+        self.headings: list[tuple[str, str]] = []
+        self._tag: str | None = None
+        self._id: str | None = None
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if self._tag is not None or tag not in self.heading_tags:
+            return
+        heading_id = dict(attrs).get("id")
+        if heading_id:
+            self._tag = tag
+            self._id = heading_id
+            self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._tag is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag != self._tag or self._id is None:
+            return
+        title = " ".join("".join(self._text).replace("\u200b", "").split())
+        if len(title) >= 4:
+            self.headings.append((urljoin(self.base_url, f"#{self._id}"), title))
+        self._tag = None
+        self._id = None
         self._text = []
 
 
@@ -203,12 +273,43 @@ def parse_html_listing(
     source_id: str,
     language: str,
     base_url: str,
+    include_url_patterns: list[str] | None = None,
+    exclude_url_patterns: list[str] | None = None,
+    title_class_patterns: list[str] | None = None,
 ) -> list[RawFeedItem]:
-    parser = _ListingParser(base_url)
+    parser = _ListingParser(base_url, title_class_patterns or [])
     parser.feed(content.decode("utf-8", errors="replace"))
     seen: set[str] = set()
     result: list[RawFeedItem] = []
+    includes = [re.compile(pattern) for pattern in (include_url_patterns or [])]
+    excludes = [re.compile(pattern) for pattern in (exclude_url_patterns or [])]
     for link, title in parser.links:
+        if link in seen:
+            continue
+        if includes and not any(pattern.search(link) for pattern in includes):
+            continue
+        if any(pattern.search(link) for pattern in excludes):
+            continue
+        seen.add(link)
+        result.append(
+            RawFeedItem(source_id=source_id, url=link, title=title, language=language)
+        )
+    return result
+
+
+def parse_html_headings(
+    content: bytes,
+    *,
+    source_id: str,
+    language: str,
+    base_url: str,
+    heading_tags: Sequence[str],
+) -> list[RawFeedItem]:
+    parser = _HeadingParser(base_url, set(heading_tags))
+    parser.feed(content.decode("utf-8", errors="replace"))
+    seen: set[str] = set()
+    result: list[RawFeedItem] = []
+    for link, title in parser.headings:
         if link in seen:
             continue
         seen.add(link)
@@ -234,11 +335,22 @@ class JsonFeedAdapter:
 
 class HtmlListingAdapter:
     def parse(self, content: bytes, source: SourceConfig) -> list[RawFeedItem]:
+        if source.heading_tags:
+            return parse_html_headings(
+                content,
+                source_id=source.id,
+                language=source.language,
+                base_url=str(source.url),
+                heading_tags=source.heading_tags,
+            )
         return parse_html_listing(
             content,
             source_id=source.id,
             language=source.language,
             base_url=str(source.url),
+            include_url_patterns=source.include_url_patterns,
+            exclude_url_patterns=source.exclude_url_patterns,
+            title_class_patterns=source.title_class_patterns,
         )
 
 

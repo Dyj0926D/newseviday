@@ -7,8 +7,8 @@
 |---|---|
 | 产品名称 | NewsEviday |
 | 名称含义 | News + Evidence + Day |
-| 文档版本 | v1.2.5 |
-| 文档状态 | P4–P6 工程基线已实现；付费调用、外部向量资源和人工生产 Gate 挂起 |
+| 文档版本 | v1.2.6 |
+| 文档状态 | P4–P6 工程基线已实现；首批来源策略已确认，付费调用、外部向量资源和人工生产 Gate 挂起 |
 | 更新日期 | 2026-08-02 |
 | 目标岗位 | 产品经理 / AI 产品经理作品集 |
 | 产品形态 | 响应式 Web 网站 |
@@ -424,28 +424,23 @@ Eval、数据状态、GitHub 和 PRD 不占用顶部主导航，通过产品介�
 | S2 | 可信行业媒体和技术社区 | 用于发现信号，重要结论需回到 S1 |
 | S3 | 社交平台和未验证转载 | MVP 不自动进入 RAG，只保留未来扩展 |
 
-### 8.2 首批候选来源
+### 8.2 MVP 已启用来源
 
-实际接入前逐一确认 RSS、API、robots 和使用条件。
+首批来源遵循“官方、一手、通用 AI 与数据方向兼顾、可稳定解析、低噪声”的选择原则。当前启用 9 个来源：
 
-海外候选：
+| 来源 | 区域 | 获取方式 | 主要覆盖 |
+|---|---|---|---|
+| OpenAI News | 海外 | 官方 RSS | 通用模型、AI 产品、Agent、安全与开发平台 |
+| Anthropic Newsroom | 海外 | 官方页面结构化解析 | Claude、Agent、AI 安全与研究 |
+| Hugging Face Blog | 全球 | 官方 RSS | 开源模型、数据集、评测与开发工具 |
+| GitHub Blog AI & ML | 海外 | 官方 RSS | AI 开发工具、工程实践与开源生态 |
+| Databricks Blog | 海外 | 官方 RSS | Data Intelligence、Lakehouse 与数据 Agent |
+| dbt Labs Blog | 海外 | 官方 RSS | Semantic Layer、Analytics Engineering 与 Agent |
+| arXiv cs.AI | 全球 | 官方 Atom API | AI 论文元数据与摘要 |
+| Qwen Blog | 国内 | 官方 RSS | 通义千问、开源模型、多模态与 Agent |
+| DeepSeek API Updates | 国内 | 官方变更日志标题解析 | DeepSeek 模型和 API 发布动态 |
 
-- OpenAI、Anthropic、Google DeepMind、Microsoft、Meta AI 官方更新；
-- GitHub Trending、GitHub Release；
-- Hugging Face；
-- arXiv；
-- Databricks、Snowflake、dbt Labs；
-- DataHub、OpenMetadata、Airbyte、Dagster；
-- Cloudflare、Vercel；
-- Apache Iceberg、Apache Paimon、Trino、Flink 等开源项目。
-
-国内候选：
-
-- DeepSeek、通义千问、ModelScope；
-- 百度、腾讯混元、智谱、月之暗面、火山引擎等官方更新；
-- 阿里云 DataWorks、MaxCompute；
-- StarRocks、PingCAP、SelectDB 等数据与开源项目；
-- 国内可信 AI 和数据技术媒体，用于发现线索。
+AWS Machine Learning、Google DeepMind 和 Cloudflare Blog 不进入首批启用集。前两者按产品方向调整移出；Cloudflare 在真实抓取中出现 CDN、缓存规则等非 AI 内容，MVP 阶段优先控制信息噪声。后续可按主题质量和维护成本补充 Microsoft、Meta AI、ModelScope、DataHub、OpenMetadata、StarRocks 等官方来源。
 
 ### 8.3 默认内容比例
 
@@ -457,7 +452,7 @@ Eval、数据状态、GitHub 和 PRD 不占用顶部主导航，通过产品介�
 | 相邻主题 | 20% | 10%–30% |
 | 重大通用动态 | 10% | 10%–20% |
 
-比例是目标区间。当天没有足够高质量内容时，不用低质量信息凑数。
+比例是内容结果的目标区间，不按来源数量机械计算。当天没有足够高质量内容时，不用低质量信息凑数。
 
 ### 8.4 跨语言处理
 
@@ -1986,7 +1981,7 @@ MVP 流量较小，数据用于建立基线和发现问题，不进行统计显�
 | P1 视觉 | 维护唯一活动视觉基准并完成前端设计准备 | 四张活动 reference、Tokens、组件清单、响应式重排方案 |
 | P2 工程骨架 | 建立 Vue、Worker、Python 和测试结构 | 可迁移仓库 |
 | P3 静态产品 | 完成信息流、详情和产品介绍页 | 响应式前端 |
-| P4 内容管道 | 接入 6-8 个来源和 Python 分层去重 | 可重复每日快照 |
+| P4 内容管道 | 接入 8–10 个来源和 Python 分层去重 | 可重复每日快照 |
 | P5 AI 与画像 | 摘要、画像增强和本地推荐 | 个性化信息流 |
 | P6 RAG 与 Eval | chunk dense、引用、拒答和 30 题回归 | 可公开 Eval |
 | P7 部署 | 模式、额度、主备站和安全 | 可访问网站 |

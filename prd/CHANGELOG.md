@@ -1,5 +1,14 @@
 # NewsEviday PRD 变更日志
 
+## v1.2.6 来源策略确认 — 2026-08-02
+
+- 首批启用来源固定为 9 个：OpenAI、Anthropic、Hugging Face、GitHub AI & ML、Databricks、dbt Labs、arXiv、Qwen、DeepSeek。
+- 按产品方向移除 AWS Machine Learning 和 Google DeepMind；基于真实抓取噪声移除 Cloudflare Blog。
+- 增加“基础模型与多模态”“AI 产品、Agent 与开发工具”两个主题，保留原有数据中台、Data Agent、统一语义、智能湖仓、RAG/Eval 和元数据治理方向。
+- HTML 来源增加官方文章 URL 白名单、标题元素识别和变更日志锚点解析；规则处理由 Python 完成，不增加模型调用。
+- 主题匹配改为两次命中饱和计分，避免主题关键词越丰富、单条明确发布越难入选的问题。
+- 两次最终真实网络验证均为 9/9 来源成功、40 条内容入选、0 次模型调用；公开网站仍使用演示快照，自动更新保持暂停。
+
 ## v1.2.5 实施状态补充 — 2026-08-02
 
 - PRD 需求范围未变化。

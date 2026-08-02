@@ -44,27 +44,55 @@ sources:
     max_items: 12
     note: 重点筛选 Semantic Layer、Analytics Engineering 与 Agent 主题
 
-  - id: aws-ml-blog
-    name: AWS Machine Learning Blog
+  - id: openai-news
+    name: OpenAI News
     adapter: rss
-    url: https://aws.amazon.com/blogs/machine-learning/feed/
+    url: https://openai.com/news/rss.xml
     language: en
     region: 北美
     enabled: true
     usage_scope: metadata_and_excerpt
     max_items: 12
-    note: 只处理公开 Feed，后续按主题配额控制云厂商占比
+    note: 通用 AI 产品、模型、Agent、安全与开发者平台的一手信息
 
-  - id: cloudflare-blog
-    name: Cloudflare Blog
-    adapter: rss
-    url: https://blog.cloudflare.com/rss/
+  - id: anthropic-news
+    name: Anthropic Newsroom
+    adapter: html
+    url: https://www.anthropic.com/news
     language: en
     region: 北美
     enabled: true
+    usage_scope: metadata_and_link
+    max_items: 12
+    include_url_patterns:
+      - ^https://www\.anthropic\.com/news/[a-z0-9-]+$
+    title_class_patterns:
+      - __title(?:\s|$)
+    note: 官方站无稳定 RSS，仅采集 Newsroom 文章链接和标题，不抓导航与营销页面
+
+  - id: qwen-blog
+    name: Qwen Blog
+    adapter: rss
+    url: https://qwenlm.github.io/blog/index.xml
+    language: mixed
+    region: 中国大陆
+    enabled: true
     usage_scope: metadata_and_excerpt
     max_items: 12
-    note: 重点筛选 Workers AI、AI Gateway、Vectorize 与安全主题
+    note: 国内通用模型、Agent、开源模型和产品更新的一手信息
+
+  - id: deepseek-updates
+    name: DeepSeek API Updates
+    adapter: html
+    url: https://api-docs.deepseek.com/updates/
+    language: mixed
+    region: 中国大陆
+    enabled: true
+    usage_scope: metadata_and_link
+    max_items: 12
+    heading_tags:
+      - h3
+    note: 官方 API 更新与模型发布；按变更日志三级标题生成可追溯锚点链接
 
   - id: huggingface-blog
     name: Hugging Face Blog
@@ -76,14 +104,3 @@ sources:
     usage_scope: metadata_and_excerpt
     max_items: 12
     note: 兼容部分条目只提供 permalink GUID 的 Feed 结构
-
-  - id: google-deepmind-blog
-    name: Google DeepMind Blog
-    adapter: rss
-    url: https://deepmind.google/blog/rss.xml
-    language: en
-    region: 欧洲
-    enabled: true
-    usage_scope: metadata_and_excerpt
-    max_items: 12
-    note: 重点筛选 Agent、模型能力、评测与安全研究

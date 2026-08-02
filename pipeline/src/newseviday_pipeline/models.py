@@ -47,6 +47,12 @@ class SourceConfig(ContractModel):
     note: str | None = None
     max_items: int = Field(default=12, ge=1, le=50)
     request_timeout_seconds: int = Field(default=15, ge=3, le=30)
+    include_url_patterns: list[str] = Field(default_factory=list, max_length=8)
+    exclude_url_patterns: list[str] = Field(default_factory=list, max_length=8)
+    title_class_patterns: list[str] = Field(default_factory=list, max_length=8)
+    heading_tags: list[Literal["h2", "h3", "h4"]] = Field(
+        default_factory=list, max_length=3
+    )
 
 
 class SourcesConfig(ContractModel):

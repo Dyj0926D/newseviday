@@ -173,7 +173,7 @@ def select_by_topics(
         for topic in topics:
             matches = sum(1 for keyword in topic.keywords if keyword.casefold() in haystack)
             if matches:
-                scores[topic.id] = round(topic.weight * matches / len(topic.keywords), 4)
+                scores[topic.id] = round(topic.weight * min(1.0, matches / 2), 4)
         article.topic_scores = scores
         if not topics or max(scores.values(), default=0) >= minimum_score:
             selected.append(article)

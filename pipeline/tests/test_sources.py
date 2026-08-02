@@ -1,7 +1,12 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
-from newseviday_pipeline.adapters import parse_json_feed, parse_source
+from newseviday_pipeline.adapters import (
+    parse_html_headings,
+    parse_html_listing,
+    parse_json_feed,
+    parse_source,
+)
 from newseviday_pipeline.embeddings import HashingEmbedder, cosine_similarity
 from newseviday_pipeline.extraction import clean_html_text
 from newseviday_pipeline.models import SourceConfig, TopicConfig
@@ -46,6 +51,76 @@ def test_json_feed_adapter_supports_standard_items() -> None:
     )
     assert items[0].url == "https://example.com/a"
     assert items[0].summary == "Evidence"
+
+
+def test_html_listing_applies_official_article_url_allowlist() -> None:
+    content = b"""
+      <nav><a href="/pricing">Pricing and unrelated navigation</a></nav>
+      <main><a href="/news/agent-release">Agent release with evidence</a></main>
+    """
+    items = parse_html_listing(
+        content,
+        source_id="official-news",
+        language="en",
+        base_url="https://example.com/news",
+        include_url_patterns=[r"^https://example\.com/news/[a-z-]+$"],
+    )
+
+    assert [item.url for item in items] == ["https://example.com/news/agent-release"]
+
+
+def test_html_listing_prefers_heading_over_card_metadata() -> None:
+    content = b"""
+      <a href="/news/claude-release">
+        <span>Product</span><time>Aug 2</time><h3>Claude release for agents</h3>
+        <p>Long description that should not become the title.</p>
+      </a>
+    """
+    items = parse_html_listing(
+        content,
+        source_id="anthropic-news",
+        language="en",
+        base_url="https://example.com/news",
+    )
+
+    assert items[0].title == "Claude release for agents"
+
+
+def test_html_listing_can_select_a_source_specific_title_class() -> None:
+    content = b"""
+      <a href="/news/security-evals">
+        <time>Jul 30, 2026</time><span class="card__subject">Frontier Red Team</span>
+        <span class="card__title body-3">Investigating cybersecurity evaluations</span>
+      </a>
+    """
+    items = parse_html_listing(
+        content,
+        source_id="anthropic-news",
+        language="en",
+        base_url="https://example.com/news",
+        title_class_patterns=[r"__title(?:\s|$)"],
+    )
+
+    assert items[0].title == "Investigating cybersecurity evaluations"
+
+
+def test_html_heading_listing_creates_stable_fragment_links() -> None:
+    content = b"""
+      <h2 id="2026-08-02">2026-08-02</h2>
+      <h3 id="deepseek-v4">\xe2\x80\x8bDeepSeek-V4</h3>
+      <h3>Navigation heading without an id</h3>
+    """
+    items = parse_html_headings(
+        content,
+        source_id="deepseek-updates",
+        language="mixed",
+        base_url="https://api-docs.deepseek.com/updates/",
+        heading_tags=["h3"],
+    )
+
+    assert [(item.url, item.title) for item in items] == [
+        ("https://api-docs.deepseek.com/updates/#deepseek-v4", "DeepSeek-V4")
+    ]
 
 
 def test_public_url_validation_blocks_local_targets() -> None:

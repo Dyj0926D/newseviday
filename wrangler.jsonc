@@ -33,6 +33,6 @@
     "SNAPSHOT_ID": "snapshot-demo-p3-v1",
     "RAG_MIN_SCORE": "0.08",
     "RAG_MAX_CONTEXT_CHARS": "8000",
-    "PUBLIC_TOPIC_IDS": "data-agent,semantic-layer,data-platform,intelligent-lakehouse,rag-eval,metadata-governance",
+    "PUBLIC_TOPIC_IDS": "data-agent,semantic-layer,data-platform,intelligent-lakehouse,rag-eval,metadata-governance,foundation-models,ai-products-agents",
   },
 }

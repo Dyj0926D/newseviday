@@ -4,7 +4,7 @@
 
 NewsEviday 面向产品经理、AI 产品经理和数据产品从业者，整理海内外 AI、数据平台与产品情报。它重点解决跨语言信息差、来源分散和 AI 结论难验证的问题。
 
-当前已完成 P4–P6 的可执行工程基线：8 个真实公开来源采集、结构化 AI 摘要与画像、引用式 RAG、30 题 Eval Harness 和手动内容发布流程已经建立。需要付费或外部资源的能力仍默认关闭；网站继续使用演示快照，不会因安装或浏览页面自动产生费用。
+当前已完成 P4–P6 的可执行工程基线：9 个真实官方来源采集、结构化 AI 摘要与画像、引用式 RAG、30 题 Eval Harness 和手动内容发布流程已经建立。需要付费或外部资源的能力仍默认关闭；网站继续使用演示快照，不会因安装或浏览页面自动产生费用。
 
 ## 当前能力
 
@@ -16,7 +16,7 @@ NewsEviday 面向产品经理、AI 产品经理和数据产品从业者，整理
 - `/api/health`、`/api/status`、`/api/runtime-config` 统一 API 契约；
 - Worker 不可用时自动读取最后一份静态内容快照；
 - DeepSeek 非流式/流式适配、超时、取消、错误分类和 Token/费用接口；
-- Python 8 个官方 Atom/RSS 来源、正文清洗、两级去重、主题配额、Trace 和原子快照发布；
+- Python 9 个官方 Atom/RSS/HTML 来源、来源级标题解析、正文清洗、两级去重、8 主题筛选、Trace 和原子快照发布；
 - 单篇一次结构化摘要、内容哈希缓存、术语检查和可确认的画像语义增强；
 - 版本化 chunk、hashing dense baseline、BGE-compatible adapter、Vectorize NDJSON 和 30 题 Eval Harness；
 - TypeScript + JSON Schema + Pydantic 共享数据模型；
