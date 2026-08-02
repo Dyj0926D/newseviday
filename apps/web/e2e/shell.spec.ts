@@ -27,7 +27,7 @@ test('home search and topic filters are reflected in the URL', async ({ page }) 
 
 test('home, article and original evidence form a working route chain', async ({ page }) => {
   await page.goto('/?topic=rag-eval');
-  await page.getByRole('heading', { name: 'RAG 评测开始进入持续交付门禁' }).click();
+  await page.getByRole('link', { name: 'RAG 评测开始进入持续交付门禁', exact: true }).click();
 
   await expect(page).toHaveURL(/\/article\/demo-rag-eval$/);
   await expect(
