@@ -4,7 +4,7 @@ import {
   type RuntimeConfigResponse,
   type StatusResponse,
 } from '@newseviday/contracts';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { type Env, handleRequest } from './index';
 
@@ -15,6 +15,11 @@ const env: Env = {
   ALLOWED_ORIGINS: 'http://localhost:5173',
 };
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
 describe('worker API', () => {
   it('returns an honest static status when AI is disabled', async () => {
     const response = await handleRequest(
@@ -24,11 +29,14 @@ describe('worker API', () => {
     const payload = (await response.json()) as StatusResponse;
 
     expect(response.status).toBe(200);
+    expect(response.headers.get('Strict-Transport-Security')).toContain('max-age=31536000');
+    expect(response.headers.get('Cross-Origin-Opener-Policy')).toBe('same-origin');
     expect(payload.ok).toBe(true);
     expect(payload.data.mode).toBe('archive');
     expect(payload.data.content.sourceCount).toBe(0);
     expect(payload.data.ai.state).toBe('static-only');
     expect(payload.data.rag.state).toBe('static-only');
+    expect(payload.data.protection.persistentGuardrails).toBe('unavailable');
     expect(payload.meta.requestId).toBeTruthy();
     expect(payload.meta.version).toBe('0.1.0-test');
   });
@@ -42,6 +50,7 @@ describe('worker API', () => {
 
     expect(payload.data.features.aiSummary).toBe(false);
     expect(payload.data.limits.dailyQuestionsPerIp).toBe(5);
+    expect(payload.data.limits.globalDailyGenerations).toBe(20);
     expect(JSON.stringify(payload)).not.toContain('server-only-secret');
   });
 
@@ -87,5 +96,58 @@ describe('worker API', () => {
     expect(response.status).toBe(503);
     expect(payload.error.code).toBe('invalid_configuration');
     expect(JSON.stringify(payload)).not.toContain('999');
+  });
+
+  it('fails closed when soft limits exceed their hard limits', async () => {
+    const response = await handleRequest(
+      new Request(`https://example.com${API_PATHS.runtimeConfig}`),
+      { ...env, MONTHLY_BUDGET_CNY: '40', HARD_BUDGET_CNY: '35' },
+    );
+    const payload = (await response.json()) as ApiError;
+
+    expect(response.status).toBe(503);
+    expect(payload.error.code).toBe('invalid_configuration');
+  });
+
+  it('does not call the model when persistent guardrails are unavailable', async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal('fetch', fetcher);
+    const response = await handleRequest(
+      new Request(`https://example.com${API_PATHS.profileEnhance}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'CF-Connecting-IP': '203.0.113.10',
+        },
+        body: JSON.stringify({ role: 'AI 产品经理', work: '', goal: '', description: '' }),
+      }),
+      {
+        ...env,
+        AI_ENABLED: 'true',
+        DEEPSEEK_API_KEY: 'server-only-secret',
+        DEEPSEEK_MODEL: 'test-model',
+        DEEPSEEK_INPUT_CNY_PER_MILLION: '1',
+        DEEPSEEK_OUTPUT_CNY_PER_MILLION: '1',
+        IP_HASH_SECRET: 'test-ip-secret-at-least-16',
+      },
+    );
+    const payload = (await response.json()) as ApiError;
+
+    expect(response.status).toBe(503);
+    expect(payload.error.code).toBe('guardrails_unavailable');
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('does not enable AI without explicit current token prices', async () => {
+    const response = await handleRequest(new Request(`https://example.com${API_PATHS.status}`), {
+      ...env,
+      AI_ENABLED: 'true',
+      DEEPSEEK_API_KEY: 'server-only-secret',
+      DEEPSEEK_MODEL: 'test-model',
+    });
+    const payload = (await response.json()) as ApiError;
+
+    expect(response.status).toBe(503);
+    expect(payload.error.code).toBe('invalid_configuration');
   });
 });

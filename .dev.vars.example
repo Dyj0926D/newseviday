@@ -2,5 +2,12 @@
 # Keep AI_ENABLED=false and RAG_ENABLED=false until the P7 rate-limit and budget gates pass.
 DEEPSEEK_API_KEY=replace_with_personal_key
 DEEPSEEK_MODEL=replace_with_provider_exact_model_id
+# Required before AI_ENABLED=true. Confirm current prices in the provider console.
+DEEPSEEK_INPUT_CNY_PER_MILLION=replace_with_current_input_price
+DEEPSEEK_OUTPUT_CNY_PER_MILLION=replace_with_current_output_price
 IP_HASH_SECRET=generate_a_random_value_with_at_least_32_characters
 TRACE_HASH_SECRET=generate_a_separate_random_value_with_at_least_32_characters
+# Cloudflare official dummy keys. Use only in local development/test.
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+TURNSTILE_HOSTNAMES=localhost,127.0.0.1

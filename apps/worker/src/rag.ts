@@ -8,6 +8,7 @@ import {
 } from '@newseviday/contracts';
 
 import { DeepSeekClient } from './ai/deepseek';
+import { NoopUsageRecorder, type TokenPrice, type UsageRecorder } from './ai/types';
 import { deepSeekConfig, ragConfig, type Env } from './config';
 import { HttpInputError } from './http';
 import { untrustedEvidenceBlock } from './security';
@@ -258,6 +259,8 @@ export async function prepareRagResponse(
   input: AskRequest,
   env: Env,
   requestId: string,
+  usageRecorder: UsageRecorder = new NoopUsageRecorder(),
+  tokenPrice: TokenPrice | null = null,
 ): Promise<PreparedRagResponse> {
   const startedAt = performance.now();
   const config = ragConfig(env);
@@ -298,7 +301,7 @@ export async function prepareRagResponse(
         `[${index + 1}] articleId=${chunk.articleId}; chunkId=${chunk.id}\n${chunk.text}`,
     )
     .join('\n\n');
-  const client = new DeepSeekClient(ai);
+  const client = new DeepSeekClient(ai, fetch, usageRecorder, tokenPrice);
   const stream = await client.stream({
     requestId,
     signal: request.signal,

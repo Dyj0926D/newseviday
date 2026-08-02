@@ -1,5 +1,14 @@
 # NewsEviday PRD 变更日志
 
+## v1.2.8 P7 持久保护与接口校准 — 2026-08-02
+
+- D1 接入单 IP/全站日额度、并发租约、幂等请求、月度预算预留与结算，并记录 API Trace、模型和 Token 统计；保护存储不可用时失败关闭。
+- 生成页面接入 Turnstile，Worker 强制校验 token、`action=generate` 与生产 hostname；CSP 同步最小放行 Cloudflare challenge 域名。
+- 默认额度统一为单 IP 3 次/日、全站 20 次/日、软预算后 10 次/日、并发 2、软预算 35 元、硬预算 50 元。
+- 移除“MVP 已有运营控制台”和未确认 DeepSeek V4 Pro 价格的错误口径；额度改为版本化配置，真实价格待烟雾测试前确认。
+- 接口表改为实际实现：文章内问答使用 `/api/ask` 的可选 `articleId`，Eval 读取静态 JSON，`/api/admin/*` 明确延后。
+- 远程 D1 migration 与 Turnstile 资源已完成；AI/RAG 仍保持关闭，不执行付费调用。
+
 ## v1.2.7 对外文案与架构口径校准 — 2026-08-02
 
 - 公开页面统一使用“最新情报、情报详情、证据问答、关注偏好、质量评测、更新状态、产品与技术”。

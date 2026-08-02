@@ -15,13 +15,31 @@ import {
   publicRuntimeConfig,
   ragConfig,
   runtimeMode,
+  tokenPrice,
   type Env,
 } from './config';
+import {
+  beginGeneration,
+  finalizeStreamingResponse,
+  generationCapabilityState,
+  GuardrailError,
+  type GuardrailStore,
+  guardrailsConfigured,
+} from './guardrails';
 import { failure, HttpInputError, readJsonBody, requestContext, success } from './http';
-import { prepareRagResponse, RagUnavailableError, validateAskRequest } from './rag';
+import {
+  prepareRagResponse,
+  RagUnavailableError,
+  type PreparedRagResponse,
+  validateAskRequest,
+} from './rag';
 import { corsHeaders } from './security';
 
 export type { Env } from './config';
+
+export interface RequestDependencies {
+  guardrailStore?: GuardrailStore;
+}
 
 function withCors(response: Response, cors: Record<string, string>): Response {
   const headers = new Headers(response.headers);
@@ -65,7 +83,11 @@ async function contentStatus(request: Request, env: Env): Promise<StatusData['co
   };
 }
 
-export async function handleRequest(request: Request, env: Env): Promise<Response> {
+export async function handleRequest(
+  request: Request,
+  env: Env,
+  dependencies: RequestDependencies = {},
+): Promise<Response> {
   const context = requestContext(request);
   const url = new URL(request.url);
   const cors = corsHeaders(request, env);
@@ -92,21 +114,37 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
       const rag = ragConfig(env);
       const content = await contentStatus(request, env);
       const aiAvailable = ai.enabled && Boolean(ai.apiKey) && Boolean(ai.model);
+      const protectionsReady = guardrailsConfigured(env);
+      let generationState: StatusData['ai']['state'] = 'static-only';
+      if (aiAvailable && protectionsReady) {
+        try {
+          generationState = await generationCapabilityState(env);
+        } catch {
+          generationState = 'static-only';
+        }
+      }
       const ragAvailable =
-        rag.enabled && aiAvailable && Boolean(env.ASSETS) && Boolean(rag.traceSecret);
+        rag.enabled &&
+        (generationState === 'available' || generationState === 'saving-mode') &&
+        Boolean(env.ASSETS) &&
+        Boolean(rag.traceSecret);
       const payload: StatusData = {
         product: 'NewsEviday',
         mode: runtimeMode(env.RUNTIME_MODE),
         content,
         ai: {
-          state: aiAvailable ? 'available' : 'static-only',
+          state: generationState,
           provider: aiAvailable ? 'deepseek' : null,
           model: aiAvailable ? ai.model : null,
         },
         rag: {
-          state: ragAvailable ? 'available' : 'static-only',
+          state: ragAvailable ? generationState : 'static-only',
           retrievalMode: ragAvailable ? 'article_dense' : null,
           corpusSnapshotId: ragAvailable ? content.snapshotId : null,
+        },
+        protection: {
+          persistentGuardrails: protectionsReady ? 'available' : 'unavailable',
+          turnstile: publicRuntimeConfig(env).features.turnstile ? 'enabled' : 'disabled',
         },
       };
       return withCors(success(payload, context, env), cors);
@@ -123,15 +161,76 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
         runtime.limits.requestBodyBytes,
       );
       const input = validateProfileRequest(raw);
-      const result = await enhanceProfile(input, env, context.requestId, request.signal);
-      return withCors(success(result, context, env), cors);
+      const ai = deepSeekConfig(env);
+      if (!ai.enabled || !ai.apiKey || !ai.model) {
+        throw new AiProviderError('ai_unavailable', 'AI is disabled', false, 503);
+      }
+      const reservation = await beginGeneration(
+        request,
+        env,
+        'profile',
+        context.requestId,
+        dependencies.guardrailStore,
+      );
+      try {
+        const result = await enhanceProfile(
+          input,
+          env,
+          context.requestId,
+          request.signal,
+          reservation.usageRecorder,
+          tokenPrice(env),
+        );
+        await reservation.finish(true);
+        return withCors(success(result, context, env), cors);
+      } catch (error) {
+        await reservation.finish(true).catch(() => {});
+        throw error;
+      }
     }
 
     if (url.pathname === API_PATHS.ask && request.method === 'POST') {
       const runtime = publicRuntimeConfig(env);
       const raw = await readJsonBody<AskRequest>(request, runtime.limits.requestBodyBytes);
       const input = validateAskRequest(raw);
-      const result = await prepareRagResponse(request, input, env, context.requestId);
+      const ai = deepSeekConfig(env);
+      const rag = ragConfig(env);
+      if (
+        !rag.enabled ||
+        !rag.traceSecret ||
+        !ai.enabled ||
+        !ai.apiKey ||
+        !ai.model ||
+        !env.ASSETS
+      ) {
+        throw new RagUnavailableError();
+      }
+      const reservation = await beginGeneration(
+        request,
+        env,
+        'ask',
+        context.requestId,
+        dependencies.guardrailStore,
+      );
+      let result: PreparedRagResponse;
+      try {
+        result = await prepareRagResponse(
+          request,
+          input,
+          env,
+          context.requestId,
+          reservation.usageRecorder,
+          tokenPrice(env),
+        );
+      } catch (error) {
+        await reservation.finish(error instanceof AiProviderError).catch(() => {});
+        throw error;
+      }
+      if (result.kind === 'stream') {
+        result.response = finalizeStreamingResponse(result.response, reservation);
+      } else {
+        await reservation.finish(false);
+      }
       return withCors(
         result.kind === 'stream' ? result.response : success(result.data, context, env),
         cors,
@@ -185,6 +284,18 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
       return withCors(
         failure('rag_unavailable', 'Evidence-grounded Q&A is currently unavailable', context, env, {
           status: 503,
+        }),
+        cors,
+      );
+    }
+    if (error instanceof GuardrailError) {
+      return withCors(
+        failure(error.code, error.message, context, env, {
+          status: error.status,
+          retryable: error.retryable,
+          ...(error.retryAfterSeconds
+            ? { headers: { 'Retry-After': String(error.retryAfterSeconds) } }
+            : {}),
         }),
         cors,
       );

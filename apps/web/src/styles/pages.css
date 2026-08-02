@@ -461,6 +461,26 @@ button:disabled {
   color: var(--ne-color-text-muted);
 }
 
+.turnstile-control {
+  display: grid;
+  gap: var(--ne-space-2);
+  padding: var(--ne-space-4) var(--ne-space-5);
+  border-top: 1px solid var(--ne-color-border-subtle);
+  background: color-mix(in srgb, var(--ne-color-accent-soft) 42%, transparent);
+}
+
+.turnstile-control > div {
+  width: 100%;
+  min-height: 4.1rem;
+}
+
+.turnstile-control p {
+  margin: 0;
+  color: var(--ne-color-text-muted);
+  font-size: var(--ne-font-size-caption);
+  line-height: 1.5;
+}
+
 .question-composer__footer {
   display: flex;
   align-items: center;

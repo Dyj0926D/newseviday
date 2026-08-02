@@ -7,6 +7,14 @@
   "observability": {
     "enabled": true,
   },
+  "d1_databases": [
+    {
+      "binding": "GUARDRAIL_DB",
+      "database_name": "newseviday-guardrails",
+      "database_id": "c2876512-947d-4658-b5ca-0991a6badbab",
+      "migrations_dir": "../../migrations",
+    },
+  ],
   "vars": {
     "APP_VERSION": "0.1.0",
     "RUNTIME_MODE": "archive",
@@ -16,8 +24,17 @@
     "TREND_BRIEF_ENABLED": "false",
     "ALLOWED_ORIGINS": "http://localhost:5173,http://127.0.0.1:5173",
     "DAILY_QUESTIONS_PER_IP": "3",
+    "GLOBAL_DAILY_GENERATIONS": "20",
+    "SOFT_BUDGET_DAILY_GENERATIONS": "10",
+    "MAX_CONCURRENT_GENERATIONS": "2",
     "MONTHLY_BUDGET_CNY": "35",
     "HARD_BUDGET_CNY": "50",
+    "ASK_RESERVE_CNY": "0.10",
+    "PROFILE_RESERVE_CNY": "0.05",
+    "GUARDRAIL_LEASE_SECONDS": "120",
+    "TURNSTILE_ENABLED": "true",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAEEd4lodwrvBl_hI",
+    "TURNSTILE_HOSTNAMES": "newseviday.dyjnewseviday-worker.workers.dev",
     "REQUEST_BODY_BYTES": "32768",
     "UPSTREAM_TIMEOUT_MS": "20000",
     "DEEPSEEK_MAX_RETRIES": "0",

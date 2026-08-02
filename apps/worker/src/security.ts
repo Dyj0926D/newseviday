@@ -6,7 +6,8 @@ export function corsHeaders(request: Request, env: Env): Record<string, string> 
   if (!allowedOrigins(env).includes(origin)) return { Vary: 'Origin' };
 
   return {
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Request-Id',
+    'Access-Control-Allow-Headers':
+      'Content-Type, Authorization, X-Request-Id, Idempotency-Key, X-Turnstile-Token',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Max-Age': '600',
@@ -31,21 +32,6 @@ export async function anonymizeIp(ip: string, secret: string): Promise<string> {
   return Array.from(new Uint8Array(signature).slice(0, 16))
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
-}
-
-export interface RateLimitDecision {
-  allowed: boolean;
-  remaining: number;
-  resetAt: string;
-}
-
-export interface RateLimitStore {
-  consume(key: string, limit: number, windowSeconds: number): Promise<RateLimitDecision>;
-}
-
-export interface BudgetLedger {
-  reserve(estimatedCny: number, hardLimitCny: number): Promise<boolean>;
-  settle(estimatedCny: number, actualCny: number): Promise<void>;
 }
 
 const SENSITIVE_KEYS = /authorization|api[-_]?key|token|secret|password|cookie|ip/i;

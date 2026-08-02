@@ -5,7 +5,7 @@
 | API 版本 | `0.1.x` |
 | 数据 Schema | `1.0.0` |
 | 传输 | HTTPS + JSON；问答使用 SSE |
-| 当前状态 | 健康、状态、运行配置、画像增强和问答路由已实现；付费能力默认关闭 |
+| 当前状态 | 健康、状态、运行配置、画像增强、问答和持久保护已实现；付费能力默认关闭 |
 
 ## 1. 统一响应
 
@@ -55,7 +55,7 @@
 | 方法 | 路径 | 用途 | AI 调用 | 缓存 |
 |---|---|---|---|---|
 | GET | `/api/health` | Worker 存活检查 | 无 | `no-store` |
-| GET | `/api/status` | 公开内容和 AI 能力状态 | 无 | `no-store` |
+| GET | `/api/status` | 公开内容、AI 与生成保护状态 | 无 | `no-store` |
 | GET | `/api/runtime-config` | 公开开关与额度，不含密钥 | 无 | `no-store` |
 | OPTIONS | `/api/*` | CORS 预检 | 无 | 浏览器最多 600 秒 |
 
@@ -90,6 +90,10 @@ AI 状态：
 | `origin_not_allowed` | 403 | 否 | CORS 来源未列入白名单 |
 | `method_not_allowed` | 405 | 否 | 方法不受支持 |
 | `not_found` | 404 | 否 | API 路由不存在 |
+| `verification_required` | 400 | 完成验证后重试 | 缺少 Turnstile token |
+| `verification_failed` | 403 | 重新验证后重试 | token、action 或 hostname 校验失败 |
+| `request_conflict` | 409 | 使用新幂等键 | `Idempotency-Key` 重复或格式不合法 |
+| `guardrails_unavailable` | 503 | 稍后重试 | D1、HMAC Secret 或 Turnstile 保护不可用 |
 | `rate_limited` | 429 | 等待后重试 | 单 IP 匿名额度用尽 |
 | `budget_paused` | 503 | 否 | 项目预算开关已暂停生成 |
 | `ai_unavailable` | 503 | 否 | AI 关闭、缺 Key 或缺 model ID |
@@ -107,6 +111,7 @@ DeepSeek 适配器只把 429、500、503 归为可重试错误。默认重试次
 
 ### `POST /api/profile/enhance`
 
+- 请求头：`Idempotency-Key`；Turnstile 开启时还需 `X-Turnstile-Token`；
 - 输入：`role`、`work`、`goal`、`description`，至少一项非空；
 - 输出：结构化字段、允许主题内的兴趣建议、推断术语、警告、模型与 Prompt 版本；
 - 结果只进入前端预览，用户点击“应用建议”后才写入表单，再次保存后才进入浏览器本地画像；
@@ -114,17 +119,19 @@ DeepSeek 适配器只把 429、500、503 归为可重试错误。默认重试次
 
 ### `POST /api/ask`
 
+- 请求头：`Idempotency-Key`；Turnstile 开启时还需 `X-Turnstile-Token`；
 - 输入：2–300 字问题、`7d/30d` 范围、可选 `articleId`；
 - 证据不足时返回结构化 `RagRefusalData`，不会调用生成模型；
 - 证据充分时返回 SSE。首个事件为 `event: meta`，包含匿名 Trace ID、检索模式与引用；后续 `data:` 保持 OpenAI-compatible delta 格式，最后为 `[DONE]`；
 - 客户端停止或断开连接时通过 `AbortSignal` 取消上游请求；
 - Trace 只记录问题 HMAC 指纹、候选 chunk、注入 chunk、回退原因和耗时，不保存问题或 IP 原文。
 
-服务端在模型调用前执行：功能开关、配置完整性、请求体校验、检索和证据阈值。持久匿名限流与预算台账属于 P7，因此公开环境继续保持 RAG 关闭。
+服务端在模型调用前执行：功能开关、配置完整性、请求体校验、Turnstile、预算预留、并发租约、匿名日额度、检索和证据阈值。证据不足时释放预算并返还额度；模型调用后按 Usage 或保守预留额结算。公开环境继续保持 RAG 关闭，等待真实模型烟雾测试与质量 Gate。
 
 ## 6. 边界
 
 - CORS 是浏览器边界，不是身份认证。
-- `/api/runtime-config` 只公开布尔开关和数字额度；不得出现 Key、哈希盐、账号 ID。
+- `/api/status` 只公开保护是否就绪，不返回计数、消费明细或匿名键。
+- `/api/runtime-config` 只公开布尔开关、数字额度和 Turnstile Site Key；不得出现 Secret、哈希盐、账号 ID。
 - 真实 IP 只在请求内存中用于生成 HMAC 匿名键，不写入业务日志。
 - 用户问题原文默认不进入长期日志；Eval 使用脱敏样本或人工构造黄金集。

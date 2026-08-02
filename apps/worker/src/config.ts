@@ -9,8 +9,14 @@ export interface Env {
   TREND_BRIEF_ENABLED?: string;
   ALLOWED_ORIGINS?: string;
   DAILY_QUESTIONS_PER_IP?: string;
+  GLOBAL_DAILY_GENERATIONS?: string;
+  SOFT_BUDGET_DAILY_GENERATIONS?: string;
+  MAX_CONCURRENT_GENERATIONS?: string;
   MONTHLY_BUDGET_CNY?: string;
   HARD_BUDGET_CNY?: string;
+  ASK_RESERVE_CNY?: string;
+  PROFILE_RESERVE_CNY?: string;
+  GUARDRAIL_LEASE_SECONDS?: string;
   REQUEST_BODY_BYTES?: string;
   UPSTREAM_TIMEOUT_MS?: string;
   DEEPSEEK_MODEL?: string;
@@ -22,10 +28,17 @@ export interface Env {
   CONTENT_SOURCE_COUNT?: string;
   SNAPSHOT_ID?: string;
   TRACE_HASH_SECRET?: string;
+  TURNSTILE_ENABLED?: string;
+  TURNSTILE_SITE_KEY?: string;
+  TURNSTILE_SECRET?: string;
+  TURNSTILE_HOSTNAMES?: string;
+  DEEPSEEK_INPUT_CNY_PER_MILLION?: string;
+  DEEPSEEK_OUTPUT_CNY_PER_MILLION?: string;
   RAG_MIN_SCORE?: string;
   RAG_MAX_CONTEXT_CHARS?: string;
   PUBLIC_TOPIC_IDS?: string;
   ASSETS?: { fetch(request: Request): Promise<Response> };
+  GUARDRAIL_DB?: D1Database;
 }
 
 export class ConfigurationError extends Error {
@@ -76,6 +89,31 @@ export function allowedOrigins(env: Env): string[] {
 
 export function publicRuntimeConfig(env: Env): RuntimeConfigData {
   const aiEnabled = asBoolean(env.AI_ENABLED);
+  const turnstileEnabled = asBoolean(env.TURNSTILE_ENABLED);
+  const globalDailyGenerations = asInteger(
+    env.GLOBAL_DAILY_GENERATIONS,
+    20,
+    0,
+    10_000,
+    'GLOBAL_DAILY_GENERATIONS',
+  );
+  const softBudgetDailyGenerations = asInteger(
+    env.SOFT_BUDGET_DAILY_GENERATIONS,
+    10,
+    0,
+    10_000,
+    'SOFT_BUDGET_DAILY_GENERATIONS',
+  );
+  const monthlyBudgetCny = asInteger(env.MONTHLY_BUDGET_CNY, 35, 0, 50, 'MONTHLY_BUDGET_CNY');
+  const hardBudgetCny = asInteger(env.HARD_BUDGET_CNY, 50, 0, 50, 'HARD_BUDGET_CNY');
+  if (softBudgetDailyGenerations > globalDailyGenerations) {
+    throw new ConfigurationError(
+      'SOFT_BUDGET_DAILY_GENERATIONS must not exceed GLOBAL_DAILY_GENERATIONS',
+    );
+  }
+  if (monthlyBudgetCny > hardBudgetCny) {
+    throw new ConfigurationError('MONTHLY_BUDGET_CNY must not exceed HARD_BUDGET_CNY');
+  }
   return {
     schemaVersion: SCHEMA_VERSION,
     mode: runtimeMode(env.RUNTIME_MODE),
@@ -84,6 +122,7 @@ export function publicRuntimeConfig(env: Env): RuntimeConfigData {
       aiSummary: aiEnabled,
       rag: asBoolean(env.RAG_ENABLED),
       trendBrief: asBoolean(env.TREND_BRIEF_ENABLED),
+      turnstile: turnstileEnabled,
     },
     limits: {
       dailyQuestionsPerIp: asInteger(
@@ -93,8 +132,17 @@ export function publicRuntimeConfig(env: Env): RuntimeConfigData {
         100,
         'DAILY_QUESTIONS_PER_IP',
       ),
-      monthlyBudgetCny: asInteger(env.MONTHLY_BUDGET_CNY, 35, 0, 50, 'MONTHLY_BUDGET_CNY'),
-      hardBudgetCny: asInteger(env.HARD_BUDGET_CNY, 50, 0, 50, 'HARD_BUDGET_CNY'),
+      globalDailyGenerations,
+      softBudgetDailyGenerations,
+      maxConcurrentGenerations: asInteger(
+        env.MAX_CONCURRENT_GENERATIONS,
+        2,
+        1,
+        20,
+        'MAX_CONCURRENT_GENERATIONS',
+      ),
+      monthlyBudgetCny,
+      hardBudgetCny,
       requestBodyBytes: asInteger(
         env.REQUEST_BODY_BYTES,
         32_768,
@@ -109,6 +157,9 @@ export function publicRuntimeConfig(env: Env): RuntimeConfigData {
         60_000,
         'UPSTREAM_TIMEOUT_MS',
       ),
+    },
+    protection: {
+      turnstileSiteKey: turnstileEnabled ? env.TURNSTILE_SITE_KEY?.trim() || null : null,
     },
   };
 }
@@ -129,8 +180,24 @@ export interface RagConfig {
   traceSecret: string | null;
 }
 
+export interface GuardrailConfig {
+  askReserveCny: number;
+  profileReserveCny: number;
+  leaseSeconds: number;
+  ipHashSecret: string | null;
+  turnstileEnabled: boolean;
+  turnstileSiteKey: string | null;
+  turnstileSecret: string | null;
+  turnstileHostnames: string[];
+}
+
 export function deepSeekConfig(env: Env): DeepSeekConfig {
   const runtime = publicRuntimeConfig(env);
+  if (runtime.features.aiSummary && !tokenPrice(env)) {
+    throw new ConfigurationError(
+      'DEEPSEEK token prices are required before AI generation can be enabled',
+    );
+  }
   const baseUrl = env.DEEPSEEK_BASE_URL?.trim() || 'https://api.deepseek.com';
   try {
     const parsed = new URL(baseUrl);
@@ -167,6 +234,47 @@ function asNumber(
     throw new ConfigurationError(`${name} must be between ${min} and ${max}`);
   }
   return parsed;
+}
+
+export function guardrailConfig(env: Env): GuardrailConfig {
+  const runtime = publicRuntimeConfig(env);
+  const ipHashSecret = env.IP_HASH_SECRET?.trim() || null;
+  const turnstileSiteKey = env.TURNSTILE_SITE_KEY?.trim() || null;
+  const turnstileSecret = env.TURNSTILE_SECRET?.trim() || null;
+  if (ipHashSecret && ipHashSecret.length < 16) {
+    throw new ConfigurationError('IP_HASH_SECRET must contain at least 16 characters');
+  }
+  if (runtime.features.turnstile && (!turnstileSiteKey || !turnstileSecret)) {
+    throw new ConfigurationError('TURNSTILE configuration is incomplete');
+  }
+  return {
+    askReserveCny: asNumber(env.ASK_RESERVE_CNY, 0.1, 0.001, 10, 'ASK_RESERVE_CNY'),
+    profileReserveCny: asNumber(env.PROFILE_RESERVE_CNY, 0.05, 0.001, 10, 'PROFILE_RESERVE_CNY'),
+    leaseSeconds: asInteger(env.GUARDRAIL_LEASE_SECONDS, 120, 30, 600, 'GUARDRAIL_LEASE_SECONDS'),
+    ipHashSecret,
+    turnstileEnabled: runtime.features.turnstile,
+    turnstileSiteKey,
+    turnstileSecret,
+    turnstileHostnames: (env.TURNSTILE_HOSTNAMES ?? '')
+      .split(',')
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean),
+  };
+}
+
+export function tokenPrice(
+  env: Env,
+): { inputCnyPerMillion: number; outputCnyPerMillion: number } | null {
+  const input = env.DEEPSEEK_INPUT_CNY_PER_MILLION?.trim();
+  const output = env.DEEPSEEK_OUTPUT_CNY_PER_MILLION?.trim();
+  if (!input && !output) return null;
+  if (!input || !output) {
+    throw new ConfigurationError('Both DeepSeek token price variables are required');
+  }
+  return {
+    inputCnyPerMillion: asNumber(input, 0, 0, 100_000, 'DEEPSEEK_INPUT_CNY_PER_MILLION'),
+    outputCnyPerMillion: asNumber(output, 0, 0, 100_000, 'DEEPSEEK_OUTPUT_CNY_PER_MILLION'),
+  };
 }
 
 export function ragConfig(env: Env): RagConfig {

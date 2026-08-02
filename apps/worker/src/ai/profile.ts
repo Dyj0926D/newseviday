@@ -8,6 +8,7 @@ import type { Env } from '../config';
 import { deepSeekConfig, publicTopicIds } from '../config';
 import { HttpInputError } from '../http';
 import { DeepSeekClient } from './deepseek';
+import { NoopUsageRecorder, type TokenPrice, type UsageRecorder } from './types';
 
 export const PROFILE_PROMPT_VERSION = 'profile-enhancement-v1';
 
@@ -133,9 +134,11 @@ export async function enhanceProfile(
   env: Env,
   requestId: string,
   signal?: AbortSignal,
+  usageRecorder: UsageRecorder = new NoopUsageRecorder(),
+  tokenPrice: TokenPrice | null = null,
 ): Promise<ProfileEnhanceData> {
   const allowedTopicIds = publicTopicIds(env);
-  const client = new DeepSeekClient(deepSeekConfig(env));
+  const client = new DeepSeekClient(deepSeekConfig(env), fetch, usageRecorder, tokenPrice);
   const completion = await client.complete({
     requestId,
     signal,

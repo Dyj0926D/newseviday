@@ -28,7 +28,13 @@ npm run dev
 - 无 DeepSeek Key 也可以构建、测试和浏览；
 - Worker 不发起真实模型请求。
 
-本地需要模型适配测试时，把根目录 `.dev.vars.example` 复制为 `.dev.vars`。该文件已被 Git 忽略。不要同时使用 `.env` 和 `.dev.vars` 保存 Worker Secret。
+首次本地运行 D1 migration：
+
+```powershell
+npx wrangler d1 migrations apply newseviday-guardrails --local
+```
+
+本地需要模型适配测试时，把根目录 `.dev.vars.example` 复制为 `.dev.vars`。示例文件使用 Cloudflare 官方 dummy Turnstile keys，可在 localhost 测试且不会触发真实 challenge；生产 Secret 不得复制到本地示例。该文件已被 Git 忽略。不要同时使用 `.env` 和 `.dev.vars` 保存 Worker Secret。
 
 ## 3. 部署前检查
 
@@ -72,16 +78,31 @@ curl.exe -sS https://<worker-host>/data/current.json
 ```powershell
 npx wrangler secret put DEEPSEEK_API_KEY
 npx wrangler secret put IP_HASH_SECRET
+npx wrangler secret put TRACE_HASH_SECRET
+npx wrangler secret put TURNSTILE_SECRET
 ```
+
+### 5.1 D1 与 Turnstile
+
+创建资源后，把 D1 binding 与公开 Turnstile Site Key 写入 `wrangler.jsonc`，Secret 只通过 Wrangler 写入：
+
+```powershell
+npx wrangler d1 migrations apply newseviday-guardrails --remote
+npx wrangler secret list
+```
+
+当前远程 D1 `newseviday-guardrails` 已完成 `0001_generation_guardrails.sql` 与 `0002_generation_usage_trace.sql`。部署前应确认 Secret 名称包含 `DEEPSEEK_API_KEY`、`IP_HASH_SECRET`、`TRACE_HASH_SECRET`、`TURNSTILE_SECRET`，但不要打印或复制其值。
 
 模型准确 ID 作为普通配置 `DEEPSEEK_MODEL` 管理。开启真实调用前必须完成：
 
-1. 问答路由、匿名持久限流和预算台账完成；
-2. `DEEPSEEK_MODEL` 与控制台文档一致；
-3. 月预算和硬上限不超过 35/50 元；
+1. 问答路由、D1 匿名持久限流、并发租约、预算台账和 Turnstile 已完成；
+2. `DEEPSEEK_MODEL` 与控制台文档一致，并配置当期 `DEEPSEEK_INPUT_CNY_PER_MILLION`、`DEEPSEEK_OUTPUT_CNY_PER_MILLION`；
+3. 月预算和硬上限不超过 35/50 元，动态最坏成本预留不高于硬预算；
 4. 将 `AI_ENABLED` 改为 `true` 并走 Git 评审；
 5. 只执行一次最小烟雾测试，记录输入/输出 Token 与费用估算；
 6. 验证通过后再扩大访问范围。
+
+配置的 Site Key 只允许生产 Worker hostname。新增自定义域名或备用站动态 API 前，应先扩充 Turnstile hostname 白名单，并同步 `TURNSTILE_HOSTNAMES`；不能使用“允许任意 hostname”。
 
 ## 6. 暂停采集与 AI
 
@@ -126,6 +147,8 @@ python -m uv run --project pipeline newseviday-pipeline run `
 | 页面可开，API 失败 | `/api/health`、最近部署 | 前端自动读静态快照；关闭 AI |
 | `invalid_configuration` | Wrangler 数字变量和模式 | 改回仓库默认值再部署 |
 | `ai_unavailable` | 总开关、Key、model ID | 保持静态模式，补齐配置后再测 |
+| `verification_required/failed` | Widget、CSP、Site Key、hostname | 重置 Widget；不要绕过服务端校验 |
+| `guardrails_unavailable` | D1 binding、migration、HMAC/Turnstile Secret | 保持 AI 关闭，修复保护链路后再测 |
 | 429/503 | 匿名额度、预算、上游状态 | 不扩大重试；暂停生成 |
 | 快照异常 | `schemaVersion`、发布日志 | 恢复上一版本，禁止覆盖唯一副本 |
 | 疑似密钥泄露 | Git 历史、日志、构建产物 | 立即轮换 Secret，再调查范围 |

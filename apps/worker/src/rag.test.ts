@@ -8,6 +8,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { Env } from './config';
+import type { GuardrailStore } from './guardrails';
 import { handleRequest } from './index';
 
 const snapshot: ContentSnapshot = {
@@ -69,7 +70,10 @@ const baseEnv: Env = {
   RAG_ENABLED: 'true',
   DEEPSEEK_API_KEY: 'server-side-test-key',
   DEEPSEEK_MODEL: 'mock-model',
+  DEEPSEEK_INPUT_CNY_PER_MILLION: '1',
+  DEEPSEEK_OUTPUT_CNY_PER_MILLION: '1',
   TRACE_HASH_SECRET: 'test-trace-secret-at-least-16',
+  IP_HASH_SECRET: 'test-ip-secret-at-least-16',
   RAG_MIN_SCORE: '0.08',
   ASSETS: {
     async fetch() {
@@ -77,6 +81,30 @@ const baseEnv: Env = {
     },
   },
 };
+
+const allowingGuardrailStore: GuardrailStore = {
+  async reserve() {
+    return 'reserved';
+  },
+  async consumeQuotas() {
+    return true;
+  },
+  async acquireLease() {
+    return true;
+  },
+  async finalize() {},
+  async budgetSnapshot() {
+    return { committedMicros: 0 };
+  },
+};
+
+function generationRequest(question: string): Request {
+  return new Request(`https://example.com${API_PATHS.ask}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '203.0.113.10' },
+    body: JSON.stringify({ question, range: '30d' }),
+  });
+}
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -100,14 +128,11 @@ describe('RAG endpoint', () => {
   it('fails closed in archive mode before model access', async () => {
     const fetcher = vi.fn();
     vi.stubGlobal('fetch', fetcher);
-    const response = await handleRequest(
-      new Request(`https://example.com${API_PATHS.ask}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: 'RAG 评测是什么？', range: '30d' }),
-      }),
-      { ...baseEnv, AI_ENABLED: 'false', RAG_ENABLED: 'false' },
-    );
+    const response = await handleRequest(generationRequest('RAG 评测是什么？'), {
+      ...baseEnv,
+      AI_ENABLED: 'false',
+      RAG_ENABLED: 'false',
+    });
 
     expect(response.status).toBe(503);
     expect(fetcher).not.toHaveBeenCalled();
@@ -116,12 +141,9 @@ describe('RAG endpoint', () => {
   it('refuses when the evidence score is below the configured threshold', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => undefined);
     const response = await handleRequest(
-      new Request(`https://example.com${API_PATHS.ask}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: '火星农业天气', range: '30d' }),
-      }),
+      generationRequest('火星农业天气'),
       { ...baseEnv, RAG_MIN_SCORE: '1' },
+      { guardrailStore: allowingGuardrailStore },
     );
     const payload = (await response.json()) as ApiResponse<RagRefusalData>;
 
@@ -141,14 +163,9 @@ describe('RAG endpoint', () => {
           }),
       ),
     );
-    const response = await handleRequest(
-      new Request(`https://example.com${API_PATHS.ask}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: 'RAG 评测进入什么门禁？', range: '30d' }),
-      }),
-      baseEnv,
-    );
+    const response = await handleRequest(generationRequest('RAG 评测进入什么门禁？'), baseEnv, {
+      guardrailStore: allowingGuardrailStore,
+    });
     const body = await response.text();
 
     expect(response.headers.get('Content-Type')).toContain('text/event-stream');

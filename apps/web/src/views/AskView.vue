@@ -18,6 +18,7 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import InnerPageHero from '../components/InnerPageHero.vue';
+import TurnstileWidget from '../components/TurnstileWidget.vue';
 import InlineNotice from '../components/home/InlineNotice.vue';
 import { displayTitle, resolveSource } from '../lib/intelligence';
 import { useContentStore } from '../stores/content';
@@ -38,13 +39,33 @@ const traceId = ref('');
 const refusal = ref(false);
 const askError = ref('');
 const asking = ref(false);
+const turnstileToken = ref('');
+const turnstileResetKey = ref(0);
 let activeController: AbortController | null = null;
 
 const scopedArticle = computed(() => {
   const id = typeof route.query.article === 'string' ? route.query.article : '';
   return content.snapshot?.articles.find((item) => item.id === id) ?? null;
 });
-const ragAvailable = computed(() => runtime.status?.rag.state === 'available');
+const ragAvailable = computed(
+  () => runtime.status?.rag.state === 'available' || runtime.status?.rag.state === 'saving-mode',
+);
+const turnstileRequired = computed(
+  () =>
+    runtime.status?.protection?.turnstile === 'enabled' ||
+    Boolean(runtime.config?.features.turnstile),
+);
+const turnstileSiteKey = computed(() => runtime.config?.protection?.turnstileSiteKey ?? '');
+const verificationReady = computed(
+  () => !turnstileRequired.value || Boolean(turnstileSiteKey.value),
+);
+const canAsk = computed(
+  () =>
+    ragAvailable.value &&
+    verificationReady.value &&
+    Boolean(question.value.trim()) &&
+    (!turnstileRequired.value || Boolean(turnstileToken.value)),
+);
 const suggested = [
   'Data Agent 最近出现了哪些产品变化？',
   '统一语义层为什么重新受到关注？',
@@ -95,7 +116,7 @@ async function consumeStream(response: Response): Promise<void> {
 }
 
 async function ask(): Promise<void> {
-  if (!ragAvailable.value || !question.value.trim() || asking.value) return;
+  if (!canAsk.value || asking.value) return;
   activeController = new AbortController();
   asking.value = true;
   answer.value = '';
@@ -110,6 +131,8 @@ async function ask(): Promise<void> {
       headers: {
         Accept: 'text/event-stream, application/json',
         'Content-Type': 'application/json',
+        'Idempotency-Key': crypto.randomUUID(),
+        ...(turnstileToken.value ? { 'X-Turnstile-Token': turnstileToken.value } : {}),
       },
       body: JSON.stringify({
         question: question.value.trim(),
@@ -133,11 +156,25 @@ async function ask(): Promise<void> {
     if (error instanceof DOMException && error.name === 'AbortError') {
       askError.value = '回答已停止，当前已接收内容保留在页面中。';
     } else {
-      askError.value = '问答暂时不可用，没有产生可展示的结果。请稍后重试。';
+      const code = error instanceof Error ? error.message : '';
+      if (code === 'rate_limited') {
+        askError.value = '今天的问答额度已用完，请明天再试。';
+      } else if (code === 'budget_paused') {
+        askError.value = '本月生成额度已暂停，已有情报和证据仍可正常浏览。';
+      } else if (code === 'verification_required' || code === 'verification_failed') {
+        askError.value = '安全验证未通过，请重新验证后再试。';
+      } else if (code === 'guardrails_unavailable') {
+        askError.value = '生成保护服务暂时不可用。已有情报和证据仍可正常浏览。';
+      } else if (code === 'request_conflict') {
+        askError.value = '本次请求凭证已使用，请重新验证后再试。';
+      } else {
+        askError.value = '问答暂时不可用，没有产生可展示的结果。请稍后重试。';
+      }
     }
   } finally {
     asking.value = false;
     activeController = null;
+    if (turnstileRequired.value) turnstileResetKey.value += 1;
   }
 }
 
@@ -183,6 +220,15 @@ onBeforeUnmount(cancelAsk);
             rows="5"
             placeholder="例如：统一语义层最近为什么重新受到关注？"
           ></textarea>
+          <TurnstileWidget
+            v-if="ragAvailable && turnstileRequired && turnstileSiteKey"
+            :site-key="turnstileSiteKey"
+            :reset-key="turnstileResetKey"
+            @token="turnstileToken = $event"
+          />
+          <p v-else-if="ragAvailable && turnstileRequired" class="ask-error" role="status">
+            安全验证配置暂时不可用，生成请求保持关闭。
+          </p>
           <div class="question-composer__footer">
             <label>
               <span>检索范围</span>
@@ -195,12 +241,7 @@ onBeforeUnmount(cancelAsk);
               <PhStopCircle :size="17" aria-hidden="true" />
               停止回答
             </button>
-            <button
-              v-else
-              class="button button--primary"
-              type="submit"
-              :disabled="!ragAvailable || !question.trim()"
-            >
+            <button v-else class="button button--primary" type="submit" :disabled="!canAsk">
               <PhMagnifyingGlass :size="17" aria-hidden="true" />
               {{ ragAvailable ? '开始检索' : '暂未开放' }}
             </button>

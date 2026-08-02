@@ -2,6 +2,7 @@ import {
   API_PATHS,
   assertContentSnapshot,
   type ApiResponse,
+  type RuntimeConfigData,
   type StatusData,
 } from '@newseviday/contracts';
 import { computed, ref } from 'vue';
@@ -12,6 +13,7 @@ type RequestState = 'idle' | 'loading' | 'success' | 'static' | 'error';
 export const useRuntimeStore = defineStore('runtime', () => {
   const requestState = ref<RequestState>('idle');
   const status = ref<StatusData | null>(null);
+  const config = ref<RuntimeConfigData | null>(null);
 
   const modeLabel = computed(() => {
     const mode = status.value?.mode;
@@ -48,6 +50,7 @@ export const useRuntimeStore = defineStore('runtime', () => {
       },
       ai: { state: 'static-only', provider: null, model: null },
       rag: { state: 'static-only', retrievalMode: null, corpusSnapshotId: null },
+      protection: { persistentGuardrails: 'unavailable', turnstile: 'disabled' },
     };
     requestState.value = 'static';
   }
@@ -65,6 +68,16 @@ export const useRuntimeStore = defineStore('runtime', () => {
       const payload = (await response.json()) as ApiResponse<StatusData>;
       if (!payload.ok) throw new Error(payload.error.code);
       status.value = payload.data;
+      try {
+        const configResponse = await fetch(`${baseUrl}${API_PATHS.runtimeConfig}`, {
+          headers: { Accept: 'application/json' },
+        });
+        if (!configResponse.ok) throw new Error('runtime config unavailable');
+        const configPayload = (await configResponse.json()) as ApiResponse<RuntimeConfigData>;
+        config.value = configPayload.ok ? configPayload.data : null;
+      } catch {
+        config.value = null;
+      }
       requestState.value = 'success';
     } catch {
       try {
@@ -75,5 +88,5 @@ export const useRuntimeStore = defineStore('runtime', () => {
     }
   }
 
-  return { modeLabel, refresh, requestState, status, statusLabel };
+  return { config, modeLabel, refresh, requestState, status, statusLabel };
 });

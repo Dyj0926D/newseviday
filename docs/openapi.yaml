@@ -40,6 +40,9 @@ paths:
     post:
       operationId: enhanceProfile
       description: Returns a reviewable profile suggestion. It never saves the profile.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/TurnstileToken'
       requestBody:
         required: true
         content:
@@ -51,11 +54,18 @@ paths:
           content:
             application/json:
               schema: { type: object }
-        '503': { description: AI is disabled or unavailable. }
+        '400': { description: Invalid input or missing human-verification token. }
+        '403': { description: Human verification failed. }
+        '409': { description: Idempotency key conflict. }
+        '429': { description: Daily or concurrent generation limit reached. }
+        '503': { description: AI, budget protection, or persistent guardrails are unavailable. }
   /api/ask:
     post:
       operationId: askWithEvidence
       description: Returns SSE for an answer or JSON for an evidence-threshold refusal.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/TurnstileToken'
       requestBody:
         required: true
         content:
@@ -69,8 +79,25 @@ paths:
               schema: { type: string }
             application/json:
               schema: { type: object }
-        '503': { description: RAG is disabled or incomplete. }
+        '400': { description: Invalid input or missing human-verification token. }
+        '403': { description: Human verification failed. }
+        '409': { description: Idempotency key conflict. }
+        '429': { description: Daily or concurrent generation limit reached. }
+        '503': { description: RAG, budget protection, or persistent guardrails are unavailable. }
 components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Client-generated key for a single generation attempt. The server generates one when omitted.
+      schema: { type: string, maxLength: 80, pattern: '^[a-zA-Z0-9._:-]+$' }
+    TurnstileToken:
+      name: X-Turnstile-Token
+      in: header
+      required: false
+      description: Required when the public runtime config enables Turnstile.
+      schema: { type: string, maxLength: 2048 }
   schemas:
     Meta:
       type: object
@@ -103,7 +130,7 @@ components:
         ok: { const: true }
         data:
           type: object
-          required: [product, mode, content, ai, rag]
+          required: [product, mode, content, ai, rag, protection]
           properties:
             product: { const: NewsEviday }
             mode: { enum: [archive, warmup, interview] }
@@ -129,6 +156,12 @@ components:
                 state: { enum: [available, saving-mode, static-only, rate-limited, budget-paused] }
                 retrievalMode: { enum: [chunk_dense, article_dense, null] }
                 corpusSnapshotId: { type: [string, 'null'] }
+            protection:
+              type: object
+              required: [persistentGuardrails, turnstile]
+              properties:
+                persistentGuardrails: { enum: [available, unavailable] }
+                turnstile: { enum: [enabled, disabled] }
         meta: { $ref: '#/components/schemas/Meta' }
     RuntimeConfigResponse:
       type: object
@@ -138,27 +171,36 @@ components:
         ok: { const: true }
         data:
           type: object
-          required: [schemaVersion, mode, features, limits]
+          required: [schemaVersion, mode, features, limits, protection]
           properties:
             schemaVersion: { const: 1.0.0 }
             mode: { enum: [archive, warmup, interview] }
             features:
               type: object
-              required: [ingestion, aiSummary, rag, trendBrief]
+              required: [ingestion, aiSummary, rag, trendBrief, turnstile]
               properties:
                 ingestion: { type: boolean }
                 aiSummary: { type: boolean }
                 rag: { type: boolean }
                 trendBrief: { type: boolean }
+                turnstile: { type: boolean }
             limits:
               type: object
-              required: [dailyQuestionsPerIp, monthlyBudgetCny, hardBudgetCny, requestBodyBytes, upstreamTimeoutMs]
+              required: [dailyQuestionsPerIp, globalDailyGenerations, softBudgetDailyGenerations, maxConcurrentGenerations, monthlyBudgetCny, hardBudgetCny, requestBodyBytes, upstreamTimeoutMs]
               properties:
                 dailyQuestionsPerIp: { type: integer, minimum: 0, maximum: 100 }
+                globalDailyGenerations: { type: integer, minimum: 0, maximum: 10000 }
+                softBudgetDailyGenerations: { type: integer, minimum: 0, maximum: 10000 }
+                maxConcurrentGenerations: { type: integer, minimum: 1, maximum: 20 }
                 monthlyBudgetCny: { type: integer, minimum: 0, maximum: 50 }
                 hardBudgetCny: { type: integer, minimum: 0, maximum: 50 }
                 requestBodyBytes: { type: integer, minimum: 1024 }
                 upstreamTimeoutMs: { type: integer, minimum: 1000 }
+            protection:
+              type: object
+              required: [turnstileSiteKey]
+              properties:
+                turnstileSiteKey: { type: [string, 'null'] }
         meta: { $ref: '#/components/schemas/Meta' }
     ProfileEnhanceRequest:
       type: object

@@ -4,7 +4,7 @@
 
 NewsEviday 面向产品经理、AI 产品经理和数据产品从业者，整理海内外 AI、数据平台与产品情报。它重点解决跨语言信息差、来源分散和 AI 结论难验证的问题。
 
-当前已完成 P4–P6 的可执行工程基线和 P6.5 对外口径校准：9 个真实官方来源采集、结构化 AI 摘要、关注偏好、引用式 RAG、30 题质量评测和手动内容发布流程已经建立。需要付费或外部资源的能力继续受发布 Gate 控制；安装或浏览页面不会自动产生模型费用。
+当前已完成 P4–P7 的可执行工程基线：9 个真实官方来源采集、结构化 AI 摘要、关注偏好、引用式 RAG、30 题质量评测、手动内容发布流程，以及 D1 持久限额、预算熔断、并发租约和 Turnstile 防滥用保护已经建立。需要付费或外部资源的能力继续受发布 Gate 控制；安装或浏览页面不会自动产生模型费用。
 
 ## 当前能力
 
@@ -16,6 +16,8 @@ NewsEviday 面向产品经理、AI 产品经理和数据产品从业者，整理
 - `/api/health`、`/api/status`、`/api/runtime-config` 统一 API 契约；
 - Worker 不可用时自动读取最后一份静态内容快照；
 - DeepSeek 非流式/流式适配、超时、取消、错误分类和 Token/费用接口；
+- D1 持久化单 IP/全站日额度、并发租约、月度预算预留与保守结算；
+- Turnstile 前端验证与 Worker 服务端校验，生成请求支持幂等键；
 - Python 9 个官方 Atom/RSS/HTML 来源、来源级标题解析、正文清洗、两级去重、8 主题筛选、Trace 和原子快照发布；
 - 单篇一次结构化摘要、内容哈希缓存、术语检查和可确认的关注偏好整理；
 - 版本化 chunk、hashing dense baseline、BGE-compatible adapter、Vectorize NDJSON 和 30 题 Eval Harness；
@@ -34,6 +36,7 @@ flowchart LR
     Vue -. "API 失败" .-> Snapshot
     Worker --> DeepSeek["DeepSeek，默认关闭"]
     Worker --> RAG["在线文章检索 + 引用式生成，受 Gate 控制"]
+    Worker --> Guardrails["Turnstile + D1 限额 / 预算 / 并发"]
     RAG --> Eval["离线分块检索评测 + 发布 Gate"]
     Snapshot --> EdgeOne["EdgeOne Makers 静态备用站"]
 ```
@@ -100,7 +103,7 @@ npm run audit:prod
 
 ## 密钥和成本
 
-真实 `.env`、`.dev.vars` 已被 Git 忽略。DeepSeek Key 已保存为 Cloudflare Worker Secret，但总开关仍为关闭。Key 只允许存在于 Worker Secret 或本地根目录 `.dev.vars`，不得写入 Vue、YAML、截图、日志或 Git 历史。
+真实 `.env`、`.dev.vars` 已被 Git 忽略。DeepSeek Key、Turnstile Secret 和 HMAC Secret 已保存为 Cloudflare Worker Secret，但 AI 总开关仍为关闭。Secret 只允许存在于 Worker Secret 或本地根目录 `.dev.vars`，不得写入 Vue、普通变量、截图、日志或 Git 历史。
 
 ```text
 AI_ENABLED=false
@@ -122,6 +125,7 @@ HARD_BUDGET_CNY=50
 - [数据模型与 Schema](./docs/数据模型与Schema.md)
 - [安全与成本控制](./docs/安全与成本控制.md)
 - [Cloudflare 运行手册](./docs/Cloudflare运行手册.md)
+- [P7 验收与手动操作清单](./docs/P7验收与手动操作清单.md)
 - [开发环境与迁移说明](./docs/开发环境与迁移说明.md)
 - [项目实施计划与进度跟踪](./docs/项目实施计划与进度跟踪.md)
 
@@ -132,7 +136,8 @@ HARD_BUDGET_CNY=50
 - 真实来源网络采集已实现并连续运行验证，但只允许手动触发，当前公开站仍保留演示快照；
 - DeepSeek Key 已保存为 Cloudflare Secret，但 AI 总开关关闭，当前不会调用模型；
 - Worker 在线文章级 hashing 检索、RAG 生成路由和离线 Eval Runner 已实现；Cloudflare Vectorize 创建/绑定与 BGE-M3 实测仍待手动执行；
-- IP 限流和预算台账只有接口，公开问答前必须接入持久存储；
+- D1 持久限流、并发和预算台账已接入生成请求；远程数据库迁移完成，生产 Worker binding 随 P7 分支发布后生效；
+- Turnstile Widget 与服务端 Siteverify 已接入；AI、RAG 继续关闭，真实 DeepSeek 烟雾测试待用户单独确认；
 - 8 个公开页面、内容预览、关键跳转链路和六档响应式回归已完成；
 - 当前内容仍是显式标注的演示快照；真实快照需经过来源抽检和 PR 后发布；
 - 质量评测页展示 30 题小规模验证集结果，题集尚待人工复核，暂不作为正式发布结论。

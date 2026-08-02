@@ -2,9 +2,9 @@
 import {
   PhArrowRight,
   PhArchive,
-  PhCloudCheck,
   PhDatabase,
   PhRobot,
+  PhShieldCheck,
   PhWarningCircle,
 } from '@phosphor-icons/vue';
 import { computed } from 'vue';
@@ -23,6 +23,14 @@ const contributingSources = computed(() => {
   const sourceIds = new Set((content.snapshot?.articles ?? []).map((article) => article.sourceId));
   return (content.snapshot?.sources ?? []).filter((source) => sourceIds.has(source.id));
 });
+const ragAvailable = computed(
+  () => runtime.status?.rag.state === 'available' || runtime.status?.rag.state === 'saving-mode',
+);
+const protectionReady = computed(
+  () =>
+    runtime.status?.protection?.persistentGuardrails === 'available' &&
+    runtime.status?.protection?.turnstile === 'enabled',
+);
 
 async function refreshStatus(): Promise<void> {
   await Promise.all([content.refresh(true), runtime.refresh()]);
@@ -65,18 +73,16 @@ async function refreshStatus(): Promise<void> {
         <article>
           <PhRobot :size="22" weight="duotone" aria-hidden="true" />
           <span>证据问答</span>
-          <strong>{{ runtime.status?.rag.state === 'available' ? '可用' : '准备中' }}</strong>
+          <strong>{{ ragAvailable ? '可用' : '准备中' }}</strong>
           <p>
-            {{
-              runtime.status?.rag.state === 'available' ? '引用式问答可用' : '当前仅展示已有内容'
-            }}
+            {{ ragAvailable ? '引用式问答可用' : '当前仅展示已有内容' }}
           </p>
         </article>
         <article>
-          <PhCloudCheck :size="22" weight="duotone" aria-hidden="true" />
-          <span>状态来源</span>
-          <strong>{{ runtime.requestState === 'success' ? '在线状态' : '内容快照' }}</strong>
-          <p>状态服务不可用时读取最近快照</p>
+          <PhShieldCheck :size="22" weight="duotone" aria-hidden="true" />
+          <span>生成保护</span>
+          <strong>{{ protectionReady ? '已就绪' : '未启用' }}</strong>
+          <p>{{ protectionReady ? '限额、预算与人机校验生效' : '生成能力保持关闭' }}</p>
         </article>
       </div>
 

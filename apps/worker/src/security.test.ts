@@ -12,6 +12,13 @@ describe('low-cost security primitives', () => {
     expect(first).not.toContain('203.0.113.9');
   });
 
+  it('creates unlinkable keys when the caller rotates the UTC day prefix', async () => {
+    const first = await anonymizeIp('2026-08-02:203.0.113.9', 'test-secret-that-is-long-enough');
+    const second = await anonymizeIp('2026-08-03:203.0.113.9', 'test-secret-that-is-long-enough');
+
+    expect(first).not.toBe(second);
+  });
+
   it('redacts secret-shaped log fields recursively', () => {
     const result = redactForLog({ authorization: 'Bearer secret', nested: { apiKey: 'secret' } });
     expect(result).toEqual({ authorization: '[REDACTED]', nested: { apiKey: '[REDACTED]' } });

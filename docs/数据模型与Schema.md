@@ -29,6 +29,9 @@ Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使�
 | `RagTrace` | 检索与上下文注入过程 | 候选排名、注入 Chunk、fallback 原因 | Worker 匿名日志已实现 |
 | `EvalRun` | 检索版本能否上线的证据 | 数据集版本、指标、时延、gate | Python Runner 与 Demo 报告已实现 |
 | `RuntimeConfig` | 开关、限额和模型选择 | `features`、`limits`、`ai` | Worker 公开子集已实现 |
+| `generation_requests` | 生成预算预留、结算和幂等 | request、匿名日键、预留/实际微元、状态 | D1 migration 已实现 |
+| `quota_counters` | 单 IP 与全站日额度 | scope、匿名键、UTC 日、count/limit | D1 migration 已实现 |
+| `generation_leases` | 跨 Worker 实例并发保护 | lease、request、过期秒数 | D1 migration 已实现 |
 
 ## 3. 事实与 AI 内容分离
 
@@ -112,3 +115,16 @@ Vue 请求 Worker 失败时读取 `/data/current.json`。Cloudflare 和 EdgeOne 
 - 未确认授权的网页全文。
 
 MVP 优先存元数据、摘要、证据摘录、来源 URL 和运行指标。来源的版权与使用范围由 `usageScope` 记录。
+
+## 9. P7 D1 内部模型
+
+D1 表属于 Worker 内部保护模型，不进入公开 ContentSnapshot，也不返回给浏览器：
+
+- 金额统一存人民币微元整数，避免浮点累计误差；
+- `request_id` 来自受格式约束的幂等键，`trace_id` 关联公开 API Trace；二者均不包含问题正文；
+- 已结算记录可保存 provider、model 与输入/输出/总 Token，供成本回溯；
+- `client_hash` 使用 `HMAC(secret, UTC日期 + IP)`，不保存原始 IP，跨日键不同；
+- `monthly_budget_before_reserve` 在 INSERT 时原子检查已结算费用和未过期预留；
+- D1 batch 同时更新单 IP 与全站计数，任一额度失败则整批回滚；
+- 未调用模型的 released 请求不计预算，并返还已占用日额度；
+- 过期 reservation 与 lease 不计入当前预算或并发，占用记录可按运行手册定期清理。

@@ -21,6 +21,10 @@ export type ApiErrorCode =
   | 'method_not_allowed'
   | 'not_found'
   | 'origin_not_allowed'
+  | 'verification_required'
+  | 'verification_failed'
+  | 'request_conflict'
+  | 'guardrails_unavailable'
   | 'rate_limited'
   | 'budget_paused'
   | 'ai_unavailable'
@@ -81,6 +85,10 @@ export interface StatusData {
     retrievalMode: 'chunk_dense' | 'article_dense' | null;
     corpusSnapshotId: string | null;
   };
+  protection: {
+    persistentGuardrails: 'available' | 'unavailable';
+    turnstile: 'enabled' | 'disabled';
+  };
 }
 
 export interface RuntimeConfigData {
@@ -91,13 +99,20 @@ export interface RuntimeConfigData {
     aiSummary: boolean;
     rag: boolean;
     trendBrief: boolean;
+    turnstile: boolean;
   };
   limits: {
     dailyQuestionsPerIp: number;
+    globalDailyGenerations: number;
+    softBudgetDailyGenerations: number;
+    maxConcurrentGenerations: number;
     monthlyBudgetCny: number;
     hardBudgetCny: number;
     requestBodyBytes: number;
     upstreamTimeoutMs: number;
+  };
+  protection: {
+    turnstileSiteKey: string | null;
   };
 }
 

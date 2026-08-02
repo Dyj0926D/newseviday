@@ -13,6 +13,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import InnerPageHero from '../components/InnerPageHero.vue';
+import TurnstileWidget from '../components/TurnstileWidget.vue';
 import InlineNotice from '../components/home/InlineNotice.vue';
 import { useContentStore } from '../stores/content';
 import { useProfileStore } from '../stores/profile';
@@ -33,6 +34,8 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const enhancement = ref<ProfileEnhanceData | null>(null);
 const enhancementError = ref('');
 const enhancing = ref(false);
+const turnstileToken = ref('');
+const turnstileResetKey = ref(0);
 
 const topics = computed(() => content.snapshot?.topics ?? []);
 const selectedTopics = computed(() =>
@@ -44,11 +47,24 @@ const canSave = computed(
       role.value.trim() || work.value.trim() || goal.value.trim() || description.value.trim(),
     ) || selectedTopics.value.length > 0,
 );
-const aiAvailable = computed(() => runtime.status?.ai.state === 'available');
+const aiAvailable = computed(
+  () => runtime.status?.ai.state === 'available' || runtime.status?.ai.state === 'saving-mode',
+);
+const turnstileRequired = computed(
+  () =>
+    runtime.status?.protection?.turnstile === 'enabled' ||
+    Boolean(runtime.config?.features.turnstile),
+);
+const turnstileSiteKey = computed(() => runtime.config?.protection?.turnstileSiteKey ?? '');
+const verificationReady = computed(
+  () => !turnstileRequired.value || Boolean(turnstileSiteKey.value),
+);
 const canEnhance = computed(
   () =>
     aiAvailable.value &&
+    verificationReady.value &&
     !enhancing.value &&
+    (!turnstileRequired.value || Boolean(turnstileToken.value)) &&
     Boolean(
       role.value.trim() || work.value.trim() || goal.value.trim() || description.value.trim(),
     ),
@@ -99,7 +115,12 @@ async function requestEnhancement(): Promise<void> {
   try {
     const response = await fetch(`${baseUrl}${API_PATHS.profileEnhance}`, {
       method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'Idempotency-Key': crypto.randomUUID(),
+        ...(turnstileToken.value ? { 'X-Turnstile-Token': turnstileToken.value } : {}),
+      },
       body: JSON.stringify({
         role: role.value,
         work: work.value,
@@ -113,12 +134,25 @@ async function requestEnhancement(): Promise<void> {
     }
     enhancement.value = payload.data;
   } catch (error) {
-    enhancementError.value =
-      error instanceof Error && error.message === 'ai_unavailable'
-        ? '智能整理当前暂不可用，你仍可手动设置关注偏好。'
-        : '增强失败，原有输入没有改变，请稍后重试或继续手动编辑。';
+    const code = error instanceof Error ? error.message : '';
+    if (code === 'ai_unavailable') {
+      enhancementError.value = '智能整理当前暂不可用，你仍可手动设置关注偏好。';
+    } else if (code === 'rate_limited') {
+      enhancementError.value = '今天的智能整理额度已用完，你仍可继续手动编辑。';
+    } else if (code === 'budget_paused') {
+      enhancementError.value = '本月生成额度已暂停，你仍可继续手动编辑。';
+    } else if (code === 'verification_required' || code === 'verification_failed') {
+      enhancementError.value = '安全验证未通过，请重新验证后再试。';
+    } else if (code === 'guardrails_unavailable') {
+      enhancementError.value = '生成保护服务暂时不可用，你仍可继续手动编辑。';
+    } else if (code === 'request_conflict') {
+      enhancementError.value = '本次请求凭证已使用，请重新验证后再试。';
+    } else {
+      enhancementError.value = '增强失败，原有输入没有改变，请稍后重试或继续手动编辑。';
+    }
   } finally {
     enhancing.value = false;
+    if (turnstileRequired.value) turnstileResetKey.value += 1;
   }
 }
 
@@ -284,6 +318,15 @@ onMounted(() => {
               <PhSparkle :size="17" aria-hidden="true" />
               {{ enhancing ? '正在整理…' : aiAvailable ? '整理关注方向' : '智能整理暂不可用' }}
             </button>
+            <TurnstileWidget
+              v-if="aiAvailable && turnstileRequired && turnstileSiteKey"
+              :site-key="turnstileSiteKey"
+              :reset-key="turnstileResetKey"
+              @token="turnstileToken = $event"
+            />
+            <p v-else-if="aiAvailable && turnstileRequired" class="form-error" role="status">
+              安全验证配置暂时不可用，智能整理保持关闭。
+            </p>
             <p v-if="enhancementError" class="form-error" role="alert">
               {{ enhancementError }}
             </p>
