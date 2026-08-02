@@ -50,6 +50,26 @@ describe('profile store', () => {
     expect(store.profile?.work).toBe('数据中台');
   });
 
+  it('rejects malformed topic weights and oversized fields', () => {
+    const store = useProfileStore();
+    const base = {
+      version: 1,
+      role: '',
+      work: '',
+      goal: '',
+      description: '',
+      interests: { 'data-agent': 3 },
+      updatedAt: '2026-08-02T00:00:00.000Z',
+    };
+
+    expect(() =>
+      store.importJson(JSON.stringify({ ...base, interests: { 'data-agent': 99 } })),
+    ).toThrow('invalid_profile_schema');
+    expect(() => store.importJson(JSON.stringify({ ...base, role: 'x'.repeat(81) }))).toThrow(
+      'invalid_profile_schema',
+    );
+  });
+
   it('clears the local profile', () => {
     const store = useProfileStore();
     store.save({ role: 'PM', work: '', goal: '', description: '', interests: {} });

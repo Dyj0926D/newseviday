@@ -30,7 +30,7 @@ def normalize_text(value: str) -> str:
     return " ".join(value.replace("\u3000", " ").split()).strip()
 
 
-def canonicalize_url(value: str) -> str:
+def canonicalize_url(value: str, *, preserve_fragment: bool = False) -> str:
     parts = urlsplit(value.strip())
     if parts.scheme not in {"http", "https"} or not parts.netloc:
         raise ValueError("article_url_must_be_http")
@@ -42,7 +42,8 @@ def canonicalize_url(value: str) -> str:
         )
     )
     path = parts.path.rstrip("/") or "/"
-    return urlunsplit((parts.scheme.casefold(), parts.netloc.casefold(), path, query, ""))
+    fragment = parts.fragment if preserve_fragment else ""
+    return urlunsplit((parts.scheme.casefold(), parts.netloc.casefold(), path, query, fragment))
 
 
 def normalize_item(
@@ -54,7 +55,7 @@ def normalize_item(
     title = normalize_text(item.title)
     extracted = clean_html_text(item.content_html) if item.content_html else ""
     abstract = normalize_text(extracted or item.summary or "")[:2_500] or None
-    canonical_url = canonicalize_url(item.url)
+    canonical_url = canonicalize_url(item.url, preserve_fragment=item.preserve_fragment)
     digest_input = f"{title.casefold()}\n{(abstract or '').casefold()}"
     content_hash = hashlib.sha256(digest_input.encode("utf-8")).hexdigest()
     article_id = f"article-{hashlib.sha256(canonical_url.encode('utf-8')).hexdigest()[:20]}"

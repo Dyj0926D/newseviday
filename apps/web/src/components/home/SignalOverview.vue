@@ -22,27 +22,27 @@ defineProps<{
         <p>SIGNAL OVERVIEW</p>
         <h2 id="signal-title">信号概览</h2>
       </div>
-      <span>{{ demo ? '演示样例' : '实时快照' }}</span>
+      <span>{{ demo ? '内容预览' : '最新快照' }}</span>
     </div>
 
     <dl class="signal-metrics">
       <div>
-        <dt><PhGlobeHemisphereWest :size="17" aria-hidden="true" /> 海外信号</dt>
+        <dt><PhGlobeHemisphereWest :size="17" aria-hidden="true" /> 海外内容</dt>
         <dd>{{ overseasCount }}</dd>
       </div>
       <div>
-        <dt><PhArrowUpRight :size="17" aria-hidden="true" /> 本次新增</dt>
+        <dt><PhArrowUpRight :size="17" aria-hidden="true" /> 快照收录</dt>
         <dd>{{ newCount }}</dd>
       </div>
       <div>
-        <dt><PhClockCounterClockwise :size="17" aria-hidden="true" /> 已接入来源</dt>
+        <dt><PhClockCounterClockwise :size="17" aria-hidden="true" /> 内容来源</dt>
         <dd>{{ sourceCount }}</dd>
       </div>
     </dl>
 
     <div class="topic-signals">
       <div class="topic-signals__heading">
-        <h3>主题热度</h3>
+        <h3>主题分布</h3>
         <span>按当前快照统计</span>
       </div>
       <ol>
@@ -68,7 +68,7 @@ defineProps<{
         }}
       </time>
       <span v-else>暂无快照</span>
-      <RouterLink to="/status">查看数据状态</RouterLink>
+      <RouterLink to="/status">查看更新状态</RouterLink>
     </div>
   </aside>
 </template>

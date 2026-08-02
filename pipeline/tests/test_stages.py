@@ -30,6 +30,13 @@ def test_canonical_url_removes_tracking_and_fragment() -> None:
     )
 
 
+def test_canonical_url_can_preserve_a_meaningful_section_fragment() -> None:
+    assert canonicalize_url(
+        "https://api-docs.deepseek.com/updates/#deepseek-v4",
+        preserve_fragment=True,
+    ) == "https://api-docs.deepseek.com/updates#deepseek-v4"
+
+
 def test_exact_and_fuzzy_deduplication_are_deterministic() -> None:
     raw = [
         item("https://example.com/a?utm_source=x", "Semantic Layer for Data Agents", "Traceable"),

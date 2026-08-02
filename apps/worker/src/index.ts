@@ -105,7 +105,7 @@ export async function handleRequest(request: Request, env: Env): Promise<Respons
         },
         rag: {
           state: ragAvailable ? 'available' : 'static-only',
-          retrievalMode: ragAvailable ? 'chunk_dense' : null,
+          retrievalMode: ragAvailable ? 'article_dense' : null,
           corpusSnapshotId: ragAvailable ? content.snapshotId : null,
         },
       };

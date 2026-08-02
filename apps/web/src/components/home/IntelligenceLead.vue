@@ -25,7 +25,7 @@ const emit = defineEmits<{ save: [articleId: string] }>();
 <template>
   <article class="intelligence-lead">
     <div class="intelligence-lead__accent" aria-hidden="true">
-      <span>TOP SIGNAL</span>
+      <span>KEY SIGNAL</span>
       <strong>01</strong>
     </div>
     <div class="intelligence-lead__content">
@@ -40,7 +40,7 @@ const emit = defineEmits<{ save: [articleId: string] }>();
         <span>{{ formatDateTime(article.publishedAt) }}</span>
       </div>
 
-      <p class="intel-kicker">今日重点</p>
+      <p class="intel-kicker">重点情报</p>
       <h3>
         <RouterLink :to="`/article/${article.id}`">{{ displayTitle(article) }}</RouterLink>
       </h3>

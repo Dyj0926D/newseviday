@@ -91,8 +91,11 @@ const overseasCount = computed(
   () =>
     (snapshot.value?.articles ?? []).filter((article) => {
       const itemSource = resolveSource(article, sources.value);
-      return itemSource?.region !== '中国';
+      return Boolean(itemSource?.region && !itemSource.region.includes('中国'));
     }).length,
+);
+const contributingSourceCount = computed(
+  () => new Set((snapshot.value?.articles ?? []).map((article) => article.sourceId)).size,
 );
 
 function readQuery(key: string): string {
@@ -207,17 +210,17 @@ onMounted(async () => {
 <template>
   <main id="main-content">
     <PageIntro
-      eyebrow="DAILY INTELLIGENCE · 今日更新"
-      title="发现变化，看见脉络"
-      description="海内外 AI 与数据情报，经过翻译、整理与证据关联。"
+      eyebrow="AI & DATA INTELLIGENCE"
+      title="追踪值得关注的变化"
+      description="汇集海内外 AI、数据与开发工具动态，提供中文整理、主题筛选和原文回链。"
     >
       <template #actions>
         <RouterLink class="button button--primary" to="/profile">
           <PhSparkle :size="17" weight="fill" aria-hidden="true" />
-          定制我的关注
+          设置关注偏好
         </RouterLink>
         <RouterLink class="hero-text-link" to="/product">
-          看懂产品方法
+          了解产品与技术
           <PhArrowRight :size="16" aria-hidden="true" />
         </RouterLink>
       </template>
@@ -248,8 +251,8 @@ onMounted(async () => {
           <div class="section-heading intelligence-heading">
             <div>
               <p class="section-kicker">CURATED FEED</p>
-              <h2 id="feed-title">{{ view === 'recommended' ? '为你推荐' : '今日情报' }}</h2>
-              <p>{{ filteredArticles.length }} 条信号，按来源时间与主题相关度整理</p>
+              <h2 id="feed-title">{{ view === 'recommended' ? '为你推荐' : '最新情报' }}</h2>
+              <p>{{ filteredArticles.length }} 条内容，按发布时间与主题相关度整理</p>
             </div>
             <RouterLink class="text-link" to="/brief">
               查看趋势简报
@@ -259,14 +262,14 @@ onMounted(async () => {
 
           <InlineNotice
             v-if="content.isDemo"
-            title="当前展示产品演示快照"
-            description="内容用于验证页面结构与产品流程，不代表实时新闻。真实采集和 DeepSeek 调用仍保持关闭。"
+            title="当前为内容预览"
+            description="页面展示用于体验产品流程的示例内容，来源与结论不用于实时判断。"
           />
 
           <InlineNotice
             v-if="view === 'recommended' && !profile.hasProfile"
             title="当前使用通用推荐"
-            description="你还没有设置本地画像，系统按站点主题相关度排序。画像为可选功能。"
+            description="你还没有设置关注偏好，系统会按站点主题相关度排序。该功能完全可选。"
           />
 
           <div
@@ -308,7 +311,7 @@ onMounted(async () => {
 
           <div v-else class="empty-state" role="status">
             <h3>{{ content.state === 'error' ? '快照暂时无法读取' : '没有符合条件的情报' }}</h3>
-            <p>页面主体仍可浏览。你可以清除筛选，或稍后查看新的归档快照。</p>
+            <p>你可以调整筛选条件，或查看最近一次有效内容快照。</p>
             <button class="button button--secondary" type="button" @click="clearFilters">
               清除筛选
             </button>
@@ -317,7 +320,7 @@ onMounted(async () => {
       </div>
 
       <SignalOverview
-        :source-count="snapshot?.sourceCount ?? 0"
+        :source-count="contributingSourceCount"
         :overseas-count="overseasCount"
         :new-count="snapshot?.articles.length ?? 0"
         :updated-at="snapshot?.generatedAt ?? null"

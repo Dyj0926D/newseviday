@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import {
-  PhArrowRight,
-  PhArrowUpRight,
-  PhCalendarBlank,
-  PhEye,
-  PhGlobeHemisphereWest,
-} from '@phosphor-icons/vue';
+import { PhArrowRight, PhArrowUpRight, PhCalendarBlank } from '@phosphor-icons/vue';
 import { computed } from 'vue';
 
 import InnerPageHero from '../components/InnerPageHero.vue';
@@ -71,13 +65,13 @@ function formatPeriod(value: string): string {
     <section v-else-if="!brief" class="page-container empty-state page-empty">
       <h2>当前没有可用简报</h2>
       <p>内容不足或生成失败时不会覆盖上一版成功快照。</p>
-      <RouterLink class="button button--secondary" to="/">返回情报流</RouterLink>
+      <RouterLink class="button button--secondary" to="/">返回最新情报</RouterLink>
     </section>
 
     <template v-else>
       <section class="page-container brief-header" aria-labelledby="brief-title">
         <div>
-          <p class="section-kicker">CURRENT ARCHIVE</p>
+          <p class="section-kicker">LATEST BRIEF</p>
           <h2 id="brief-title">{{ brief.title }}</h2>
         </div>
         <dl>
@@ -94,11 +88,11 @@ function formatPeriod(value: string): string {
             <dd>{{ content.snapshot?.sourceCount ?? 0 }} 个</dd>
           </div>
           <div>
-            <dt>整理模型</dt>
+            <dt>整理方式</dt>
             <dd>
               {{
                 brief.generatedBy?.model === 'demo-fixture'
-                  ? '演示整理'
+                  ? '内容示例'
                   : (brief.generatedBy?.model ?? '规则生成')
               }}
             </dd>
@@ -109,8 +103,8 @@ function formatPeriod(value: string): string {
       <section class="page-container brief-layout">
         <div class="brief-main">
           <InlineNotice
-            title="当前为演示趋势简报"
-            description="结论来自静态演示快照，用于验证信息结构和证据跳转，不代表实时市场判断。"
+            title="当前为趋势内容预览"
+            description="结论用于体验简报结构和证据回链，不用于实时市场判断。"
           />
 
           <article
@@ -126,12 +120,6 @@ function formatPeriod(value: string): string {
                 <h3>发生了什么变化</h3>
                 <p>{{ section.body }}</p>
               </div>
-              <div class="trend-copy">
-                <h3>对产品经理的影响</h3>
-                <p>
-                  需要把能力描述继续拆成数据基础、产品流程、质量门槛和失败回退，并用实际证据验证优先级。
-                </p>
-              </div>
               <div class="trend-evidence">
                 <h3>变化依据</h3>
                 <RouterLink
@@ -145,53 +133,23 @@ function formatPeriod(value: string): string {
                 </RouterLink>
               </div>
               <p class="trend-uncertainty">
-                不确定性：当前为有限演示语料，需在真实多来源采集后重新验证趋势强度。
+                不确定性：当前内容为预览样例，需要结合更多来源重新验证趋势强度。
               </p>
             </div>
           </article>
-
-          <section class="region-compare">
-            <div>
-              <PhGlobeHemisphereWest :size="22" aria-hidden="true" />
-              <h2>国内外信号对比</h2>
-            </div>
-            <p>
-              当前演示快照尚未包含国内来源，因此不生成机械对比结论。真实管道接入后，再按来源区域和同类主题进行对照。
-            </p>
-          </section>
         </div>
 
         <aside class="brief-sidebar">
           <section>
             <div class="brief-sidebar__heading">
-              <PhEye :size="20" aria-hidden="true" />
-              <h2>下一步观察</h2>
-            </div>
-            <ol class="watch-list">
-              <li>
-                <span>01</span>
-                <p>语义层是否形成跨平台通用接口和权限标准。</p>
-              </li>
-              <li>
-                <span>02</span>
-                <p>Data Agent 是否从问数扩展到可审计的任务执行。</p>
-              </li>
-              <li>
-                <span>03</span>
-                <p>RAG 发布门禁能否同时约束质量、延迟和成本。</p>
-              </li>
-            </ol>
-          </section>
-          <section>
-            <div class="brief-sidebar__heading">
               <PhCalendarBlank :size="20" aria-hidden="true" />
-              <h2>简报规则</h2>
+              <h2>阅读说明</h2>
             </div>
             <ul>
-              <li>访客只能查看，不能重复生成</li>
-              <li>证据不足时保留上一版</li>
-              <li>单一来源必须明确标记</li>
-              <li>AI 关闭后历史简报仍可访问</li>
+              <li>每个判断关联原始来源</li>
+              <li>单一来源会明确标记</li>
+              <li>证据不足时不生成强结论</li>
+              <li>更新失败时保留上一版内容</li>
             </ul>
           </section>
           <RouterLink class="button button--secondary" to="/">查看全部情报</RouterLink>

@@ -3,9 +3,6 @@ import { PhList, PhMagnifyingGlass, PhUserCircle, PhX } from '@phosphor-icons/vu
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { useRuntimeStore } from '../stores/runtime';
-
-const runtime = useRuntimeStore();
 const route = useRoute();
 const isCompact = ref(false);
 const mobileOpen = ref(false);
@@ -14,7 +11,7 @@ const drawer = ref<HTMLElement | null>(null);
 let heroObserver: IntersectionObserver | null = null;
 
 const currentSection = computed(() =>
-  typeof route.meta.title === 'string' ? route.meta.title : '情报流',
+  typeof route.meta.title === 'string' ? route.meta.title : '最新情报',
 );
 
 function observeHero(): void {
@@ -92,20 +89,19 @@ onBeforeUnmount(() => {
       </RouterLink>
 
       <nav class="desktop-nav" aria-label="主导航">
-        <RouterLink to="/">情报流</RouterLink>
+        <RouterLink to="/">最新情报</RouterLink>
         <RouterLink to="/brief">趋势简报</RouterLink>
-        <RouterLink to="/ask">情报问答</RouterLink>
-        <RouterLink to="/product">产品介绍</RouterLink>
+        <RouterLink to="/ask">证据问答</RouterLink>
+        <RouterLink to="/product">产品与技术</RouterLink>
       </nav>
 
       <span class="header-context" aria-live="polite">{{ currentSection }}</span>
 
       <div class="app-header__actions">
-        <span class="mode-badge">{{ runtime.statusLabel }}</span>
         <RouterLink class="icon-link" to="/?focus=search" aria-label="搜索情报">
           <PhMagnifyingGlass :size="20" weight="regular" aria-hidden="true" />
         </RouterLink>
-        <RouterLink class="icon-link desktop-profile" to="/profile" aria-label="我的画像">
+        <RouterLink class="icon-link desktop-profile" to="/profile" aria-label="关注偏好">
           <PhUserCircle :size="20" weight="regular" aria-hidden="true" />
         </RouterLink>
         <button
@@ -145,15 +141,15 @@ onBeforeUnmount(() => {
               </button>
             </div>
             <nav>
-              <RouterLink to="/">情报流</RouterLink>
+              <RouterLink to="/">最新情报</RouterLink>
               <RouterLink to="/brief">趋势简报</RouterLink>
-              <RouterLink to="/ask">情报问答</RouterLink>
-              <RouterLink to="/product">产品介绍</RouterLink>
-              <RouterLink to="/profile">我的画像</RouterLink>
-              <RouterLink to="/eval">Eval</RouterLink>
-              <RouterLink to="/status">数据状态</RouterLink>
+              <RouterLink to="/ask">证据问答</RouterLink>
+              <RouterLink to="/product">产品与技术</RouterLink>
+              <RouterLink to="/profile">关注偏好</RouterLink>
+              <RouterLink to="/eval">质量评测</RouterLink>
+              <RouterLink to="/status">更新状态</RouterLink>
             </nav>
-            <p>{{ runtime.statusLabel }}，动态 AI 能力保持关闭。</p>
+            <p>所有 AI 整理均保留原始来源与内容更新时间。</p>
           </aside>
         </div>
       </Transition>

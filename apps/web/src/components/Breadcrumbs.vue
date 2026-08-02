@@ -8,7 +8,7 @@ defineProps<{
 
 <template>
   <nav class="breadcrumbs" aria-label="面包屑">
-    <RouterLink :to="parentTo ?? '/'">{{ parentLabel ?? '情报流' }}</RouterLink>
+    <RouterLink :to="parentTo ?? '/'">{{ parentLabel ?? '最新情报' }}</RouterLink>
     <span aria-hidden="true">/</span>
     <span aria-current="page">{{ current }}</span>
   </nav>

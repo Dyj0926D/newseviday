@@ -121,6 +121,7 @@ def test_html_heading_listing_creates_stable_fragment_links() -> None:
     assert [(item.url, item.title) for item in items] == [
         ("https://api-docs.deepseek.com/updates/#deepseek-v4", "DeepSeek-V4")
     ]
+    assert items[0].preserve_fragment is True
 
 
 def test_public_url_validation_blocks_local_targets() -> None:

@@ -58,14 +58,14 @@ const related = computed(() => {
       <p>链接可能已失效，或该内容不在当前公开快照中。</p>
       <RouterLink class="button button--primary" to="/">
         <PhArrowLeft :size="17" aria-hidden="true" />
-        返回情报流
+        返回最新情报
       </RouterLink>
     </section>
 
     <template v-else>
       <header class="article-hero" data-page-intro>
         <div class="page-container article-hero__inner">
-          <Breadcrumbs current="文章详情" />
+          <Breadcrumbs current="情报详情" />
           <div class="intel-meta article-hero__meta">
             <span class="source-mark">{{ source?.name.slice(0, 1) ?? 'N' }}</span>
             <strong>{{ source?.name ?? article.sourceId }}</strong>
@@ -123,11 +123,11 @@ const related = computed(() => {
           </section>
 
           <section class="article-section">
-            <h2>影响对象</h2>
+            <h2>相关主题</h2>
             <p>
               这条信号与
               {{ topicLabels(article, content.snapshot?.topics ?? []).join('、') }}
-              相关，适合数据产品经理、AI 产品经理和平台架构团队继续验证。
+              相关。你可以结合原始来源和关联证据判断它是否值得继续跟进。
             </p>
           </section>
 
@@ -135,14 +135,19 @@ const related = computed(() => {
             <div>
               <p class="section-kicker">ARTICLE Q&A</p>
               <h2>继续追问当前文章</h2>
-              <p>当前为归档模式，文章问答保留入口和示例问题，但不会发起模型调用。</p>
+              <p>问答只使用当前文章和关联证据；证据不足时会明确说明。</p>
             </div>
             <div class="suggested-question-list">
               <span>这项变化会影响哪些数据产品？</span>
               <span>原始来源提供了哪些直接证据？</span>
               <span>这条信号还有哪些不确定性？</span>
             </div>
-            <button class="button button--secondary" type="button" disabled>AI 问答已暂停</button>
+            <RouterLink
+              class="button button--secondary"
+              :to="{ path: '/ask', query: { article: article.id } }"
+            >
+              带着文章去提问
+            </RouterLink>
           </section>
 
           <section v-if="related.length" class="related-section">

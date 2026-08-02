@@ -95,6 +95,7 @@ class RawFeedItem(ContractModel):
     published_at: datetime | None = None
     language: str
     content_html: str | None = None
+    preserve_fragment: bool = False
 
 
 class ArticleFacts(ContractModel):

@@ -2,6 +2,8 @@ import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 
 const STORAGE_KEY = 'newseviday-profile-v1';
+const FIELD_LIMITS = { role: 80, work: 200, goal: 240, description: 500 } as const;
+const TOPIC_ID = /^[a-z0-9-]{2,80}$/;
 
 export interface LocalProfile {
   version: 1;
@@ -14,17 +16,32 @@ export interface LocalProfile {
 }
 
 function isLocalProfile(value: unknown): value is LocalProfile {
-  if (!value || typeof value !== 'object') return false;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const candidate = value as Partial<LocalProfile>;
+  const validFields = (Object.keys(FIELD_LIMITS) as Array<keyof typeof FIELD_LIMITS>).every(
+    (key) =>
+      typeof candidate[key] === 'string' && (candidate[key] as string).length <= FIELD_LIMITS[key],
+  );
+  const interestEntries =
+    candidate.interests &&
+    typeof candidate.interests === 'object' &&
+    !Array.isArray(candidate.interests)
+      ? Object.entries(candidate.interests)
+      : [];
   return (
     candidate.version === 1 &&
-    typeof candidate.role === 'string' &&
-    typeof candidate.work === 'string' &&
-    typeof candidate.goal === 'string' &&
-    typeof candidate.description === 'string' &&
-    Boolean(candidate.interests) &&
-    typeof candidate.interests === 'object' &&
-    typeof candidate.updatedAt === 'string'
+    validFields &&
+    interestEntries.length <= 12 &&
+    interestEntries.every(
+      ([topicId, weight]) =>
+        TOPIC_ID.test(topicId) &&
+        Number.isInteger(weight) &&
+        Number(weight) >= 1 &&
+        Number(weight) <= 5,
+    ) &&
+    typeof candidate.updatedAt === 'string' &&
+    candidate.updatedAt.length <= 35 &&
+    Number.isFinite(Date.parse(candidate.updatedAt))
   );
 }
 

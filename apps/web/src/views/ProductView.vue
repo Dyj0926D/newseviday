@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   PhArrowRight,
-  PhArrowUpRight,
   PhArticle,
   PhBrain,
   PhBracketsCurly,
@@ -9,7 +8,6 @@ import {
   PhDatabase,
   PhFlask,
   PhFlowArrow,
-  PhGithubLogo,
   PhGlobeHemisphereWest,
   PhLockKey,
   PhMagnifyingGlass,
@@ -18,7 +16,7 @@ import {
 } from '@phosphor-icons/vue';
 import { computed } from 'vue';
 
-import homePreviewUrl from '../../../../design/reference/实现回归/P3-首页/首页-1440.png?url';
+import homePreviewUrl from '../../../../design/reference/实现回归/P6.5-文案与架构优化/首页-1440.png?url';
 import { displaySummary, displayTitle, resolveSource } from '../lib/intelligence';
 import { useContentStore } from '../stores/content';
 
@@ -33,7 +31,7 @@ const exampleSource = computed(() =>
 const loopSteps = [
   ['发现', '汇总海内外官方博客、论文和开源信号'],
   ['理解', '翻译并整理标题、摘要和为什么值得看'],
-  ['推荐', '按站点主题或本地画像调整内容顺序'],
+  ['推荐', '按站点主题或关注偏好调整内容顺序'],
   ['追问', '在已收录语料内发起证据约束问答'],
   ['验证', '从回答回到文章、证据和原始来源'],
   ['简报', '把近 7 天信号整理成趋势与观察问题'],
@@ -53,28 +51,28 @@ const architectureLayers = [
     detail: '确定性任务优先使用 Python，降低 Token 成本并保持结果可复现。',
   },
   {
-    name: '数据与向量层',
+    name: '内容发布层',
     icon: PhDatabase,
-    summary: 'Postgres/D1 保存结构化记录，Vectorize 保存可追溯 Chunk。',
-    detail: '当前 MVP 发布静态 JSON 与本地 dense 基线；Vectorize 导出已完成，外部索引待创建。',
+    summary: '版本化 JSON 快照承载内容、证据和简报。',
+    detail: '内容发布与在线生成解耦；动态服务不可用时仍能读取最近一次有效快照。',
   },
   {
-    name: 'RAG 与 Eval',
+    name: '检索与质量评测',
     icon: PhFlowArrow,
-    summary: '检索候选、注入上下文、引用式生成、Trace 和发布门禁。',
-    detail: '引用式 SSE、阈值拒答和匿名 Trace 已实现；公开开关关闭，Demo Eval 标记为 observe。',
+    summary: '检索候选、证据阈值、引用生成和版本化评测。',
+    detail: '当前基线按文章召回；生产级分块检索需要通过独立数据集和质量门槛。',
   },
   {
     name: 'Worker API',
     icon: PhRobot,
-    summary: '密钥隔离、开关、限流、预算、超时和统一错误语义。',
-    detail: '浏览器永远不接触 DeepSeek Key，API 失败时页面回退静态快照。',
+    summary: '统一处理密钥隔离、能力状态、超时和错误语义。',
+    detail: '浏览器不会接触模型密钥；证据问答开放前还需通过访问额度和预算保护。',
   },
   {
     name: 'Vue 响应式前端',
     icon: PhStack,
     summary: 'Cloudflare 主站与 EdgeOne Makers 静态备用站共用一份产物。',
-    detail: '归档模式仍可浏览页面、往期情报、简报和项目说明。',
+    detail: '页面优先读取内容快照，在线 API 暂不可用时不影响已发布内容。',
   },
 ] as const;
 </script>
@@ -88,38 +86,38 @@ const architectureLayers = [
           <h1>把信息变成可验证的判断</h1>
           <p>
             NewsEviday 面向 AI
-            与数据产品从业者，整理海内外情报，降低跨语言信息差，并保留证据和技术边界。
+            与数据产品从业者，汇集海内外一手动态，用中文整理关键变化，并保留原文和证据入口。
           </p>
           <div class="product-hero__actions">
             <RouterLink class="button button--primary" to="/">
-              体验情报流
+              浏览最新情报
               <PhArrowRight :size="17" aria-hidden="true" />
             </RouterLink>
-            <a class="hero-text-link" href="#technical-perspective">查看技术视角</a>
+            <a class="hero-text-link" href="#technical-perspective">了解技术实现</a>
           </div>
           <dl>
             <div>
-              <dt>当前阶段</dt>
-              <dd>P3 静态产品</dd>
+              <dt>信息覆盖</dt>
+              <dd>海内外动态</dd>
             </div>
             <div>
-              <dt>动态 AI</dt>
-              <dd>默认关闭</dd>
+              <dt>内容处理</dt>
+              <dd>跨语言整理</dd>
             </div>
             <div>
-              <dt>月度预算</dt>
-              <dd>目标 35 元内</dd>
+              <dt>可信机制</dt>
+              <dd>原文与证据回链</dd>
             </div>
           </dl>
         </div>
         <div class="product-preview">
           <img :src="homePreviewUrl" alt="NewsEviday 首页实际 Vue 实现截图" />
-          <p>实际页面截图，内容为演示快照</p>
+          <p>NewsEviday 首页界面</p>
         </div>
       </div>
     </section>
 
-    <nav class="product-jump-nav" aria-label="产品介绍快速定位">
+    <nav class="product-jump-nav" aria-label="产品与技术快速定位">
       <div class="page-container">
         <a href="#product-perspective">产品视角</a>
         <a href="#technical-perspective">技术架构</a>
@@ -190,15 +188,15 @@ const architectureLayers = [
             <h3>海内外情报整理</h3>
             <p>保留原始标题、语言、时间和原文入口，海外内容提供中文结构化摘要。</p>
           </div>
-          <span>静态演示可用</span>
+          <span>跨语言</span>
         </article>
         <article>
           <PhBrain :size="24" aria-hidden="true" />
           <div>
-            <h3>可选个人画像</h3>
+            <h3>可选关注偏好</h3>
             <p>本地保存兴趣权重，未设置时继续使用通用排序。</p>
           </div>
-          <span>手动模式可用</span>
+          <span>本地保存</span>
         </article>
         <article>
           <PhMagnifyingGlass :size="24" aria-hidden="true" />
@@ -206,7 +204,7 @@ const architectureLayers = [
             <h3>证据约束问答</h3>
             <p>只检索已收录语料，回答必须带引用，证据不足时拒答。</p>
           </div>
-          <span>规划中</span>
+          <span>证据约束</span>
         </article>
         <article>
           <PhArticle :size="24" aria-hidden="true" />
@@ -214,7 +212,7 @@ const architectureLayers = [
             <h3>7 日趋势简报</h3>
             <p>按变化、影响、依据和不确定性组织趋势，访客不能重复生成。</p>
           </div>
-          <span>演示简报可用</span>
+          <span>来源回链</span>
         </article>
       </div>
     </section>
@@ -222,7 +220,7 @@ const architectureLayers = [
     <section v-if="exampleArticle" class="evidence-demo section-block">
       <div class="page-container evidence-demo__inner">
         <div class="product-section-heading">
-          <p class="product-eyebrow">EVIDENCE DEMO</p>
+          <p class="product-eyebrow">EVIDENCE IN PRACTICE</p>
           <h2>一条海外信号如何保留原文和中文判断</h2>
         </div>
         <div class="evidence-demo__content">
@@ -260,14 +258,14 @@ const architectureLayers = [
       </div>
       <div class="decision-list">
         <article>
-          <h3>画像保持可选</h3>
-          <p>首次访问不弹窗强迫创建画像，通用流始终可用。</p>
+          <h3>关注偏好保持可选</h3>
+          <p>首次访问不强制填写信息，通用内容始终可用。</p>
           <strong>降低体验门槛和隐私风险</strong>
         </article>
         <article>
-          <h3>归档模式优先</h3>
-          <p>暂停采集与生成后，网站仍展示历史数据和完整前端。</p>
-          <strong>控制长期成本</strong>
+          <h3>内容与生成解耦</h3>
+          <p>内容快照独立发布，在线生成暂不可用时仍可稳定浏览。</p>
+          <strong>保证内容连续性</strong>
         </article>
         <article>
           <h3>生成与浏览分离</h3>
@@ -286,8 +284,8 @@ const architectureLayers = [
       <div class="page-container">
         <div class="product-section-heading">
           <p class="product-eyebrow">TECHNICAL ARCHITECTURE</p>
-          <h2>静态优先、AI 可拔插、全过程可追溯</h2>
-          <p>每层都能单独关闭或回滚。MVP 先保证页面与历史快照稳定，再逐步开放动态能力。</p>
+          <h2>可靠优先、按需生成、全过程可追溯</h2>
+          <p>内容、检索和生成分别控制。任何动态能力异常，都不会影响已经发布的情报和证据。</p>
         </div>
         <div class="architecture-flow">
           <details
@@ -320,7 +318,7 @@ const architectureLayers = [
             <li>URL、哈希和相似去重</li>
             <li>主题初筛与内容配额</li>
             <li>快照校验、发布与回滚</li>
-            <li>Eval 指标计算</li>
+            <li>质量指标计算</li>
           </ul>
         </article>
         <article>
@@ -328,7 +326,7 @@ const architectureLayers = [
           <h3>DeepSeek 与 Embedding</h3>
           <ul>
             <li>跨语言标题与摘要</li>
-            <li>可选画像语义增强</li>
+            <li>可选关注偏好整理</li>
             <li>基于证据的问答生成</li>
             <li>趋势简报文本组织</li>
             <li>跨语言语义检索</li>
@@ -340,7 +338,7 @@ const architectureLayers = [
     <section id="rag" class="rag-section section-block">
       <div class="page-container rag-section__inner">
         <div class="product-section-heading">
-          <p class="product-eyebrow">AGENTIC RAG</p>
+          <p class="product-eyebrow">TRACEABLE RAG</p>
           <h2>RAG 负责把问题连接到可引用的证据</h2>
           <p>检索、阈值判断、生成和 Trace 分开记录，任何一步失败都能说明原因并回退。</p>
         </div>
@@ -350,8 +348,8 @@ const architectureLayers = [
             <p>最近 30 天，默认单轮，限制 300 字。</p>
           </li>
           <li>
-            <span>Retrieve</span><strong>chunk dense 检索</strong>
-            <p>召回候选并保留 article fallback。</p>
+            <span>Retrieve</span><strong>召回相关候选</strong>
+            <p>当前基线按文章召回，后续策略沿用同一套质量评测。</p>
           </li>
           <li>
             <span>Gate</span><strong>判断证据阈值</strong>
@@ -376,7 +374,7 @@ const architectureLayers = [
       <div class="product-section-heading">
         <p class="product-eyebrow">EVALUATION</p>
         <h2>评测覆盖内容管道、检索、回答和性能</h2>
-        <p>参考项目的指标只用于理解方法，NewsEviday 必须用自己的语料和黄金集重新运行。</p>
+        <p>所有公开指标都来自版本化语料、测试集和可重复运行的评测结果。</p>
       </div>
       <div class="evaluation-layers">
         <article>
@@ -403,10 +401,10 @@ const architectureLayers = [
       <div class="evaluation-cta">
         <PhFlask :size="24" weight="duotone" aria-hidden="true" />
         <div>
-          <strong>Demo 工程基线已运行</strong>
-          <p>30 题结果可复现；人工复核、引用覆盖和生产 Gate 仍待完成。</p>
+          <strong>可复现检索基线</strong>
+          <p>30 题结果可以重复运行；正式开放前还需完成人工复核和引用质量评测。</p>
         </div>
-        <RouterLink class="button button--secondary" to="/eval">查看 Eval 页面</RouterLink>
+        <RouterLink class="button button--secondary" to="/eval">查看质量评测</RouterLink>
       </div>
     </section>
 
@@ -414,7 +412,7 @@ const architectureLayers = [
       <div class="page-container cost-section__inner">
         <div class="product-section-heading">
           <p class="product-eyebrow">COST AND SECURITY</p>
-          <h2>低成本运行依赖架构开关，不依赖人工盯守</h2>
+          <h2>按需调用、额度保护、失败可降级</h2>
         </div>
         <div class="cost-principles">
           <article>
@@ -424,8 +422,8 @@ const architectureLayers = [
           </article>
           <article>
             <PhCheckCircle :size="23" aria-hidden="true" />
-            <h3>默认全部关闭</h3>
-            <p>采集、AI、RAG 和简报开关默认 false。</p>
+            <h3>能力分别控制</h3>
+            <p>采集、摘要、问答和简报拥有独立状态，故障不会相互扩散。</p>
           </article>
           <article>
             <PhDatabase :size="23" aria-hidden="true" />
@@ -434,63 +432,33 @@ const architectureLayers = [
           </article>
           <article>
             <PhRobot :size="23" aria-hidden="true" />
-            <h3>预算与额度接口</h3>
-            <p>单 IP 次数、月度软阈值与硬上限可配置。</p>
+            <h3>访问额度设计</h3>
+            <p>证据问答开放以单 IP 次数和月度费用双重限制为前置条件。</p>
           </article>
         </div>
         <RouterLink class="text-link" to="/status">
-          查看当前运行状态 <PhArrowRight :size="16" aria-hidden="true" />
+          查看更新状态 <PhArrowRight :size="16" aria-hidden="true" />
         </RouterLink>
       </div>
-    </section>
-
-    <section class="page-container reference-boundary section-block">
-      <div>
-        <p class="product-eyebrow">REFERENCE BOUNDARY</p>
-        <h2>参考 newnews 的方法，不复制代码和结果</h2>
-      </div>
-      <p>
-        NewsEviday 复用“Agentic RAG、Trace、Eval Gate
-        和静态降级”的方法论，再针对个人作品集、低成本运行和中国大陆访问边界重新设计产品与工程实现。
-      </p>
-      <a
-        href="https://github.com/huiq777/newnews#%E4%B8%AD%E6%96%87"
-        target="_blank"
-        rel="noreferrer"
-      >查看参考项目 <PhArrowUpRight :size="16" aria-hidden="true" /></a>
     </section>
 
     <section class="resource-section section-block">
       <div class="page-container">
         <div class="product-section-heading">
-          <p class="product-eyebrow">PROJECT RESOURCES</p>
-          <h2>继续查看产品、评测和项目资料</h2>
+          <p class="product-eyebrow">EXPLORE NEWSEVIDAY</p>
+          <h2>继续体验核心能力</h2>
         </div>
         <nav class="resource-links" aria-label="项目资料">
           <RouterLink to="/">
-            <span>产品体验</span><strong>情报流</strong><PhArrowRight :size="17" aria-hidden="true" />
+            <span>产品体验</span><strong>最新情报</strong><PhArrowRight :size="17" aria-hidden="true" />
           </RouterLink>
           <RouterLink to="/eval">
-            <span>质量透明</span><strong>Eval</strong><PhArrowRight :size="17" aria-hidden="true" />
+            <span>质量透明</span><strong>质量评测</strong><PhArrowRight :size="17" aria-hidden="true" />
           </RouterLink>
           <RouterLink to="/status">
-            <span>运行透明</span><strong>数据状态</strong><PhArrowRight :size="17" aria-hidden="true" />
+            <span>更新透明</span><strong>更新状态</strong><PhArrowRight :size="17" aria-hidden="true" />
           </RouterLink>
-          <a href="https://github.com/Dyj0926D/newseviday" target="_blank" rel="noreferrer"><span>当前私有</span><strong>GitHub</strong><PhGithubLogo :size="18" aria-hidden="true" /></a>
-          <a
-            href="https://github.com/Dyj0926D/newseviday/blob/main/prd/NewsEviday-PRD.md"
-            target="_blank"
-            rel="noreferrer"
-          ><span>产品文档</span><strong>PRD</strong><PhArrowUpRight :size="17" aria-hidden="true" /></a>
-          <a
-            href="https://github.com/Dyj0926D/newseviday/blob/main/docs/%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%96%BD%E8%AE%A1%E5%88%92%E4%B8%8E%E8%BF%9B%E5%BA%A6%E8%B7%9F%E8%B8%AA.md"
-            target="_blank"
-            rel="noreferrer"
-          ><span>实施记录</span><strong>项目进度</strong><PhArrowUpRight :size="17" aria-hidden="true" /></a>
         </nav>
-        <p class="resource-note">
-          GitHub 仓库当前为私有状态，公开发布后外部访客才能查看源码和仓库文档。
-        </p>
       </div>
     </section>
   </main>

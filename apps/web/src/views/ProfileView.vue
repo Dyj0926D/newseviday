@@ -86,7 +86,7 @@ function saveProfile(): void {
       Object.entries(interests.value).filter(([, weight]) => weight > 0),
     ),
   });
-  message.value = '画像已保存在当前浏览器。';
+  message.value = '关注偏好已保存在当前浏览器。';
   void router.push({ path: '/', query: { view: 'recommended' } });
 }
 
@@ -115,7 +115,7 @@ async function requestEnhancement(): Promise<void> {
   } catch (error) {
     enhancementError.value =
       error instanceof Error && error.message === 'ai_unavailable'
-        ? 'AI 当前未开启，你仍可手动设置画像。'
+        ? '智能整理当前暂不可用，你仍可手动设置关注偏好。'
         : '增强失败，原有输入没有改变，请稍后重试或继续手动编辑。';
   } finally {
     enhancing.value = false;
@@ -133,19 +133,19 @@ function applyEnhancement(): void {
     ...Object.fromEntries(enhancement.value.interests.map((item) => [item.topicId, item.weight])),
   };
   enhancement.value = null;
-  message.value = 'AI 建议已填入表单，尚未保存。请检查后再确认保存。';
+  message.value = '整理建议已填入表单，尚未保存。请检查后再确认保存。';
 }
 
 function clearProfile(): void {
   if (!profileStore.hasProfile) return;
-  if (!window.confirm('确认清除当前浏览器中的个人画像？')) return;
+  if (!window.confirm('确认清除当前浏览器中的关注偏好？')) return;
   profileStore.clear();
   role.value = '';
   work.value = '';
   goal.value = '';
   description.value = '';
   interests.value = {};
-  message.value = '画像已清除，推荐恢复为通用排序。';
+  message.value = '关注偏好已清除，推荐恢复为通用排序。';
 }
 
 function exportProfile(): void {
@@ -153,10 +153,10 @@ function exportProfile(): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'newseviday-profile-v1.json';
+  link.download = 'newseviday-preferences-v1.json';
   link.click();
   URL.revokeObjectURL(url);
-  message.value = '画像 JSON 已导出。';
+  message.value = '关注偏好设置已导出。';
 }
 
 async function importProfile(event: Event): Promise<void> {
@@ -167,9 +167,9 @@ async function importProfile(event: Event): Promise<void> {
   try {
     profileStore.importJson(await file.text());
     loadSavedProfile();
-    message.value = '画像已导入并保存在当前浏览器。';
+    message.value = '关注偏好已导入并保存在当前浏览器。';
   } catch {
-    importError.value = '导入失败：文件不是 NewsEviday v1 画像，现有画像未被覆盖。';
+    importError.value = '导入失败：文件格式不正确，现有关注偏好未被覆盖。';
   } finally {
     input.value = '';
   }
@@ -184,16 +184,16 @@ onMounted(() => {
 <template>
   <main id="main-content">
     <InnerPageHero
-      eyebrow="OPTIONAL LOCAL PROFILE"
+      eyebrow="LOCAL PREFERENCES"
       title="让推荐更接近你正在解决的问题"
-      description="画像完全可选，只保存在当前浏览器。即使不设置，通用情报流仍然可以正常使用。"
+      description="关注偏好完全可选，只保存在当前浏览器。即使不设置，最新情报仍然可以正常浏览。"
     />
 
     <section class="page-container profile-layout">
       <div class="profile-form-column">
         <InlineNotice
           title="你的输入不会同步到账号"
-          description="当前项目没有登录体系。保存、导入和清除都只影响本机浏览器，请勿填写公司敏感信息。"
+          description="当前没有账号同步。保存、备份和清除都只影响本机浏览器，请勿填写公司敏感信息。"
         />
 
         <form class="profile-form" @submit.prevent="saveProfile">
@@ -201,7 +201,7 @@ onMounted(() => {
             <div class="form-section-heading">
               <span>01</span>
               <div>
-                <h2>基础信息</h2>
+                <h2>关注背景</h2>
                 <p>至少填写一项，所有字段都可以留空。</p>
               </div>
             </div>
@@ -271,8 +271,8 @@ onMounted(() => {
             <div class="form-section-heading">
               <span>03</span>
               <div>
-                <h2>可选语义增强</h2>
-                <p>把自由描述整理成结构化建议；预览和确认后才会写入表单。</p>
+                <h2>智能整理（可选）</h2>
+                <p>把自由描述整理成关注主题建议；预览和确认后才会写入表单。</p>
               </div>
             </div>
             <button
@@ -282,14 +282,14 @@ onMounted(() => {
               @click="requestEnhancement"
             >
               <PhSparkle :size="17" aria-hidden="true" />
-              {{ enhancing ? '正在整理…' : aiAvailable ? '生成画像建议' : 'AI 增强当前暂停' }}
+              {{ enhancing ? '正在整理…' : aiAvailable ? '整理关注方向' : '智能整理暂不可用' }}
             </button>
             <p v-if="enhancementError" class="form-error" role="alert">
               {{ enhancementError }}
             </p>
             <div v-if="enhancement" class="profile-ai-review" aria-live="polite">
               <div>
-                <strong>AI 建议待确认</strong>
+                <strong>整理建议待确认</strong>
                 <p>
                   {{ enhancement.role || '未补充角色' }} ·
                   {{ enhancement.interests.length }} 个主题建议
@@ -327,7 +327,7 @@ onMounted(() => {
               @click="clearProfile"
             >
               <PhTrash :size="17" aria-hidden="true" />
-              清除画像
+              恢复默认推荐
             </button>
           </div>
           <p class="form-message" aria-live="polite">{{ message }}</p>
@@ -337,8 +337,8 @@ onMounted(() => {
           <div>
             <PhLockKey :size="20" aria-hidden="true" />
             <div>
-              <h2>迁移与控制</h2>
-              <p>可以导出版本化 JSON，在另一台设备导入。</p>
+              <h2>备份与迁移</h2>
+              <p>可以导出设置文件，在另一台设备恢复关注偏好。</p>
             </div>
           </div>
           <div class="profile-portability__actions">
@@ -349,11 +349,11 @@ onMounted(() => {
               @click="exportProfile"
             >
               <PhDownloadSimple :size="17" aria-hidden="true" />
-              导出画像
+              导出设置
             </button>
             <button class="button button--secondary" type="button" @click="fileInput?.click()">
               <PhUploadSimple :size="17" aria-hidden="true" />
-              导入画像
+              导入设置
             </button>
             <input
               ref="fileInput"
@@ -369,7 +369,7 @@ onMounted(() => {
 
       <aside class="profile-preview" aria-labelledby="profile-preview-title">
         <p class="section-kicker">LOCAL PREVIEW</p>
-        <h2 id="profile-preview-title">结构化画像预览</h2>
+        <h2 id="profile-preview-title">关注偏好预览</h2>
         <p v-if="!canSave" class="profile-preview__empty">
           填写任意信息或选择主题后，这里会显示保存前的结构化结果。
         </p>

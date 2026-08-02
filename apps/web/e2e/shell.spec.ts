@@ -11,9 +11,9 @@ const publicPaths = [
   '/product',
 ];
 
-test('home search and topic filters are reflected in the URL', async ({ page }) => {
+test('latest intelligence search and topic filters are reflected in the URL', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1, name: '发现变化，看见脉络' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: '追踪值得关注的变化' })).toBeVisible();
 
   await page.getByRole('button', { name: 'RAG 与评测' }).click();
   await expect(page).toHaveURL(/topic=rag-eval/);
@@ -52,7 +52,7 @@ test('trend brief links every evidence signal back to an article', async ({ page
   await expect(
     page.getByRole('heading', { level: 1, name: '把分散信号整理成可验证的趋势' }),
   ).toBeVisible();
-  await expect(page.getByText('当前为演示趋势简报')).toBeVisible();
+  await expect(page.getByText('当前为趋势内容预览')).toBeVisible();
 
   const firstEvidence = page.locator('.trend-evidence a').first();
   await firstEvidence.click();
@@ -75,17 +75,19 @@ test('optional profile saves locally and changes the recommendation view', async
 
   await page.goto('/profile');
   await expect(page.getByPlaceholder('例如：AI 产品经理')).toHaveValue('AI 产品经理');
-  await expect(page.getByRole('button', { name: 'AI 增强当前暂停' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: '智能整理暂不可用' })).toBeDisabled();
 });
 
-test('ask page keeps examples usable while model generation is paused', async ({ page }) => {
+test('evidence question page keeps examples usable while generation is unavailable', async ({
+  page,
+}) => {
   await page.goto('/ask?article=demo-semantic-agent');
   await expect(
     page.getByRole('heading', { level: 1, name: '基于已收录情报继续追问' }),
   ).toBeVisible();
   await page.getByRole('button', { name: '统一语义层为什么重新受到关注？' }).click();
   await expect(page.locator('textarea')).toHaveValue('统一语义层为什么重新受到关注？');
-  await expect(page.getByRole('button', { name: '问答已暂停' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: '暂未开放' })).toBeDisabled();
 });
 
 test('product narrative connects architecture, evaluation and status pages', async ({ page }) => {
@@ -99,28 +101,28 @@ test('product narrative connects architecture, evaluation and status pages', asy
     page.getByRole('heading', { name: '评测覆盖内容管道、检索、回答和性能' }),
   ).toBeVisible();
 
-  await page.getByRole('link', { name: '查看 Eval 页面' }).click();
+  await page.getByRole('link', { name: '查看质量评测' }).click();
   await expect(page).toHaveURL(/\/eval$/);
   await expect(
-    page.getByRole('heading', { level: 1, name: '把 RAG 能不能上线变成可回答的问题' }),
+    page.getByRole('heading', { level: 1, name: '用可复现评测约束检索质量' }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Demo 快照实测结果' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '小规模数据集实测结果' })).toBeVisible();
   await expect(page.getByText('96.15%')).toBeVisible();
 
   await page.goto('/status');
   await expect(
-    page.getByRole('heading', { level: 1, name: '数据是否新鲜，AI 是否开启，都公开说明' }),
+    page.getByRole('heading', { level: 1, name: '查看内容更新时间与可用能力' }),
   ).toBeVisible();
 });
 
 test('unknown path renders an explicit 404 and returns home', async ({ page }) => {
   await page.goto('/this-page-does-not-exist');
   await expect(page.getByRole('heading', { level: 1, name: '页面没有找到' })).toBeVisible();
-  await page.getByRole('link', { name: '返回情报流' }).click();
+  await page.getByRole('link', { name: '返回最新情报' }).click();
   await expect(page).toHaveURL(/\/$/);
 });
 
-test('six fixed acceptance viewports keep every P3 route readable', async ({ page }, testInfo) => {
+test('six fixed acceptance viewports keep every public route readable', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-chromium', 'run once with the desktop browser');
   test.setTimeout(120_000);
   const viewports = [
@@ -151,11 +153,11 @@ test('mobile navigation opens and changes route', async ({ page }, testInfo) => 
   await page.getByRole('button', { name: '打开导航菜单' }).click();
   const drawer = page.getByRole('complementary', { name: '移动端导航' });
   await expect(drawer).toBeVisible();
-  await drawer.getByRole('link', { name: '产品介绍' }).click();
+  await drawer.getByRole('link', { name: '产品与技术' }).click();
   await expect(page).toHaveURL(/\/product$/);
 });
 
-test('worker exposes the cost-safe archive status', async ({ request }) => {
+test('worker exposes the safe content snapshot status', async ({ request }) => {
   const response = await request.get('http://127.0.0.1:8787/api/status');
   expect(response.ok()).toBe(true);
 

@@ -85,10 +85,11 @@ afterEach(() => {
 
 describe('RAG endpoint', () => {
   it('derives public content status from the deployed static snapshot', async () => {
-    const response = await handleRequest(
-      new Request(`https://example.com${API_PATHS.status}`),
-      { ...baseEnv, AI_ENABLED: 'false', RAG_ENABLED: 'false' },
-    );
+    const response = await handleRequest(new Request(`https://example.com${API_PATHS.status}`), {
+      ...baseEnv,
+      AI_ENABLED: 'false',
+      RAG_ENABLED: 'false',
+    });
     const payload = await response.text();
 
     expect(response.status).toBe(200);

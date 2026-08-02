@@ -15,15 +15,15 @@ export const useRuntimeStore = defineStore('runtime', () => {
 
   const modeLabel = computed(() => {
     const mode = status.value?.mode;
-    if (mode === 'interview') return '面试模式';
-    if (mode === 'warmup') return '预热模式';
-    return '归档模式';
+    if (mode === 'interview') return '在线服务';
+    if (mode === 'warmup') return '内容准备中';
+    return '内容快照模式';
   });
 
   const statusLabel = computed(() => {
-    if (requestState.value === 'loading') return '连接状态服务';
-    if (requestState.value === 'static') return '静态快照可用';
-    if (requestState.value === 'error') return '静态页面可用';
+    if (requestState.value === 'loading') return '正在确认更新状态';
+    if (requestState.value === 'static') return '最新快照可用';
+    if (requestState.value === 'error') return '已载入本地快照';
     return modeLabel.value;
   });
 

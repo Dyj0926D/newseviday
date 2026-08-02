@@ -314,7 +314,13 @@ def parse_html_headings(
             continue
         seen.add(link)
         result.append(
-            RawFeedItem(source_id=source_id, url=link, title=title, language=language)
+            RawFeedItem(
+                source_id=source_id,
+                url=link,
+                title=title,
+                language=language,
+                preserve_fragment=True,
+            )
         )
     return result
 

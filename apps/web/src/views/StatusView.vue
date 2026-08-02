@@ -19,6 +19,10 @@ const runtime = useRuntimeStore();
 const isRefreshing = computed(
   () => content.state === 'loading' || runtime.requestState === 'loading',
 );
+const contributingSources = computed(() => {
+  const sourceIds = new Set((content.snapshot?.articles ?? []).map((article) => article.sourceId));
+  return (content.snapshot?.sources ?? []).filter((source) => sourceIds.has(source.id));
+});
 
 async function refreshStatus(): Promise<void> {
   await Promise.all([content.refresh(true), runtime.refresh()]);
@@ -29,8 +33,8 @@ async function refreshStatus(): Promise<void> {
   <main id="main-content">
     <InnerPageHero
       eyebrow="PUBLIC SYSTEM STATUS"
-      title="数据是否新鲜，AI 是否开启，都公开说明"
-      description="状态页只展示脱敏后的运行信息。当前处于归档模式，静态快照可浏览，自动采集与生成已暂停。"
+      title="查看内容更新时间与可用能力"
+      description="这里公开最近一次内容快照、来源范围和在线能力状态，不展示敏感配置。"
     >
       <template #actions>
         <button
@@ -48,9 +52,9 @@ async function refreshStatus(): Promise<void> {
       <div class="status-summary">
         <article>
           <PhArchive :size="22" weight="duotone" aria-hidden="true" />
-          <span>运行模式</span>
+          <span>内容服务</span>
           <strong>{{ runtime.modeLabel }}</strong>
-          <p>采集和生成任务暂停</p>
+          <p>最近一次有效内容可持续访问</p>
         </article>
         <article>
           <PhDatabase :size="22" weight="duotone" aria-hidden="true" />
@@ -60,19 +64,19 @@ async function refreshStatus(): Promise<void> {
         </article>
         <article>
           <PhRobot :size="22" weight="duotone" aria-hidden="true" />
-          <span>AI 与 RAG</span>
-          <strong>{{ runtime.status?.rag.state === 'available' ? '均已开启' : '已暂停' }}</strong>
+          <span>证据问答</span>
+          <strong>{{ runtime.status?.rag.state === 'available' ? '可用' : '准备中' }}</strong>
           <p>
             {{
-              runtime.status?.rag.state === 'available' ? '引用式问答可用' : '不会产生新模型调用'
+              runtime.status?.rag.state === 'available' ? '引用式问答可用' : '当前仅展示已有内容'
             }}
           </p>
         </article>
         <article>
           <PhCloudCheck :size="22" weight="duotone" aria-hidden="true" />
           <span>状态来源</span>
-          <strong>{{ runtime.requestState === 'success' ? 'Worker API' : '静态降级' }}</strong>
-          <p>失败时回退本地快照</p>
+          <strong>{{ runtime.requestState === 'success' ? '在线状态' : '内容快照' }}</strong>
+          <p>状态服务不可用时读取最近快照</p>
         </article>
       </div>
 
@@ -94,8 +98,8 @@ async function refreshStatus(): Promise<void> {
             <dd>{{ content.snapshot ? formatDateTime(content.snapshot.generatedAt) : '未知' }}</dd>
           </div>
           <div>
-            <dt>来源数量</dt>
-            <dd>{{ content.snapshot?.sourceCount ?? 0 }}</dd>
+            <dt>内容来源</dt>
+            <dd>{{ contributingSources.length }}</dd>
           </div>
           <div>
             <dt>简报数量</dt>
@@ -109,11 +113,11 @@ async function refreshStatus(): Promise<void> {
           <div>
             <p class="section-kicker">SOURCE CATALOG</p>
             <h2>快照内来源</h2>
-            <p>“快照可用”仅表示当前归档中保留了对应来源元数据。</p>
+            <p>“快照可用”仅表示当前内容中保留了对应来源元数据。</p>
           </div>
         </div>
         <div class="source-status-list">
-          <article v-for="source in content.snapshot?.sources ?? []" :key="source.id">
+          <article v-for="source in contributingSources" :key="source.id">
             <span class="source-mark">{{ source.name.slice(0, 1) }}</span>
             <div>
               <strong>{{ source.name }}</strong><small>{{ source.region }} · {{ source.language }}</small>
@@ -128,24 +132,28 @@ async function refreshStatus(): Promise<void> {
         <div>
           <PhWarningCircle :size="22" aria-hidden="true" />
           <div>
-            <h2>已知边界</h2>
-            <p>以下项目已经登记，不影响静态浏览。</p>
+            <h2>当前说明</h2>
+            <p>以下信息帮助你判断内容时效和能力范围。</p>
           </div>
         </div>
         <ul>
           <li>
-            <strong>演示数据</strong><span>当前 6 条内容用于验证产品结构，不代表实时新闻。</span>
+            <strong>内容预览</strong><span>当前
+              {{ content.snapshot?.articles.length ?? 0 }}
+              条内容用于体验产品流程，不用于实时判断。</span>
           </li>
-          <li><strong>自动更新暂停</strong><span>需要进入面试阶段时再手动开启采集。</span></li>
           <li>
-            <strong>大陆访问稳定性</strong><span>Cloudflare 为主站，EdgeOne Makers 作为有时效的备用验证入口。</span>
+            <strong>更新方式</strong><span>内容经过人工检查后发布，并保留最近一次有效快照。</span>
+          </li>
+          <li>
+            <strong>备用访问</strong><span>主站异常时可使用静态备用站浏览最近一次内容。</span>
           </li>
         </ul>
       </section>
 
       <nav class="page-next-links" aria-label="状态页后续入口">
         <RouterLink to="/">
-          <span>返回内容</span><strong>浏览静态情报流</strong><PhArrowRight :size="17" aria-hidden="true" />
+          <span>返回内容</span><strong>浏览最新情报</strong><PhArrowRight :size="17" aria-hidden="true" />
         </RouterLink>
         <RouterLink to="/product#cost-security">
           <span>了解边界</span><strong>查看成本与安全设计</strong><PhArrowRight :size="17" aria-hidden="true" />

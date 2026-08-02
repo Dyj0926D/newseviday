@@ -153,7 +153,7 @@ onBeforeUnmount(cancelAsk);
     <InnerPageHero
       eyebrow="EVIDENCE-GROUNDED Q&A"
       title="基于已收录情报继续追问"
-      description="检索已发布的静态快照，回答必须回到文章和证据。归档模式不会触发模型调用。"
+      description="从已收录内容中检索相关依据，回答必须回到文章、证据和原始来源。"
     >
       <template #actions>
         <RouterLink class="hero-text-link" to="/eval">
@@ -167,8 +167,8 @@ onBeforeUnmount(cancelAsk);
       <div class="ask-main">
         <InlineNotice
           v-if="!ragAvailable"
-          title="情报问答当前暂停"
-          description="RAG 和 DeepSeek 总开关保持关闭。你仍可浏览问题设计、语料范围和已有情报，不会产生模型费用。"
+          title="证据问答正在准备"
+          description="当前可先查看问题示例、语料范围和回答边界。开放后，回答将只基于已收录内容并附引用。"
         />
 
         <form class="question-composer" @submit.prevent="ask">
@@ -202,7 +202,7 @@ onBeforeUnmount(cancelAsk);
               :disabled="!ragAvailable || !question.trim()"
             >
               <PhMagnifyingGlass :size="17" aria-hidden="true" />
-              {{ ragAvailable ? '开始检索' : '问答已暂停' }}
+              {{ ragAvailable ? '开始检索' : '暂未开放' }}
             </button>
           </div>
         </form>
@@ -246,7 +246,7 @@ onBeforeUnmount(cancelAsk);
         <section v-if="!answer && !refusal" class="rag-empty-state">
           <PhPauseCircle :size="28" weight="duotone" aria-hidden="true" />
           <div>
-            <h2>{{ ragAvailable ? '等待问题' : '等待能力开启' }}</h2>
+            <h2>{{ ragAvailable ? '等待问题' : '功能准备中' }}</h2>
             <p>
               正式回答按“检索候选、证据阈值、引用式生成、匿名 Trace”执行。没有足够证据时会拒答。
             </p>
@@ -276,7 +276,7 @@ onBeforeUnmount(cancelAsk);
             </div>
             <div>
               <dt>快照</dt>
-              <dd>{{ runtime.status?.rag.corpusSnapshotId ?? '静态演示' }}</dd>
+              <dd>{{ runtime.status?.rag.corpusSnapshotId ?? '内容预览' }}</dd>
             </div>
           </dl>
         </section>

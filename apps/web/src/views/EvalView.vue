@@ -70,6 +70,18 @@ const retrievalMetrics = computed(() => {
       ]
     : [];
 });
+const gateLabel = computed(() => {
+  if (!report.value) return '暂无结论';
+  if (report.value.run.gate === 'pass') return '达到发布门槛';
+  if (report.value.run.gate === 'fail') return '未达到发布门槛';
+  return '观察结果';
+});
+const retrievalModeLabel = computed(() => {
+  if (!report.value) return '—';
+  if (report.value.run.retrievalMode === 'chunk_dense') return '分块检索基线';
+  if (report.value.run.retrievalMode === 'article_dense') return '文章检索基线';
+  return report.value.run.retrievalMode;
+});
 
 const datasetPlan = [
   ['单一事实定位', 7],
@@ -104,8 +116,8 @@ onMounted(async () => {
   <main id="main-content">
     <InnerPageHero
       eyebrow="EVALUATION HARNESS"
-      title="把 RAG 能不能上线变成可回答的问题"
-      description="评测页公开语料版本、检索策略、指标和发布结论。Demo 工程基线与生产 Gate 分开标记。"
+      title="用可复现评测约束检索质量"
+      description="公开数据版本、检索策略、质量指标和发布结论，让每次策略变化都可以比较和回滚。"
     >
       <template #actions>
         <RouterLink class="button button--secondary" to="/product#evaluation">
@@ -126,36 +138,30 @@ onMounted(async () => {
         title="评测报告当前不可用"
         description="页面不会用目标值代替实测结果。你仍可查看下方的评测方法和发布边界。"
       />
-      <InlineNotice
-        v-else
-        title="这是 Demo 工程基线，不是生产结论"
-        :description="report?.note ?? ''"
-      />
+      <InlineNotice v-else title="当前结果来自小规模验证集" :description="report?.note ?? ''" />
 
       <header class="eval-run-header">
         <div>
-          <p class="section-kicker">{{ report ? report.run.gate.toUpperCase() : 'NO RUN' }}</p>
-          <h2>{{ report ? '最近一次可复现评测' : '评测方法已就绪' }}</h2>
-          <p>
-            chunk-level dense retrieval 为当前基线；article-level dense retrieval 保留为 fallback。
-          </p>
+          <p class="section-kicker">{{ report ? 'MEASURED' : 'NO RUN' }}</p>
+          <h2>{{ report ? '最近一次可复现检索评测' : '评测方法已就绪' }}</h2>
+          <p>离线评测使用版本化分块检索基线；在线证据问答需要单独通过发布验证。</p>
         </div>
         <dl>
           <div>
-            <dt>运行状态</dt>
+            <dt>评测状态</dt>
             <dd>{{ report ? '已完成' : '暂无报告' }}</dd>
           </div>
           <div>
-            <dt>测试集</dt>
+            <dt>样本规模</dt>
             <dd>{{ report?.run.sampleCount ?? 0 }} 题</dd>
           </div>
           <div>
-            <dt>语料版本</dt>
-            <dd>{{ report?.run.corpusSnapshotId ?? '—' }}</dd>
+            <dt>数据版本</dt>
+            <dd>{{ report ? '验证集 v1' : '—' }}</dd>
           </div>
           <div>
-            <dt>发布结论</dt>
-            <dd>{{ report?.run.gate ?? '不可发布' }}</dd>
+            <dt>质量结论</dt>
+            <dd>{{ gateLabel }}</dd>
           </div>
         </dl>
       </header>
@@ -164,10 +170,8 @@ onMounted(async () => {
         <div class="section-heading">
           <div>
             <p class="section-kicker">MEASURED RETRIEVAL</p>
-            <h2 id="retrieval-metrics-title">Demo 快照实测结果</h2>
-            <p>
-              {{ report.run.embeddingModel }} · {{ report.run.datasetVersion }} · {{ generatedAt }}
-            </p>
+            <h2 id="retrieval-metrics-title">小规模数据集实测结果</h2>
+            <p>{{ retrievalModeLabel }} · {{ report.run.embeddingModel }} · {{ generatedAt }}</p>
           </div>
         </div>
         <div class="metric-grid">
@@ -175,7 +179,7 @@ onMounted(async () => {
             <span>{{ metric.target }}</span>
             <h3>{{ metric.name }}</h3>
             <strong>{{ metric.value }}</strong>
-            <p>当前 Demo 工程基线实测</p>
+            <p>当前验证集实测</p>
           </article>
         </div>
         <div class="eval-secondary-metrics">
@@ -191,9 +195,7 @@ onMounted(async () => {
         <article>
           <PhFlask :size="24" weight="duotone" aria-hidden="true" />
           <h2>黄金测试集设计</h2>
-          <p>
-            当前 30 题为工程草稿，覆盖事实、多来源、时间变化和无答案拒答；人工复核完成前只用于观察。
-          </p>
+          <p>当前 30 题覆盖事实、多来源、时间变化和无答案拒答；人工复核完成前只作为观察结果。</p>
           <dl class="dataset-plan">
             <div v-for="item in datasetPlan" :key="item[0]">
               <dt>{{ item[0] }}</dt>
@@ -205,13 +207,11 @@ onMounted(async () => {
         <article>
           <PhGauge :size="24" weight="duotone" aria-hidden="true" />
           <h2>端到端质量</h2>
-          <p>检索基线已运行；生成回答的引用覆盖率仍待人工评测，当前不会把它展示为 0 或伪造结果。</p>
+          <p>检索基线已经运行；生成回答的引用覆盖率仍待人工评测，暂不形成发布结论。</p>
           <ul>
             <li>引用覆盖率：{{ report?.answerQuality.citationCoverage ?? '待评测' }}</li>
             <li>
-              Demo 无答案识别：{{
-                report ? percent.format(report.answerQuality.noAnswerAccuracy) : '—'
-              }}
+              无答案识别：{{ report ? percent.format(report.answerQuality.noAnswerAccuracy) : '—' }}
             </li>
             <li>严重编造直接阻止发布</li>
           </ul>
@@ -220,12 +220,12 @@ onMounted(async () => {
         <article>
           <PhCheckSquareOffset :size="24" weight="duotone" aria-hidden="true" />
           <h2>发布与回滚</h2>
-          <p>每个检索配置都带语料、分块、Embedding 和测试集版本；Demo 数据永远只进入 observe。</p>
+          <p>每个检索配置都绑定数据、分块、Embedding 和测试集版本，确保结果可比较、可回滚。</p>
           <ol>
             <li>固定语料与黄金集</li>
             <li>运行候选策略</li>
             <li>比较质量和延迟</li>
-            <li>生产集通过 Gate 后发布</li>
+            <li>达到质量门槛后发布</li>
           </ol>
         </article>
       </section>
@@ -235,15 +235,15 @@ onMounted(async () => {
           <PhWarningCircle :size="22" aria-hidden="true" />
           <div>
             <h2>当前限制</h2>
-            <p>黄金题尚待人工复核；Demo 仅 6 篇文章；引用覆盖与模型回答质量尚未评测。</p>
+            <p>当前验证集规模较小；黄金题、引用覆盖与模型回答质量仍需人工复核。</p>
           </div>
         </div>
-        <p>因此当前 Gate 为 observe。即使离线检索数字达到目标，也不会标记为生产可发布。</p>
+        <p>当前结论仅用于比较检索策略，不能替代正式内容和在线链路的发布验收。</p>
       </section>
 
-      <nav class="page-next-links" aria-label="Eval 后续入口">
+      <nav class="page-next-links" aria-label="质量评测后续入口">
         <RouterLink to="/ask">
-          <span>体验边界</span><strong>查看情报问答与暂停态</strong><PhArrowRight :size="17" aria-hidden="true" />
+          <span>体验能力</span><strong>查看证据问答</strong><PhArrowRight :size="17" aria-hidden="true" />
         </RouterLink>
         <RouterLink to="/product#rag">
           <span>理解方案</span><strong>查看 RAG 技术链路</strong><PhArrowRight :size="17" aria-hidden="true" />

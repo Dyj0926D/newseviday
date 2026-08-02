@@ -8,12 +8,12 @@ describe('PageIntro', () => {
   it('renders the page title and description', () => {
     const wrapper = mount(PageIntro, {
       props: {
-        title: '发现变化，看见脉络',
+        title: '追踪值得关注的变化',
         description: '经过整理并可回到证据。',
       },
     });
 
-    expect(wrapper.get('h1').text()).toBe('发现变化，看见脉络');
+    expect(wrapper.get('h1').text()).toBe('追踪值得关注的变化');
     expect(wrapper.text()).toContain('经过整理并可回到证据。');
   });
 });

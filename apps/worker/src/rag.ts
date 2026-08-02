@@ -240,7 +240,7 @@ function traceLog(
       event: 'rag_trace',
       traceId,
       queryFingerprint,
-      retrievalMode: 'chunk_dense',
+      retrievalMode: 'article_dense',
       rankedCandidates: chunks.map((chunk, index) => ({
         chunkId: chunk.id,
         rank: index + 1,
@@ -318,7 +318,7 @@ export async function prepareRagResponse(
   });
   const meta: RagStreamMeta = {
     traceId,
-    retrievalMode: 'chunk_dense',
+    retrievalMode: 'article_dense',
     citations: sourceCitations,
   };
   return {

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="NewsEviday">
+  <defs>
+    <linearGradient id="g" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6d4aff"/>
+      <stop offset="1" stop-color="#a88cff"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="#f4f0ff"/>
+  <path d="M17 47V17h8l14 18V17h8v30h-8L25 29v18z" fill="url(#g)"/>
+</svg>
