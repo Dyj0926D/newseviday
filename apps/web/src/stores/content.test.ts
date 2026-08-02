@@ -26,7 +26,10 @@ describe('content store', () => {
   });
 
   it('loads and identifies the static demo snapshot', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => Response.json(snapshot)));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json(snapshot)),
+    );
     const store = useContentStore();
 
     await store.refresh();
@@ -37,7 +40,10 @@ describe('content store', () => {
   });
 
   it('keeps the page in a safe error state when the snapshot is invalid', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ snapshotId: 'broken' })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ snapshotId: 'broken' })),
+    );
     const store = useContentStore();
 
     await store.refresh();

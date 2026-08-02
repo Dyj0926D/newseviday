@@ -16,6 +16,7 @@ defineProps<{
   source?: Source;
   topics: SnapshotTopic[];
   saved: boolean;
+  recommendationReason?: string;
 }>();
 
 const emit = defineEmits<{ save: [articleId: string] }>();
@@ -40,7 +41,9 @@ const emit = defineEmits<{ save: [articleId: string] }>();
       </div>
 
       <p class="intel-kicker">今日重点</p>
-      <h3><RouterLink :to="`/article/${article.id}`">{{ displayTitle(article) }}</RouterLink></h3>
+      <h3>
+        <RouterLink :to="`/article/${article.id}`">{{ displayTitle(article) }}</RouterLink>
+      </h3>
       <p class="intel-summary">{{ displaySummary(article) }}</p>
 
       <div v-if="displayWhy(article)" class="why-panel">
@@ -50,6 +53,8 @@ const emit = defineEmits<{ save: [articleId: string] }>();
           <p>{{ displayWhy(article) }}</p>
         </div>
       </div>
+
+      <p v-if="recommendationReason" class="recommendation-reason">{{ recommendationReason }}</p>
 
       <div class="intel-footer">
         <div class="intel-tags" aria-label="主题标签">

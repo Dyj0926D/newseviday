@@ -307,5 +307,41 @@
       "retrievedAt": "2026-08-02T02:40:00Z"
     }
   ],
-  "briefs": []
+  "briefs": [
+    {
+      "schemaVersion": "1.0.0",
+      "id": "brief-demo-2026w31",
+      "title": "数据智能产品信号简报",
+      "periodStart": "2026-07-27T00:00:00Z",
+      "periodEnd": "2026-08-02T04:00:00Z",
+      "sections": [
+        {
+          "heading": "语义层正在成为 Agent 的可信入口",
+          "body": "演示快照中的语义层与 Data Agent 信号共同指向一个产品变化：自然语言问数需要受控指标、权限与业务解释。当前结论来自两个演示来源，仅用于验证简报结构。",
+          "evidenceIds": ["evidence-demo-semantic-agent", "evidence-demo-fabric-data-agent"]
+        },
+        {
+          "heading": "治理对象开始覆盖 AI 上下文",
+          "body": "湖仓治理与开源元数据工具都在把目录、血缘、权限和检索上下文连接起来。对数据平台团队而言，AI 应用治理会逐步进入现有数据治理链路。",
+          "evidenceIds": ["evidence-demo-lakehouse-governance", "evidence-demo-github-metadata"]
+        },
+        {
+          "heading": "RAG 质量控制从指标报告进入发布门禁",
+          "body": "评测信号同时强调证据覆盖、检索质量、延迟和回滚。单一离线分数不足以决定上线，Trace 与版本化 Eval 会成为工程交付的一部分。",
+          "evidenceIds": ["evidence-demo-rag-eval", "evidence-demo-arxiv-retrieval"]
+        }
+      ],
+      "generatedBy": {
+        "titleZh": null,
+        "summaryZh": null,
+        "whyItMatters": "用于验证趋势简报的信息结构和证据跳转。",
+        "keyPoints": [],
+        "provider": "deepseek",
+        "model": "demo-fixture",
+        "promptVersion": "demo-p3-v1",
+        "generatedAt": "2026-08-02T03:55:00Z"
+      },
+      "publishedAt": "2026-08-02T04:00:00Z"
+    }
+  ]
 }

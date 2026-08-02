@@ -125,7 +125,12 @@ onBeforeUnmount(() => {
     <Teleport to="body">
       <Transition name="drawer-fade">
         <div v-if="mobileOpen" class="mobile-drawer-layer">
-          <button class="mobile-drawer-backdrop" type="button" aria-label="关闭导航菜单" @click="closeMenu()" />
+          <button
+            class="mobile-drawer-backdrop"
+            type="button"
+            aria-label="关闭导航菜单"
+            @click="closeMenu()"
+          />
           <aside
             id="mobile-navigation"
             ref="drawer"

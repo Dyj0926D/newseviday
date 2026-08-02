@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { routes } from './router';
 
 describe('public routes', () => {
-  it('keeps the eight PRD routes in the engineering skeleton', () => {
+  it('keeps the eight PRD routes and an explicit 404 route', () => {
     expect(routes.map((route) => route.path)).toEqual([
       '/',
       '/article/:id',
@@ -14,6 +14,7 @@ describe('public routes', () => {
       '/eval',
       '/status',
       '/product',
+      '/:pathMatch(.*)*',
     ]);
   });
 });

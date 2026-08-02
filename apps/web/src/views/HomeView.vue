@@ -12,13 +12,17 @@ import IntelligenceRow from '../components/home/IntelligenceRow.vue';
 import SignalOverview from '../components/home/SignalOverview.vue';
 import { resolveSource } from '../lib/intelligence';
 import { useContentStore } from '../stores/content';
+import { useProfileStore } from '../stores/profile';
 
 const route = useRoute();
 const router = useRouter();
 const content = useContentStore();
+const profile = useProfileStore();
 
 const query = ref(readQuery('q'));
-const view = ref<'all' | 'recommended'>(readQuery('view') === 'recommended' ? 'recommended' : 'all');
+const view = ref<'all' | 'recommended'>(
+  readQuery('view') === 'recommended' ? 'recommended' : 'all',
+);
 const topic = ref(readQuery('topic'));
 const region = ref(readQuery('region'));
 const source = ref(readQuery('source'));
@@ -34,7 +38,8 @@ const regions = computed(() => [...new Set(sources.value.map((item) => item.regi
 const filteredArticles = computed(() => {
   const normalizedQuery = query.value.trim().toLocaleLowerCase();
   const anchor = snapshot.value ? new Date(snapshot.value.generatedAt).getTime() : Date.now();
-  const windowHours = time.value === '24h' ? 24 : time.value === '3d' ? 72 : time.value === '7d' ? 168 : null;
+  const windowHours =
+    time.value === '24h' ? 24 : time.value === '3d' ? 72 : time.value === '7d' ? 168 : null;
 
   const items = (snapshot.value?.articles ?? []).filter((article) => {
     const articleSource = resolveSource(article, sources.value);
@@ -75,16 +80,19 @@ const topicSignals = computed(() =>
   topics.value
     .map((item) => ({
       ...item,
-      count: (snapshot.value?.articles ?? []).filter((article) => Object.hasOwn(article.topicScores, item.id)).length,
+      count: (snapshot.value?.articles ?? []).filter((article) =>
+        Object.hasOwn(article.topicScores, item.id),
+      ).length,
     }))
     .sort((left, right) => right.count - left.count)
     .slice(0, 4),
 );
-const overseasCount = computed(() =>
-  (snapshot.value?.articles ?? []).filter((article) => {
-    const itemSource = resolveSource(article, sources.value);
-    return itemSource?.region !== '中国';
-  }).length,
+const overseasCount = computed(
+  () =>
+    (snapshot.value?.articles ?? []).filter((article) => {
+      const itemSource = resolveSource(article, sources.value);
+      return itemSource?.region !== '中国';
+    }).length,
 );
 
 function readQuery(key: string): string {
@@ -97,7 +105,25 @@ function timestamp(article: Article): number {
 }
 
 function recommendationScore(article: Article): number {
+  if (profile.profile) {
+    return Object.entries(article.topicScores).reduce(
+      (score, [topicId, topicScore]) =>
+        score + topicScore * (profile.profile?.interests[topicId] ?? 0),
+      0,
+    );
+  }
   return Math.max(0, ...Object.values(article.topicScores));
+}
+
+function recommendationReason(article: Article): string | undefined {
+  if (view.value !== 'recommended' || !profile.profile) return undefined;
+  const match = Object.entries(article.topicScores)
+    .map(([topicId, score]) => ({
+      label: topics.value.find((item) => item.id === topicId)?.label ?? topicId,
+      score: score * (profile.profile?.interests[topicId] ?? 0),
+    }))
+    .sort((left, right) => right.score - left.score)[0];
+  return match && match.score > 0 ? `与你关注的“${match.label}”相关` : undefined;
 }
 
 function updateRoute(key: string, value: string): void {
@@ -169,6 +195,7 @@ onMounted(async () => {
     }
   }
 
+  profile.hydrate();
   await content.refresh();
   if (readQuery('focus') === 'search') {
     await nextTick();
@@ -236,7 +263,18 @@ onMounted(async () => {
             description="内容用于验证页面结构与产品流程，不代表实时新闻。真实采集和 DeepSeek 调用仍保持关闭。"
           />
 
-          <div v-if="content.state === 'loading'" class="feed-loading" role="status" aria-label="正在读取情报快照">
+          <InlineNotice
+            v-if="view === 'recommended' && !profile.hasProfile"
+            title="当前使用通用推荐"
+            description="你还没有设置本地画像，系统按站点主题相关度排序。画像为可选功能。"
+          />
+
+          <div
+            v-if="content.state === 'loading'"
+            class="feed-loading"
+            role="status"
+            aria-label="正在读取情报快照"
+          >
             <span></span><span></span><span></span>
           </div>
 
@@ -246,6 +284,7 @@ onMounted(async () => {
               :source="resolveSource(leadArticle, sources)"
               :topics="topics"
               :saved="savedIds.has(leadArticle.id)"
+              :recommendation-reason="recommendationReason(leadArticle)"
               @save="toggleSaved"
             />
             <IntelligenceRow
@@ -255,6 +294,7 @@ onMounted(async () => {
               :source="resolveSource(article, sources)"
               :topics="topics"
               :saved="savedIds.has(article.id)"
+              :recommendation-reason="recommendationReason(article)"
               @save="toggleSaved"
             />
 
@@ -269,7 +309,9 @@ onMounted(async () => {
           <div v-else class="empty-state" role="status">
             <h3>{{ content.state === 'error' ? '快照暂时无法读取' : '没有符合条件的情报' }}</h3>
             <p>页面主体仍可浏览。你可以清除筛选，或稍后查看新的归档快照。</p>
-            <button class="button button--secondary" type="button" @click="clearFilters">清除筛选</button>
+            <button class="button button--secondary" type="button" @click="clearFilters">
+              清除筛选
+            </button>
           </div>
         </div>
       </div>

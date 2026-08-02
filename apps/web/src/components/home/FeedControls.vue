@@ -43,11 +43,7 @@ const emit = defineEmits<{
       </form>
 
       <div class="segmented-control" aria-label="情报视图">
-        <button
-          type="button"
-          :aria-pressed="view === 'all'"
-          @click="emit('update:view', 'all')"
-        >
+        <button type="button" :aria-pressed="view === 'all'" @click="emit('update:view', 'all')">
           全部情报
         </button>
         <button
@@ -88,21 +84,30 @@ const emit = defineEmits<{
       </span>
       <label>
         <span>区域</span>
-        <select :value="region" @change="emit('update:region', ($event.target as HTMLSelectElement).value)">
+        <select
+          :value="region"
+          @change="emit('update:region', ($event.target as HTMLSelectElement).value)"
+        >
           <option value="">全部区域</option>
           <option v-for="item in regions" :key="item" :value="item">{{ item }}</option>
         </select>
       </label>
       <label>
         <span>来源</span>
-        <select :value="source" @change="emit('update:source', ($event.target as HTMLSelectElement).value)">
+        <select
+          :value="source"
+          @change="emit('update:source', ($event.target as HTMLSelectElement).value)"
+        >
           <option value="">全部来源</option>
           <option v-for="item in sources" :key="item.id" :value="item.id">{{ item.name }}</option>
         </select>
       </label>
       <label>
         <span>时间</span>
-        <select :value="time" @change="emit('update:time', ($event.target as HTMLSelectElement).value)">
+        <select
+          :value="time"
+          @change="emit('update:time', ($event.target as HTMLSelectElement).value)"
+        >
           <option value="">不限时间</option>
           <option value="24h">24 小时</option>
           <option value="3d">3 天</option>

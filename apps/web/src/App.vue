@@ -2,11 +2,17 @@
 import { onMounted } from 'vue';
 
 import AppHeader from './components/AppHeader.vue';
+import { useContentStore } from './stores/content';
+import { useProfileStore } from './stores/profile';
 import { useRuntimeStore } from './stores/runtime';
 
 const runtime = useRuntimeStore();
+const content = useContentStore();
+const profile = useProfileStore();
 
 onMounted(() => {
+  profile.hydrate();
+  void content.refresh();
   void runtime.refresh();
 });
 </script>
@@ -22,6 +28,7 @@ onMounted(() => {
         <RouterLink to="/product">产品介绍</RouterLink>
         <RouterLink to="/eval">Eval</RouterLink>
         <RouterLink to="/status">数据状态</RouterLink>
+        <a href="https://github.com/Dyj0926D/newseviday" target="_blank" rel="noreferrer">GitHub</a>
       </nav>
     </div>
   </footer>

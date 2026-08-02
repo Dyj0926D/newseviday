@@ -1,4 +1,5 @@
 @import '@newseviday/design-tokens/tokens.css';
+@import './pages.css';
 
 *,
 *::before,
@@ -926,6 +927,17 @@ button {
   color: var(--ne-color-brand-default);
 }
 
+.recommendation-reason {
+  width: fit-content;
+  margin: var(--ne-space-3) 0 0;
+  padding: var(--ne-space-2) var(--ne-space-3);
+  border-left: 2px solid var(--ne-color-brand-default);
+  background: var(--ne-color-bg-tinted);
+  color: var(--ne-color-brand-active);
+  font-size: var(--ne-font-size-caption);
+  font-weight: var(--ne-font-weight-semibold);
+}
+
 .intelligence-row .intel-footer {
   margin-top: var(--ne-space-4);
 }
@@ -963,8 +975,12 @@ button {
 }
 
 @keyframes loading-pulse {
-  from { opacity: 0.5; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .empty-state,

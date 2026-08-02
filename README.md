@@ -4,11 +4,13 @@
 
 NewsEviday 面向产品经理、AI 产品经理和数据产品从业者，整理海内外 AI、数据平台与产品情报。它重点解决跨语言信息差、来源分散和 AI 结论难验证的问题。
 
-当前是 MVP 技术地基阶段。Vue 网站、Cloudflare Worker、Python 内容流水线、共享 Schema、静态降级和测试已经建立；真实采集、DeepSeek 调用、RAG 和趋势简报默认关闭，不会因安装或浏览页面自动产生费用。
+当前已完成 P3 静态产品。8 个公开页面、Cloudflare Worker、Python 内容流水线地基、共享 Schema、静态降级和测试已经建立；真实采集、DeepSeek 调用和动态 RAG 默认关闭，不会因安装或浏览页面自动产生费用。
 
 ## 当前能力
 
-- Vue 3 + Vite + TypeScript 响应式前端和 8 个公开路由；
+- Vue 3 + Vite + TypeScript 响应式前端和 8 个公开页面；
+- 情报流、文章证据、演示趋势简报、问答暂停态、本地画像、Eval、运行状态和产品介绍；
+- 本地画像手动标签、权重、推荐原因与版本化 JSON 导入导出；
 - Cloudflare Workers Static Assets 主站同源部署；
 - EdgeOne Makers 静态备用站构建、SPA 回退和安全头配置；
 - `/api/health`、`/api/status`、`/api/runtime-config` 统一 API 契约；
@@ -53,12 +55,12 @@ eviday/
 
 ## 环境
 
-| 组件 | 版本 |
-|---|---|
+| 组件    | 版本                        |
+| ------- | --------------------------- |
 | Node.js | 24.11.0，见 `.node-version` |
-| npm | 10 或 11 |
-| Python | 3.12 |
-| uv | 兼容当前 `pipeline/uv.lock` |
+| npm     | 10 或 11                    |
+| Python  | 3.12                        |
+| uv      | 兼容当前 `pipeline/uv.lock` |
 
 ## 安装与运行
 
@@ -125,6 +127,8 @@ HARD_BUDGET_CNY=50
 - DeepSeek Key 已保存为 Cloudflare Secret，但 AI 总开关关闭，当前不会调用模型；
 - 没有接入向量库、RAG 生成和 Eval Runner；
 - IP 限流和预算台账只有接口，公开问答前必须接入持久存储；
-- P3 首页、静态演示快照和响应式信息流已完成；文章详情、产品介绍和其他业务页仍按后续阶段实施。
+- P3 全部静态页面、演示快照、关键跳转链路和六档响应式回归已完成；
+- 当前内容仍是显式标注的演示快照，P4 才接入 6–8 个真实来源；
+- Eval 页面仅展示方法和目标门槛，正式黄金集尚未运行。
 
 发布为公开源代码前需另行确认许可证与来源使用条款。当前 `package.json` 保持 `private: true`，避免误发 npm。

@@ -16,6 +16,7 @@ defineProps<{
   source?: Source;
   topics: SnapshotTopic[];
   saved: boolean;
+  recommendationReason?: string;
 }>();
 
 const emit = defineEmits<{ save: [articleId: string] }>();
@@ -34,12 +35,15 @@ const emit = defineEmits<{ save: [articleId: string] }>();
       <span>{{ formatDateTime(article.publishedAt) }}</span>
     </div>
 
-    <h3><RouterLink :to="`/article/${article.id}`">{{ displayTitle(article) }}</RouterLink></h3>
+    <h3>
+      <RouterLink :to="`/article/${article.id}`">{{ displayTitle(article) }}</RouterLink>
+    </h3>
     <p class="intel-summary">{{ displaySummary(article) }}</p>
     <p v-if="displayWhy(article)" class="intel-why">
       <strong>关注原因</strong>
       {{ displayWhy(article) }}
     </p>
+    <p v-if="recommendationReason" class="recommendation-reason">{{ recommendationReason }}</p>
 
     <div class="intel-footer">
       <div class="intel-tags" aria-label="主题标签">

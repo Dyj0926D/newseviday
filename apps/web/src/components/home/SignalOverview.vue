@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { PhArrowUpRight, PhClockCounterClockwise, PhGlobeHemisphereWest } from '@phosphor-icons/vue';
+import {
+  PhArrowUpRight,
+  PhClockCounterClockwise,
+  PhGlobeHemisphereWest,
+} from '@phosphor-icons/vue';
 
 defineProps<{
   sourceCount: number;
@@ -53,7 +57,15 @@ defineProps<{
     <div class="signal-overview__footer">
       <span>快照时间</span>
       <time v-if="updatedAt" :datetime="updatedAt">
-        {{ new Intl.DateTimeFormat('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(updatedAt)) }}
+        {{
+          new Intl.DateTimeFormat('zh-CN', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }).format(new Date(updatedAt))
+        }}
       </time>
       <span v-else>暂无快照</span>
       <RouterLink to="/status">查看数据状态</RouterLink>
