@@ -161,7 +161,7 @@ npm run audit:prod
 ## 当前边界
 
 - GitHub 私有远程、CI 和 Cloudflare 主站已经建立；Cloudflare Git 自动发布仍需最终验证；
-- EdgeOne Makers 备用站尚未完成首次部署；
+- EdgeOne Makers 备用站已完成首次 Git 部署；无域名备案时仅作为有时效的大陆预览和备用验证入口；
 - 尚未启用任何真实内容来源；
 - DeepSeek Key 已保存为 Cloudflare Secret，但 AI 总开关关闭，当前不会调用模型；
 - 页面当前是工程骨架，详细信息流、文章、RAG 和产品介绍页面在后续阶段实现。
