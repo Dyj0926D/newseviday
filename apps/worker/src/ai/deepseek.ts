@@ -105,9 +105,12 @@ export class DeepSeekClient implements AiProvider {
           body: JSON.stringify({
             model: config.model,
             messages: input.messages,
+            thinking: { type: config.thinkingEnabled ? 'enabled' : 'disabled' },
             stream,
             ...(stream ? { stream_options: { include_usage: true } } : {}),
-            ...(input.temperature === undefined ? {} : { temperature: input.temperature }),
+            ...(config.thinkingEnabled || input.temperature === undefined
+              ? {}
+              : { temperature: input.temperature }),
             ...(input.maxTokens === undefined ? {} : { max_tokens: input.maxTokens }),
           }),
           signal: controller.signal,

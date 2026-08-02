@@ -21,6 +21,7 @@ export interface Env {
   UPSTREAM_TIMEOUT_MS?: string;
   DEEPSEEK_MODEL?: string;
   DEEPSEEK_BASE_URL?: string;
+  DEEPSEEK_THINKING_ENABLED?: string;
   DEEPSEEK_MAX_RETRIES?: string;
   DEEPSEEK_API_KEY?: string;
   IP_HASH_SECRET?: string;
@@ -169,6 +170,7 @@ export interface DeepSeekConfig {
   apiKey: string | null;
   model: string | null;
   baseUrl: string;
+  thinkingEnabled: boolean;
   timeoutMs: number;
   maxRetries: number;
 }
@@ -216,6 +218,7 @@ export function deepSeekConfig(env: Env): DeepSeekConfig {
     apiKey: env.DEEPSEEK_API_KEY?.trim() || null,
     model: env.DEEPSEEK_MODEL?.trim() || null,
     baseUrl: baseUrl.replace(/\/$/, ''),
+    thinkingEnabled: asBoolean(env.DEEPSEEK_THINKING_ENABLED),
     timeoutMs: runtime.limits.upstreamTimeoutMs,
     maxRetries: asInteger(env.DEEPSEEK_MAX_RETRIES, 0, 0, 1, 'DEEPSEEK_MAX_RETRIES'),
   };

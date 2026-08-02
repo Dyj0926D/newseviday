@@ -93,7 +93,7 @@ npx wrangler secret list
 
 当前远程 D1 `newseviday-guardrails` 已完成 `0001_generation_guardrails.sql` 与 `0002_generation_usage_trace.sql`。部署前应确认 Secret 名称包含 `DEEPSEEK_API_KEY`、`IP_HASH_SECRET`、`TRACE_HASH_SECRET`、`TURNSTILE_SECRET`，但不要打印或复制其值。
 
-模型准确 ID 作为普通配置 `DEEPSEEK_MODEL` 管理。开启真实调用前必须完成：
+模型准确 ID 作为普通配置 `DEEPSEEK_MODEL` 管理。2026-08-02 已核对并写入 `deepseek-v4-pro`、缓存未命中输入价 3 元/百万 Token、输出价 6 元/百万 Token，且通过 `DEEPSEEK_THINKING_ENABLED=false` 显式使用非思考模式。开启真实调用前必须完成：
 
 1. 问答路由、D1 匿名持久限流、并发租约、预算台账和 Turnstile 已完成；
 2. `DEEPSEEK_MODEL` 与控制台文档一致，并配置当期 `DEEPSEEK_INPUT_CNY_PER_MILLION`、`DEEPSEEK_OUTPUT_CNY_PER_MILLION`；

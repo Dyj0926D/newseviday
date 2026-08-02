@@ -42,6 +42,7 @@ class DeepSeekStructuredClient:
         model: str,
         base_url: str = "https://api.deepseek.com",
         timeout_seconds: int = 30,
+        thinking_enabled: bool = False,
     ) -> None:
         if not api_key or not model:
             raise ValueError("deepseek_configuration_incomplete")
@@ -51,6 +52,7 @@ class DeepSeekStructuredClient:
         self._model = model
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
+        self.thinking_enabled = thinking_enabled
 
     @property
     def model(self) -> str:
@@ -69,8 +71,9 @@ class DeepSeekStructuredClient:
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
                 ],
+                "thinking": {"type": "enabled" if self.thinking_enabled else "disabled"},
                 "response_format": {"type": "json_object"},
-                "temperature": 0.1,
+                **({} if self.thinking_enabled else {"temperature": 0.1}),
                 "max_tokens": 1_200,
             },
             timeout=self.timeout_seconds,
@@ -89,6 +92,8 @@ class DeepSeekStructuredClient:
             api_key=os.environ.get("DEEPSEEK_API_KEY", ""),
             model=os.environ.get("DEEPSEEK_MODEL", ""),
             base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+            thinking_enabled=os.environ.get("DEEPSEEK_THINKING_ENABLED", "false").lower()
+            == "true",
         )
 
 

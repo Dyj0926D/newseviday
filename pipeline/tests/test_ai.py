@@ -2,7 +2,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from newseviday_pipeline.ai import FileAiCache, enhance_profile, enrich_snapshot
+from newseviday_pipeline.ai import (
+    DeepSeekStructuredClient,
+    FileAiCache,
+    enhance_profile,
+    enrich_snapshot,
+)
 from newseviday_pipeline.ai_models import ArticleEnrichment
 from newseviday_pipeline.models import TopicConfig
 from newseviday_pipeline.snapshot import load_snapshot
@@ -44,6 +49,28 @@ class FakeStructuredClient:
 
 def topic() -> TopicConfig:
     return TopicConfig(id="data-agent", label="Data Agent", keywords=["data agent"])
+
+
+def test_deepseek_v4_request_explicitly_disables_thinking(monkeypatch: Any) -> None:
+    captured: dict[str, Any] = {}
+
+    class FakeResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict[str, Any]:
+            return {"choices": [{"message": {"content": '{"ok": true}'}}]}
+
+    def fake_post(*_args: Any, **kwargs: Any) -> FakeResponse:
+        captured.update(kwargs["json"])
+        return FakeResponse()
+
+    monkeypatch.setattr("newseviday_pipeline.ai.httpx.post", fake_post)
+    client = DeepSeekStructuredClient(api_key="test-key", model="deepseek-v4-pro")
+
+    assert client.complete_json(system="system", user="user") == {"ok": True}
+    assert captured["thinking"] == {"type": "disabled"}
+    assert captured["temperature"] == 0.1
 
 
 def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path) -> None:

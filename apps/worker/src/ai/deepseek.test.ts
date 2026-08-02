@@ -9,6 +9,7 @@ const enabledConfig: DeepSeekConfig = {
   apiKey: 'test-only-key',
   model: 'provider-model-id',
   baseUrl: 'https://api.deepseek.com',
+  thinkingEnabled: false,
   timeoutMs: 1_000,
   maxRetries: 0,
 };
@@ -36,6 +37,10 @@ describe('DeepSeekClient', () => {
     const recorder = new MemoryUsageRecorder();
     const fetcher = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
       expect(init?.headers).toMatchObject({ Authorization: 'Bearer test-only-key' });
+      expect(JSON.parse(String(init?.body))).toMatchObject({
+        model: 'provider-model-id',
+        thinking: { type: 'disabled' },
+      });
       return Response.json({
         id: 'chat-1',
         model: 'provider-model-id',
@@ -54,6 +59,25 @@ describe('DeepSeekClient', () => {
     expect(result.usage.totalTokens).toBe(15);
     expect(recorder.records).toHaveLength(1);
     expect(JSON.stringify(recorder.records)).not.toContain('test-only-key');
+  });
+
+  it('explicitly enables thinking mode and omits unsupported temperature', async () => {
+    const fetcher = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      expect(body.thinking).toEqual({ type: 'enabled' });
+      expect(body).not.toHaveProperty('temperature');
+      return Response.json({
+        id: 'chat-thinking',
+        choices: [{ finish_reason: 'stop', message: { content: 'answer' } }],
+      });
+    });
+    const client = new DeepSeekClient({ ...enabledConfig, thinkingEnabled: true }, fetcher);
+
+    await client.complete({
+      messages: [{ role: 'user', content: 'hello' }],
+      requestId: 'req-thinking',
+      temperature: 0.1,
+    });
   });
 
   it('classifies provider overload as retryable', async () => {
