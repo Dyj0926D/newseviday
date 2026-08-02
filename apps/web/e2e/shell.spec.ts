@@ -75,6 +75,7 @@ test('optional profile saves locally and changes the recommendation view', async
 
   await page.goto('/profile');
   await expect(page.getByPlaceholder('例如：AI 产品经理')).toHaveValue('AI 产品经理');
+  await expect(page.getByRole('button', { name: 'AI 增强当前暂停' })).toBeDisabled();
 });
 
 test('ask page keeps examples usable while model generation is paused', async ({ page }) => {
@@ -103,6 +104,8 @@ test('product narrative connects architecture, evaluation and status pages', asy
   await expect(
     page.getByRole('heading', { level: 1, name: '把 RAG 能不能上线变成可回答的问题' }),
   ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Demo 快照实测结果' })).toBeVisible();
+  await expect(page.getByText('96.15%')).toBeVisible();
 
   await page.goto('/status');
   await expect(

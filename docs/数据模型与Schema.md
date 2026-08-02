@@ -22,12 +22,12 @@ Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使�
 | `Source` | 来源身份、类型和使用边界 | `kind`、`language`、`region`、`usageScope` | 契约已定义 |
 | `Article` | 规范化文章主记录 | `facts`、`ai`、`contentHash`、`topicScores` | Python 已生成 |
 | `Evidence` | 结论可回链的证据片段 | `articleId`、`sourceId`、`url`、`excerpt` | Python 已生成 |
-| `Chunk` | RAG 的最小检索单元 | `articleId`、`position`、`contentHash` | 契约预留 |
-| `PipelineRun` | 每次采集处理的过程记录 | `stages`、计数、耗时、`errorCode` | 内存记录已实现，持久化待接入 |
+| `Chunk` | RAG 的最小检索单元 | `articleId`、`position`、`contentHash` | Python/Worker 基线已生成 |
+| `PipelineRun` | 每次采集处理的过程记录 | `stages`、计数、耗时、`errorCode` | JSON 持久化已实现 |
 | `ContentSnapshot` | 可发布、可回滚的只读内容包 | `snapshotKind`、来源/主题目录、文章/证据/简报 | 已实现 |
 | `Brief` | 趋势简报及引用关系 | `sections[].evidenceIds`、`generatedBy` | 契约预留 |
-| `RagTrace` | 检索与上下文注入过程 | 候选排名、注入 Chunk、fallback 原因 | 契约预留 |
-| `EvalRun` | 检索版本能否上线的证据 | 数据集版本、指标、时延、gate | 契约预留 |
+| `RagTrace` | 检索与上下文注入过程 | 候选排名、注入 Chunk、fallback 原因 | Worker 匿名日志已实现 |
+| `EvalRun` | 检索版本能否上线的证据 | 数据集版本、指标、时延、gate | Python Runner 与 Demo 报告已实现 |
 | `RuntimeConfig` | 开关、限额和模型选择 | `features`、`limits`、`ai` | Worker 公开子集已实现 |
 
 ## 3. 事实与 AI 内容分离

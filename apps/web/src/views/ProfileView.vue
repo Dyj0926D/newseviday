@@ -8,6 +8,7 @@ import {
   PhTrash,
   PhUploadSimple,
 } from '@phosphor-icons/vue';
+import { API_PATHS, type ApiResponse, type ProfileEnhanceData } from '@newseviday/contracts';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -15,10 +16,12 @@ import InnerPageHero from '../components/InnerPageHero.vue';
 import InlineNotice from '../components/home/InlineNotice.vue';
 import { useContentStore } from '../stores/content';
 import { useProfileStore } from '../stores/profile';
+import { useRuntimeStore } from '../stores/runtime';
 
 const router = useRouter();
 const content = useContentStore();
 const profileStore = useProfileStore();
+const runtime = useRuntimeStore();
 const role = ref('');
 const work = ref('');
 const goal = ref('');
@@ -27,6 +30,9 @@ const interests = ref<Record<string, number>>({});
 const message = ref('');
 const importError = ref('');
 const fileInput = ref<HTMLInputElement | null>(null);
+const enhancement = ref<ProfileEnhanceData | null>(null);
+const enhancementError = ref('');
+const enhancing = ref(false);
 
 const topics = computed(() => content.snapshot?.topics ?? []);
 const selectedTopics = computed(() =>
@@ -37,6 +43,15 @@ const canSave = computed(
     Boolean(
       role.value.trim() || work.value.trim() || goal.value.trim() || description.value.trim(),
     ) || selectedTopics.value.length > 0,
+);
+const aiAvailable = computed(() => runtime.status?.ai.state === 'available');
+const canEnhance = computed(
+  () =>
+    aiAvailable.value &&
+    !enhancing.value &&
+    Boolean(
+      role.value.trim() || work.value.trim() || goal.value.trim() || description.value.trim(),
+    ),
 );
 
 function loadSavedProfile(): void {
@@ -73,6 +88,52 @@ function saveProfile(): void {
   });
   message.value = '画像已保存在当前浏览器。';
   void router.push({ path: '/', query: { view: 'recommended' } });
+}
+
+async function requestEnhancement(): Promise<void> {
+  if (!canEnhance.value) return;
+  enhancement.value = null;
+  enhancementError.value = '';
+  enhancing.value = true;
+  const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? '';
+  try {
+    const response = await fetch(`${baseUrl}${API_PATHS.profileEnhance}`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        role: role.value,
+        work: work.value,
+        goal: goal.value,
+        description: description.value,
+      }),
+    });
+    const payload = (await response.json()) as ApiResponse<ProfileEnhanceData>;
+    if (!response.ok || !payload.ok) {
+      throw new Error(payload.ok ? 'request_failed' : payload.error.code);
+    }
+    enhancement.value = payload.data;
+  } catch (error) {
+    enhancementError.value =
+      error instanceof Error && error.message === 'ai_unavailable'
+        ? 'AI 当前未开启，你仍可手动设置画像。'
+        : '增强失败，原有输入没有改变，请稍后重试或继续手动编辑。';
+  } finally {
+    enhancing.value = false;
+  }
+}
+
+function applyEnhancement(): void {
+  if (!enhancement.value) return;
+  role.value = enhancement.value.role;
+  work.value = enhancement.value.work;
+  goal.value = enhancement.value.goal;
+  description.value = enhancement.value.description;
+  interests.value = {
+    ...interests.value,
+    ...Object.fromEntries(enhancement.value.interests.map((item) => [item.topicId, item.weight])),
+  };
+  enhancement.value = null;
+  message.value = 'AI 建议已填入表单，尚未保存。请检查后再确认保存。';
 }
 
 function clearProfile(): void {
@@ -211,13 +272,47 @@ onMounted(() => {
               <span>03</span>
               <div>
                 <h2>可选语义增强</h2>
-                <p>未来可将自由描述整理成结构化画像，结果必须由用户确认后才生效。</p>
+                <p>把自由描述整理成结构化建议；预览和确认后才会写入表单。</p>
               </div>
             </div>
-            <button class="button button--secondary" type="button" disabled>
+            <button
+              class="button button--secondary"
+              type="button"
+              :disabled="!canEnhance"
+              @click="requestEnhancement"
+            >
               <PhSparkle :size="17" aria-hidden="true" />
-              AI 增强当前暂停
+              {{ enhancing ? '正在整理…' : aiAvailable ? '生成画像建议' : 'AI 增强当前暂停' }}
             </button>
+            <p v-if="enhancementError" class="form-error" role="alert">
+              {{ enhancementError }}
+            </p>
+            <div v-if="enhancement" class="profile-ai-review" aria-live="polite">
+              <div>
+                <strong>AI 建议待确认</strong>
+                <p>
+                  {{ enhancement.role || '未补充角色' }} ·
+                  {{ enhancement.interests.length }} 个主题建议
+                </p>
+              </div>
+              <ul v-if="enhancement.interests.length">
+                <li v-for="item in enhancement.interests" :key="item.topicId">
+                  <span>{{
+                    topics.find((topic) => topic.id === item.topicId)?.label ?? item.topicId
+                  }}</span>
+                  <strong>{{ item.weight }} / 5</strong>
+                  <small>{{ item.reason }}</small>
+                </li>
+              </ul>
+              <div class="profile-ai-review__actions">
+                <button class="button button--primary" type="button" @click="applyEnhancement">
+                  应用建议
+                </button>
+                <button class="button button--secondary" type="button" @click="enhancement = null">
+                  放弃
+                </button>
+              </div>
+            </div>
           </section>
 
           <div class="profile-form__actions">

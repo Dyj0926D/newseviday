@@ -84,7 +84,7 @@
     { "id": "data-agent", "label": "Data Agent" },
     { "id": "semantic-layer", "label": "统一语义" },
     { "id": "data-platform", "label": "数据中台" },
-    { "id": "lakehouse", "label": "智能数据湖" },
+    { "id": "intelligent-lakehouse", "label": "智能数据湖" },
     { "id": "rag-eval", "label": "RAG 与评测" }
   ],
   "articles": [
@@ -139,7 +139,7 @@
         "generatedAt": "2026-08-02T03:50:00Z"
       },
       "evidenceIds": ["evidence-demo-lakehouse-governance"],
-      "topicScores": { "lakehouse": 0.96, "data-platform": 0.78 },
+      "topicScores": { "intelligent-lakehouse": 0.96, "data-platform": 0.78 },
       "contentHash": "demo-lakehouse-governance-20260802"
     },
     {

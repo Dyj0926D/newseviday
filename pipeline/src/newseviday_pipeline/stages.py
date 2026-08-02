@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from difflib import SequenceMatcher
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
+from newseviday_pipeline.extraction import clean_html_text
 from newseviday_pipeline.models import (
     Article,
     ArticleFacts,
@@ -51,7 +52,8 @@ def normalize_item(
 ) -> tuple[Article, Evidence]:
     collected = collected_at or datetime.now(UTC)
     title = normalize_text(item.title)
-    abstract = normalize_text(item.summary or "") or None
+    extracted = clean_html_text(item.content_html) if item.content_html else ""
+    abstract = normalize_text(extracted or item.summary or "")[:2_500] or None
     canonical_url = canonicalize_url(item.url)
     digest_input = f"{title.casefold()}\n{(abstract or '').casefold()}"
     content_hash = hashlib.sha256(digest_input.encode("utf-8")).hexdigest()
@@ -97,7 +99,7 @@ def exact_deduplicate(articles: list[Article]) -> list[Article]:
 
 
 def _comparison_text(article: Article) -> str:
-    value = f"{article.facts.title} {article.facts.abstract or ''}".casefold()
+    value = f"{article.facts.title} {(article.facts.abstract or '')[:500]}".casefold()
     return re.sub(r"[^\w\u4e00-\u9fff]+", "", value)
 
 
@@ -105,6 +107,15 @@ def _trigrams(value: str) -> set[str]:
     if len(value) < 3:
         return {value} if value else set()
     return {value[index : index + 3] for index in range(len(value) - 2)}
+
+
+def fuzzy_similarity(left: Article, right: Article) -> float:
+    return SequenceMatcher(
+        None,
+        _comparison_text(left),
+        _comparison_text(right),
+        autojunk=False,
+    ).ratio()
 
 
 def fuzzy_deduplicate(
@@ -117,6 +128,7 @@ def fuzzy_deduplicate(
         raise ValueError(f"fuzzy_dedup_batch_exceeds_{max_batch_size}")
     accepted: list[Article] = []
     accepted_text: list[str] = []
+    accepted_trigrams: list[set[str]] = []
     trigram_index: dict[str, set[int]] = {}
     for article in articles:
         candidate = _comparison_text(article)
@@ -126,15 +138,23 @@ def fuzzy_deduplicate(
             possible_matches.update(trigram_index.get(trigram, set()))
         if len(candidate) < 3:
             possible_matches.update(range(len(accepted_text)))
+        plausible_matches = (
+            index
+            for index in possible_matches
+            if len(candidate_trigrams & accepted_trigrams[index])
+            / max(1, min(len(candidate_trigrams), len(accepted_trigrams[index])))
+            >= 0.45
+        )
         duplicate = any(
             SequenceMatcher(None, candidate, accepted_text[index], autojunk=False).ratio()
             >= similarity_threshold
-            for index in possible_matches
+            for index in plausible_matches
         )
         if not duplicate:
             accepted_index = len(accepted)
             accepted.append(article)
             accepted_text.append(candidate)
+            accepted_trigrams.append(candidate_trigrams)
             for trigram in candidate_trigrams:
                 trigram_index.setdefault(trigram, set()).add(accepted_index)
     return accepted
@@ -158,3 +178,31 @@ def select_by_topics(
         if not topics or max(scores.values(), default=0) >= minimum_score:
             selected.append(article)
     return selected
+
+
+def apply_content_quotas(
+    articles: list[Article],
+    *,
+    max_total: int = 40,
+    max_per_source: int = 8,
+) -> list[Article]:
+    if max_total < 1 or max_per_source < 1:
+        raise ValueError("content_quotas_must_be_positive")
+    ranked = sorted(
+        articles,
+        key=lambda article: (
+            max(article.topic_scores.values(), default=0),
+            article.published_at or article.collected_at,
+        ),
+        reverse=True,
+    )
+    counts: dict[str, int] = {}
+    result: list[Article] = []
+    for article in ranked:
+        if len(result) >= max_total:
+            break
+        if counts.get(article.source_id, 0) >= max_per_source:
+            continue
+        result.append(article)
+        counts[article.source_id] = counts.get(article.source_id, 0) + 1
+    return result

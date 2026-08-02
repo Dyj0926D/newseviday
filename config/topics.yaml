@@ -27,3 +27,26 @@ topics:
       - intelligent data lake
       - lakehouse
       - 智能数据湖
+  - id: rag-eval
+    label: RAG、检索与评测
+    weight: 1.0
+    keywords:
+      - rag
+      - retrieval
+      - rerank
+      - evaluation
+      - benchmark
+      - vectorize
+      - 检索
+      - 评测
+  - id: metadata-governance
+    label: 元数据、治理与可信 AI
+    weight: 0.8
+    keywords:
+      - metadata
+      - data governance
+      - lineage
+      - catalog
+      - trustworthy ai
+      - 元数据
+      - 数据治理

@@ -38,7 +38,7 @@ describe('profile store', () => {
         work: '数据中台',
         goal: '',
         description: '',
-        interests: { lakehouse: 3 },
+        interests: { 'intelligent-lakehouse': 3 },
         updatedAt: '2026-08-02T00:00:00.000Z',
       }),
     );

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "run": {
+    "schemaVersion": "1.0.0",
+    "id": "eval-20260802085815",
+    "createdAt": "2026-08-02T08:58:15.430675Z",
+    "datasetVersion": "rag-gold-demo-v1",
+    "retrievalMode": "chunk_dense",
+    "sampleCount": 30,
+    "metrics": {
+      "recallAt5": 0.9615,
+      "recallAt10": 1.0,
+      "mrr": 0.7577,
+      "ndcgAt10": 0.8102,
+      "hitAt5": 1.0,
+      "p50LatencyMs": 1,
+      "p95LatencyMs": 1
+    },
+    "gate": "observe",
+    "datasetKind": "demo",
+    "corpusSnapshotId": "snapshot-demo-p3-v1",
+    "embeddingModel": "hashing-chargram-v1"
+  },
+  "datasetKind": "demo",
+  "reviewStatus": "engineering_draft_pending_human_review",
+  "corpusHealth": {
+    "passed": true,
+    "articleCount": 6,
+    "chunkCount": 6,
+    "chunkCoverage": 1.0,
+    "missingExpectedArticleIds": []
+  },
+  "answerQuality": {
+    "citationCoverage": null,
+    "noAnswerAccuracy": 0.5,
+    "status": "pending_generated_answer_review"
+  },
+  "note": "Demo 快照上的工程基线，仅用于验证评测链路。黄金题尚待人工复核，回答引用覆盖率尚未评测，不构成生产发布结论。"
+}

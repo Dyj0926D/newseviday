@@ -108,7 +108,16 @@ python -m uv run --project pipeline newseviday-pipeline validate-snapshot `
   data/local-preview/current.json
 ```
 
-真实采集尚未开放。后续发布任务只允许把校验通过的 `current.json` 同步到 `apps/web/public/data/current.json`，并保留 `versions/<snapshotId>.json`。回滚时从上一版本恢复 `current.json`，重新构建部署。
+真实采集由 `.github/workflows/content-refresh.yml` 的手动任务承载，没有定时触发器。默认只采集、校验并上传 14 天产物；只有显式选择 `open_pull_request=true` 才把快照写入前端目录并创建待评审 PR。`allow_model=false` 时不会调用 DeepSeek。
+
+本地真实采集仍需显式授权：
+
+```powershell
+python -m uv run --project pipeline newseviday-pipeline run `
+  --allow-network --output data/runtime/content-refresh
+```
+
+失败任务保留上一版 `current.json`。回滚时从上一 Git 提交恢复公开快照并重新部署。完整外部操作见 [P4–P6 待手动操作清单](./P4-P6待手动操作清单.md)。
 
 ## 8. 故障处理
 

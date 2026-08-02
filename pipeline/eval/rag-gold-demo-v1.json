@@ -1,0 +1,192 @@
+{
+  "version": "rag-gold-demo-v1",
+  "datasetKind": "demo",
+  "reviewStatus": "engineering_draft_pending_human_review",
+  "corpusSnapshotId": "snapshot-demo-p3-v1",
+  "questions": [
+    {
+      "id": "q01",
+      "question": "语义层为什么开始成为 Data Agent 的可信指标入口？",
+      "category": "单一事实定位",
+      "expectedArticleIds": ["demo-semantic-agent"]
+    },
+    {
+      "id": "q02",
+      "question": "湖仓治理现在覆盖了哪些 AI 上下文？",
+      "category": "单一事实定位",
+      "expectedArticleIds": ["demo-lakehouse-governance"]
+    },
+    {
+      "id": "q03",
+      "question": "Data Agent 为什么会成为分析平台上面的产品层？",
+      "category": "单一事实定位",
+      "expectedArticleIds": ["demo-fabric-data-agent"]
+    },
+    {
+      "id": "q04",
+      "question": "RAG 评测进入持续交付门禁后会检查哪些指标？",
+      "category": "单一事实定位",
+      "expectedArticleIds": ["demo-rag-eval"]
+    },
+    {
+      "id": "q05",
+      "question": "检索研究如何同时优化证据覆盖和推理效率？",
+      "category": "单一事实定位",
+      "expectedArticleIds": ["demo-arxiv-retrieval"]
+    },
+    {
+      "id": "q06",
+      "question": "开源元数据工具增加了什么 Agent 接口？",
+      "category": "单一事实定位",
+      "expectedArticleIds": ["demo-github-metadata"]
+    },
+    {
+      "id": "q07",
+      "question": "统一语义层怎样减少同一指标出现多种答案？",
+      "category": "单一事实定位",
+      "expectedArticleIds": ["demo-semantic-agent"]
+    },
+    {
+      "id": "q08",
+      "question": "Data Agent 的可信查询同时依赖语义层和元数据的哪些能力？",
+      "category": "多来源归纳",
+      "expectedArticleIds": ["demo-semantic-agent", "demo-github-metadata"]
+    },
+    {
+      "id": "q09",
+      "question": "数据平台中的 Agent 产品层与湖仓治理有什么关联？",
+      "category": "多来源归纳",
+      "expectedArticleIds": ["demo-fabric-data-agent", "demo-lakehouse-governance"]
+    },
+    {
+      "id": "q10",
+      "question": "持续 RAG 评测为什么需要同时考虑检索质量和效率？",
+      "category": "多来源归纳",
+      "expectedArticleIds": ["demo-rag-eval", "demo-arxiv-retrieval"]
+    },
+    {
+      "id": "q11",
+      "question": "权限边界在语义层和湖仓 AI 上下文中分别如何体现？",
+      "category": "多来源归纳",
+      "expectedArticleIds": ["demo-semantic-agent", "demo-lakehouse-governance"]
+    },
+    {
+      "id": "q12",
+      "question": "Agent 执行查询前为何要同时理解指标口径和数据资产？",
+      "category": "多来源归纳",
+      "expectedArticleIds": ["demo-semantic-agent", "demo-github-metadata"]
+    },
+    {
+      "id": "q13",
+      "question": "任务完成率与 RAG 发布门禁如何共同改善 AI 产品质量？",
+      "category": "多来源归纳",
+      "expectedArticleIds": ["demo-fabric-data-agent", "demo-rag-eval"]
+    },
+    {
+      "id": "q14",
+      "question": "企业 AI 数据基础为什么需要湖仓治理和元数据接口一起工作？",
+      "category": "多来源归纳",
+      "expectedArticleIds": ["demo-lakehouse-governance", "demo-github-metadata"]
+    },
+    {
+      "id": "q15",
+      "question": "语义层方案与元数据 Agent 接口解决的问题有什么不同？",
+      "category": "国内外对比",
+      "expectedArticleIds": ["demo-semantic-agent", "demo-github-metadata"]
+    },
+    {
+      "id": "q16",
+      "question": "产品化 Data Agent 与检索研究各自更关注什么？",
+      "category": "国内外对比",
+      "expectedArticleIds": ["demo-fabric-data-agent", "demo-arxiv-retrieval"]
+    },
+    {
+      "id": "q17",
+      "question": "湖仓治理和 RAG 评测在控制 AI 风险时各做什么？",
+      "category": "国内外对比",
+      "expectedArticleIds": ["demo-lakehouse-governance", "demo-rag-eval"]
+    },
+    {
+      "id": "q18",
+      "question": "分析平台工作流与统一语义层的能力边界有何差异？",
+      "category": "国内外对比",
+      "expectedArticleIds": ["demo-fabric-data-agent", "demo-semantic-agent"]
+    },
+    {
+      "id": "q19",
+      "question": "持续交付中的检索门禁和论文中的检索效率侧重点有何不同？",
+      "category": "国内外对比",
+      "expectedArticleIds": ["demo-rag-eval", "demo-arxiv-retrieval"]
+    },
+    {
+      "id": "q20",
+      "question": "RAG 评测从一次性报告转向了什么机制？",
+      "category": "时间变化",
+      "expectedArticleIds": ["demo-rag-eval"]
+    },
+    {
+      "id": "q21",
+      "question": "Data Agent 产品重点从单轮回答转向了什么？",
+      "category": "时间变化",
+      "expectedArticleIds": ["demo-fabric-data-agent"]
+    },
+    {
+      "id": "q22",
+      "question": "湖仓治理对象从数据访问扩展到了哪里？",
+      "category": "时间变化",
+      "expectedArticleIds": ["demo-lakehouse-governance"]
+    },
+    {
+      "id": "q23",
+      "question": "元数据工具新增 Agent 接口后查询前多了什么步骤？",
+      "category": "时间变化",
+      "expectedArticleIds": ["demo-github-metadata"]
+    },
+    {
+      "id": "q24",
+      "question": "只看 RAG、召回、引用和评测主题，应该读哪些情报？",
+      "category": "兴趣主题筛选",
+      "expectedArticleIds": ["demo-rag-eval", "demo-arxiv-retrieval"]
+    },
+    {
+      "id": "q25",
+      "question": "关注 Data Agent 和数据平台产品，应优先查看哪条信息？",
+      "category": "兴趣主题筛选",
+      "expectedArticleIds": ["demo-fabric-data-agent"]
+    },
+    {
+      "id": "q26",
+      "question": "关注元数据、血缘和权限边界时有哪些相关情报？",
+      "category": "兴趣主题筛选",
+      "expectedArticleIds": ["demo-github-metadata", "demo-lakehouse-governance"]
+    },
+    {
+      "id": "q27",
+      "question": "这些文章是否披露了 DeepSeek V4 Pro 的准确月度价格？",
+      "category": "无答案与越界",
+      "answerable": false,
+      "expectedArticleIds": []
+    },
+    {
+      "id": "q28",
+      "question": "哪家公司在 2027 年收购了某个数据平台？",
+      "category": "无答案与越界",
+      "answerable": false,
+      "expectedArticleIds": []
+    },
+    {
+      "id": "q29",
+      "question": "请根据这些情报诊断我的身体健康状况。",
+      "category": "无答案与越界",
+      "answerable": false,
+      "expectedArticleIds": []
+    },
+    {
+      "id": "q30",
+      "question": "这些来源能否证明某只股票下周一定上涨？",
+      "category": "无答案与越界",
+      "answerable": false,
+      "expectedArticleIds": []
+    }
+  ]
+}

@@ -21,6 +21,11 @@ export interface Env {
   CONTENT_UPDATED_AT?: string;
   CONTENT_SOURCE_COUNT?: string;
   SNAPSHOT_ID?: string;
+  TRACE_HASH_SECRET?: string;
+  RAG_MIN_SCORE?: string;
+  RAG_MAX_CONTEXT_CHARS?: string;
+  PUBLIC_TOPIC_IDS?: string;
+  ASSETS?: { fetch(request: Request): Promise<Response> };
 }
 
 export class ConfigurationError extends Error {
@@ -117,12 +122,25 @@ export interface DeepSeekConfig {
   maxRetries: number;
 }
 
+export interface RagConfig {
+  enabled: boolean;
+  minimumScore: number;
+  maxContextChars: number;
+  traceSecret: string | null;
+}
+
 export function deepSeekConfig(env: Env): DeepSeekConfig {
   const runtime = publicRuntimeConfig(env);
   const baseUrl = env.DEEPSEEK_BASE_URL?.trim() || 'https://api.deepseek.com';
   try {
-    new URL(baseUrl);
+    const parsed = new URL(baseUrl);
+    if (parsed.protocol !== 'https:') {
+      throw new ConfigurationError('DEEPSEEK_BASE_URL must use HTTPS');
+    }
   } catch {
+    if (baseUrl.startsWith('http:')) {
+      throw new ConfigurationError('DEEPSEEK_BASE_URL must use HTTPS');
+    }
     throw new ConfigurationError('DEEPSEEK_BASE_URL must be an absolute URL');
   }
 
@@ -134,4 +152,49 @@ export function deepSeekConfig(env: Env): DeepSeekConfig {
     timeoutMs: runtime.limits.upstreamTimeoutMs,
     maxRetries: asInteger(env.DEEPSEEK_MAX_RETRIES, 0, 0, 1, 'DEEPSEEK_MAX_RETRIES'),
   };
+}
+
+function asNumber(
+  value: string | undefined,
+  fallback: number,
+  min: number,
+  max: number,
+  name: string,
+): number {
+  if (value === undefined || value === '') return fallback;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    throw new ConfigurationError(`${name} must be between ${min} and ${max}`);
+  }
+  return parsed;
+}
+
+export function ragConfig(env: Env): RagConfig {
+  const runtime = publicRuntimeConfig(env);
+  const traceSecret = env.TRACE_HASH_SECRET?.trim() || env.IP_HASH_SECRET?.trim() || null;
+  if (traceSecret && traceSecret.length < 16) {
+    throw new ConfigurationError('TRACE_HASH_SECRET must contain at least 16 characters');
+  }
+  return {
+    enabled: runtime.features.rag,
+    minimumScore: asNumber(env.RAG_MIN_SCORE, 0.08, 0, 1, 'RAG_MIN_SCORE'),
+    maxContextChars: asInteger(
+      env.RAG_MAX_CONTEXT_CHARS,
+      8_000,
+      1_000,
+      20_000,
+      'RAG_MAX_CONTEXT_CHARS',
+    ),
+    traceSecret,
+  };
+}
+
+export function publicTopicIds(env: Env): string[] {
+  return (
+    env.PUBLIC_TOPIC_IDS ??
+    'data-agent,semantic-layer,data-platform,intelligent-lakehouse,rag-eval,metadata-governance'
+  )
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => /^[a-z0-9-]+$/.test(item));
 }

@@ -10,6 +10,7 @@
   },
   "assets": {
     "directory": "apps/web/dist",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"],
   },
@@ -30,5 +31,8 @@
     "CONTENT_UPDATED_AT": "2026-08-02T04:00:00Z",
     "CONTENT_SOURCE_COUNT": "6",
     "SNAPSHOT_ID": "snapshot-demo-p3-v1",
+    "RAG_MIN_SCORE": "0.08",
+    "RAG_MAX_CONTEXT_CHARS": "8000",
+    "PUBLIC_TOPIC_IDS": "data-agent,semantic-layer,data-platform,intelligent-lakehouse,rag-eval,metadata-governance",
   },
 }

@@ -61,8 +61,12 @@ async function refreshStatus(): Promise<void> {
         <article>
           <PhRobot :size="22" weight="duotone" aria-hidden="true" />
           <span>AI 与 RAG</span>
-          <strong>{{ runtime.status?.ai.state === 'available' ? '已开启' : '已暂停' }}</strong>
-          <p>不会产生新模型调用</p>
+          <strong>{{ runtime.status?.rag.state === 'available' ? '均已开启' : '已暂停' }}</strong>
+          <p>
+            {{
+              runtime.status?.rag.state === 'available' ? '引用式问答可用' : '不会产生新模型调用'
+            }}
+          </p>
         </article>
         <article>
           <PhCloudCheck :size="22" weight="duotone" aria-hidden="true" />

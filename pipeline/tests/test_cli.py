@@ -15,7 +15,7 @@ def test_doctor_reports_safe_local_state(capsys: CaptureFixture[str]) -> None:
 
     assert payload["ok"] is True
     assert payload["mode"] == "archive"
-    assert payload["enabledSources"] == 0
+    assert payload["enabledSources"] == 8
     assert payload["aiEnabled"] is False
 
 

@@ -4,8 +4,8 @@
 |---|---|
 | API 版本 | `0.1.x` |
 | 数据 Schema | `1.0.0` |
-| 传输 | HTTPS + JSON；流式接口预留 SSE |
-| 当前状态 | 健康、状态、公开运行配置已实现；问答尚未开放 |
+| 传输 | HTTPS + JSON；问答使用 SSE |
+| 当前状态 | 健康、状态、运行配置、画像增强和问答路由已实现；付费能力默认关闭 |
 
 ## 1. 统一响应
 
@@ -93,6 +93,9 @@ AI 状态：
 | `rate_limited` | 429 | 等待后重试 | 单 IP 匿名额度用尽 |
 | `budget_paused` | 503 | 否 | 项目预算开关已暂停生成 |
 | `ai_unavailable` | 503 | 否 | AI 关闭、缺 Key 或缺 model ID |
+| `rag_unavailable` | 503 | 否 | RAG 关闭、缺静态语料 binding 或缺 Trace Secret |
+| `evidence_insufficient` | 200（结构化拒答） | 否 | 检索证据未达到阈值，不调用生成模型 |
+| `invalid_model_output` | 502 | 否 | 画像等结构化输出未通过校验 |
 | `upstream_timeout` | 504 | 可重试 | 模型调用超时 |
 | `upstream_error` | 502/429/503 | 视字段而定 | 模型服务异常 |
 | `invalid_configuration` | 503 | 否 | 服务端配置不合法 |
@@ -100,15 +103,24 @@ AI 状态：
 
 DeepSeek 适配器只把 429、500、503 归为可重试错误。默认重试次数为 0，防止 POST 在结果不确定时重复计费；需要时最多配置 1 次。
 
-## 5. 问答接口预留契约
+## 5. AI 画像与问答接口
 
-问答尚未接入公开路由。进入 RAG 阶段后再增加：
+### `POST /api/profile/enhance`
 
-- `POST /api/questions`：非流式回答；
-- `POST /api/questions/stream`：SSE 流式回答；
-- `POST /api/questions/{id}/cancel`：尽力取消未完成请求。
+- 输入：`role`、`work`、`goal`、`description`，至少一项非空；
+- 输出：结构化字段、允许主题内的兴趣建议、推断术语、警告、模型与 Prompt 版本；
+- 结果只进入前端预览，用户点击“应用建议”后才写入表单，再次保存后才进入浏览器本地画像；
+- AI 关闭或缺少服务端配置时返回 `ai_unavailable`，手动画像不受影响。
 
-SSE 事件按 `meta → citation/delta → usage → done` 排序，异常以 `error` 结束。服务端必须在任何模型调用前依次通过：功能开关、匿名限流、预算预留、请求体校验。客户端断开后应触发上游 `AbortSignal`。
+### `POST /api/ask`
+
+- 输入：2–300 字问题、`7d/30d` 范围、可选 `articleId`；
+- 证据不足时返回结构化 `RagRefusalData`，不会调用生成模型；
+- 证据充分时返回 SSE。首个事件为 `event: meta`，包含匿名 Trace ID、检索模式与引用；后续 `data:` 保持 OpenAI-compatible delta 格式，最后为 `[DONE]`；
+- 客户端停止或断开连接时通过 `AbortSignal` 取消上游请求；
+- Trace 只记录问题 HMAC 指纹、候选 chunk、注入 chunk、回退原因和耗时，不保存问题或 IP 原文。
+
+服务端在模型调用前执行：功能开关、配置完整性、请求体校验、检索和证据阈值。持久匿名限流与预算台账属于 P7，因此公开环境继续保持 RAG 关闭。
 
 ## 6. 边界
 

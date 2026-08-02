@@ -56,13 +56,13 @@ const architectureLayers = [
     name: '数据与向量层',
     icon: PhDatabase,
     summary: 'Postgres/D1 保存结构化记录，Vectorize 保存可追溯 Chunk。',
-    detail: '当前 MVP 只发布静态 JSON，数据库和向量服务在 RAG 阶段接入。',
+    detail: '当前 MVP 发布静态 JSON 与本地 dense 基线；Vectorize 导出已完成，外部索引待创建。',
   },
   {
     name: 'RAG 与 Eval',
     icon: PhFlowArrow,
     summary: '检索候选、注入上下文、引用式生成、Trace 和发布门禁。',
-    detail: '当前入口保留但动态能力关闭，正式 Eval 尚未运行。',
+    detail: '引用式 SSE、阈值拒答和匿名 Trace 已实现；公开开关关闭，Demo Eval 标记为 observe。',
   },
   {
     name: 'Worker API',
@@ -403,8 +403,8 @@ const architectureLayers = [
       <div class="evaluation-cta">
         <PhFlask :size="24" weight="duotone" aria-hidden="true" />
         <div>
-          <strong>正式黄金集尚未运行</strong>
-          <p>当前 Eval 页面只展示方法和目标门槛。</p>
+          <strong>Demo 工程基线已运行</strong>
+          <p>30 题结果可复现；人工复核、引用覆盖和生产 Gate 仍待完成。</p>
         </div>
         <RouterLink class="button button--secondary" to="/eval">查看 Eval 页面</RouterLink>
       </div>

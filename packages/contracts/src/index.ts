@@ -4,6 +4,8 @@ export const API_PATHS = {
   health: '/api/health',
   status: '/api/status',
   runtimeConfig: '/api/runtime-config',
+  profileEnhance: '/api/profile/enhance',
+  ask: '/api/ask',
 } as const;
 
 export type IsoDateTime = string;
@@ -22,6 +24,9 @@ export type ApiErrorCode =
   | 'rate_limited'
   | 'budget_paused'
   | 'ai_unavailable'
+  | 'rag_unavailable'
+  | 'evidence_insufficient'
+  | 'invalid_model_output'
   | 'upstream_timeout'
   | 'upstream_error'
   | 'internal_error';
@@ -70,6 +75,11 @@ export interface StatusData {
     state: CapabilityState;
     provider: 'deepseek' | null;
     model: string | null;
+  };
+  rag: {
+    state: CapabilityState;
+    retrievalMode: 'chunk_dense' | 'article_dense' | null;
+    corpusSnapshotId: string | null;
   };
 }
 
@@ -167,7 +177,18 @@ export interface Chunk {
 }
 
 export interface PipelineStageResult {
-  stage: 'fetch' | 'extract' | 'normalize' | 'exact_dedup' | 'fuzzy_dedup' | 'select' | 'snapshot';
+  stage:
+    | 'fetch'
+    | 'extract'
+    | 'normalize'
+    | 'exact_dedup'
+    | 'fuzzy_dedup'
+    | 'select'
+    | 'ai_enrich'
+    | 'chunk'
+    | 'index'
+    | 'eval'
+    | 'snapshot';
   status: 'succeeded' | 'skipped' | 'failed';
   inputCount: number;
   outputCount: number;
@@ -251,6 +272,59 @@ export interface EvalRun {
     p95LatencyMs: number;
   };
   gate: 'pass' | 'fail' | 'observe';
+  datasetKind?: 'demo' | 'production';
+  corpusSnapshotId?: string | null;
+  embeddingModel?: string | null;
+}
+
+export interface ProfileEnhanceRequest {
+  role: string;
+  work: string;
+  goal: string;
+  description: string;
+}
+
+export interface ProfileInterestSuggestion {
+  topicId: string;
+  weight: number;
+  reason: string;
+}
+
+export interface ProfileEnhanceData extends ProfileEnhanceRequest {
+  interests: ProfileInterestSuggestion[];
+  inferredTerms: string[];
+  warnings: string[];
+  model: string;
+  promptVersion: string;
+}
+
+export interface AskRequest {
+  question: string;
+  range: '7d' | '30d';
+  articleId?: string;
+}
+
+export interface RagCitation {
+  index: number;
+  chunkId: string;
+  articleId: string;
+  title: string;
+  source: string;
+  url: string;
+  excerpt: string;
+}
+
+export interface RagStreamMeta {
+  traceId: string;
+  retrievalMode: 'chunk_dense' | 'article_dense';
+  citations: RagCitation[];
+}
+
+export interface RagRefusalData {
+  answer: null;
+  refusalReason: 'evidence_insufficient';
+  traceId: string;
+  citations: RagCitation[];
 }
 
 export interface RuntimeConfig {

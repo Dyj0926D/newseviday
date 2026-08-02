@@ -47,6 +47,7 @@ export const useRuntimeStore = defineStore('runtime', () => {
         snapshotId: snapshot.snapshotId,
       },
       ai: { state: 'static-only', provider: null, model: null },
+      rag: { state: 'static-only', retrievalMode: null, corpusSnapshotId: null },
     };
     requestState.value = 'static';
   }

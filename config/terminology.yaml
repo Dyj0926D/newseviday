@@ -1,0 +1,26 @@
+version: 1
+terms:
+  - source: Semantic Layer
+    preferredZh: 语义层
+    allowedAliases: [统一语义层]
+  - source: Data Agent
+    preferredZh: Data Agent
+    allowedAliases: [数据智能体, 数据代理]
+  - source: Lakehouse
+    preferredZh: 湖仓
+    allowedAliases: [湖仓一体]
+  - source: Retrieval-Augmented Generation
+    preferredZh: 检索增强生成
+    allowedAliases: [RAG]
+  - source: RAG
+    preferredZh: RAG
+    allowedAliases: [检索增强生成]
+  - source: Rerank
+    preferredZh: 重排
+    allowedAliases: [Rerank, Reranking]
+  - source: Grounding
+    preferredZh: 证据约束
+    allowedAliases: [事实依据, Grounding]
+  - source: Metadata
+    preferredZh: 元数据
+    allowedAliases: []

@@ -1,5 +1,6 @@
-# Copy to .dev.vars for local Worker development. Never commit the real file.
-# Keep AI_ENABLED=false until a minimal, explicit paid-call test is approved.
+# Copy to .dev.vars for the root Cloudflare Worker configuration. Never commit real values.
+# Keep AI_ENABLED=false and RAG_ENABLED=false until the P7 rate-limit and budget gates pass.
 DEEPSEEK_API_KEY=replace_with_personal_key
 DEEPSEEK_MODEL=replace_with_provider_exact_model_id
 IP_HASH_SECRET=generate_a_random_value_with_at_least_32_characters
+TRACE_HASH_SECRET=generate_a_separate_random_value_with_at_least_32_characters

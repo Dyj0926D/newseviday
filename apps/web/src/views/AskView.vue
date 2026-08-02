@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import {
+  API_PATHS,
+  type ApiResponse,
+  type RagCitation,
+  type RagRefusalData,
+  type RagStreamMeta,
+} from '@newseviday/contracts';
+import {
   PhArrowRight,
   PhDatabase,
   PhMagnifyingGlass,
   PhPauseCircle,
   PhShieldCheck,
+  PhStopCircle,
 } from '@phosphor-icons/vue';
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import InnerPageHero from '../components/InnerPageHero.vue';
@@ -15,16 +23,28 @@ import { displayTitle, resolveSource } from '../lib/intelligence';
 import { useContentStore } from '../stores/content';
 import { useRuntimeStore } from '../stores/runtime';
 
+interface DeepSeekStreamPayload {
+  choices?: Array<{ delta?: { content?: string } }>;
+}
+
 const route = useRoute();
 const content = useContentStore();
 const runtime = useRuntimeStore();
 const question = ref('');
-const range = ref('30d');
+const range = ref<'7d' | '30d'>('30d');
+const answer = ref('');
+const citations = ref<RagCitation[]>([]);
+const traceId = ref('');
+const refusal = ref(false);
+const askError = ref('');
+const asking = ref(false);
+let activeController: AbortController | null = null;
+
 const scopedArticle = computed(() => {
   const id = typeof route.query.article === 'string' ? route.query.article : '';
   return content.snapshot?.articles.find((item) => item.id === id) ?? null;
 });
-const ragAvailable = computed(() => runtime.status?.ai.state === 'available');
+const ragAvailable = computed(() => runtime.status?.rag.state === 'available');
 const suggested = [
   'Data Agent 最近出现了哪些产品变化？',
   '统一语义层为什么重新受到关注？',
@@ -35,6 +55,97 @@ function chooseQuestion(value: string): void {
   question.value = value;
   document.querySelector<HTMLTextAreaElement>('#intelligence-question')?.focus();
 }
+
+function parseEvent(block: string): void {
+  const event = block
+    .split('\n')
+    .find((line) => line.startsWith('event:'))
+    ?.slice(6)
+    .trim();
+  const data = block
+    .split('\n')
+    .filter((line) => line.startsWith('data:'))
+    .map((line) => line.slice(5).trimStart())
+    .join('\n');
+  if (!data || data === '[DONE]') return;
+  if (event === 'meta') {
+    const meta = JSON.parse(data) as RagStreamMeta;
+    citations.value = meta.citations;
+    traceId.value = meta.traceId;
+    return;
+  }
+  const payload = JSON.parse(data) as DeepSeekStreamPayload;
+  answer.value += payload.choices?.[0]?.delta?.content ?? '';
+}
+
+async function consumeStream(response: Response): Promise<void> {
+  if (!response.body) throw new Error('empty_stream');
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    buffer += decoder.decode(value, { stream: !done }).replace(/\r\n/g, '\n');
+    const blocks = buffer.split('\n\n');
+    buffer = blocks.pop() ?? '';
+    blocks.filter(Boolean).forEach(parseEvent);
+    if (done) break;
+  }
+  if (buffer.trim()) parseEvent(buffer);
+}
+
+async function ask(): Promise<void> {
+  if (!ragAvailable.value || !question.value.trim() || asking.value) return;
+  activeController = new AbortController();
+  asking.value = true;
+  answer.value = '';
+  citations.value = [];
+  traceId.value = '';
+  refusal.value = false;
+  askError.value = '';
+  const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? '';
+  try {
+    const response = await fetch(`${baseUrl}${API_PATHS.ask}`, {
+      method: 'POST',
+      headers: {
+        Accept: 'text/event-stream, application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        question: question.value.trim(),
+        range: range.value,
+        ...(scopedArticle.value ? { articleId: scopedArticle.value.id } : {}),
+      }),
+      signal: activeController.signal,
+    });
+    const contentType = response.headers.get('content-type') ?? '';
+    if (contentType.includes('application/json')) {
+      const payload = (await response.json()) as ApiResponse<RagRefusalData>;
+      if (!payload.ok) throw new Error(payload.error.code);
+      refusal.value = payload.data.refusalReason === 'evidence_insufficient';
+      citations.value = payload.data.citations;
+      traceId.value = payload.data.traceId;
+      return;
+    }
+    if (!response.ok) throw new Error(`request_failed_${response.status}`);
+    await consumeStream(response);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      askError.value = '回答已停止，当前已接收内容保留在页面中。';
+    } else {
+      askError.value = '问答暂时不可用，没有产生可展示的结果。请稍后重试。';
+    }
+  } finally {
+    asking.value = false;
+    activeController = null;
+  }
+}
+
+function cancelAsk(): void {
+  activeController?.abort();
+}
+
+onBeforeUnmount(cancelAsk);
 </script>
 
 <template>
@@ -42,7 +153,7 @@ function chooseQuestion(value: string): void {
     <InnerPageHero
       eyebrow="EVIDENCE-GROUNDED Q&A"
       title="基于已收录情报继续追问"
-      description="检索最近 30 天的公开快照，回答必须回到文章和证据。当前归档模式不会触发新生成。"
+      description="检索已发布的静态快照，回答必须回到文章和证据。归档模式不会触发模型调用。"
     >
       <template #actions>
         <RouterLink class="hero-text-link" to="/eval">
@@ -60,7 +171,7 @@ function chooseQuestion(value: string): void {
           description="RAG 和 DeepSeek 总开关保持关闭。你仍可浏览问题设计、语料范围和已有情报，不会产生模型费用。"
         />
 
-        <form class="question-composer" @submit.prevent>
+        <form class="question-composer" @submit.prevent="ask">
           <div class="question-composer__heading">
             <label for="intelligence-question">输入你的问题</label>
             <span>{{ question.length }} / 300</span>
@@ -80,7 +191,12 @@ function chooseQuestion(value: string): void {
                 <option value="7d">最近 7 天</option>
               </select>
             </label>
+            <button v-if="asking" class="button button--secondary" type="button" @click="cancelAsk">
+              <PhStopCircle :size="17" aria-hidden="true" />
+              停止回答
+            </button>
             <button
+              v-else
               class="button button--primary"
               type="submit"
               :disabled="!ragAvailable || !question.trim()"
@@ -91,6 +207,34 @@ function chooseQuestion(value: string): void {
           </div>
         </form>
 
+        <p v-if="askError" class="ask-error" role="alert">{{ askError }}</p>
+
+        <section v-if="asking || answer || refusal" class="rag-answer" aria-live="polite">
+          <p class="section-kicker">TRACEABLE ANSWER</p>
+          <h2>{{ refusal ? '当前语料不足以回答' : '基于证据的回答' }}</h2>
+          <p v-if="refusal" class="rag-answer__refusal">
+            检索结果没有达到证据阈值，因此本次不调用模型生成结论。
+          </p>
+          <p v-else class="rag-answer__body">
+            {{ answer || '正在检索证据并生成回答…' }}
+          </p>
+          <div v-if="citations.length" class="rag-citations">
+            <h3>引用证据</h3>
+            <a
+              v-for="citation in citations"
+              :key="citation.chunkId"
+              :href="citation.url"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span>[{{ citation.index }}] {{ citation.source }}</span>
+              <strong>{{ citation.title }}</strong>
+              <small>{{ citation.excerpt }}</small>
+            </a>
+          </div>
+          <small v-if="traceId" class="rag-answer__trace">Trace {{ traceId.slice(0, 8) }}</small>
+        </section>
+
         <div class="suggested-questions">
           <h2>可以这样问</h2>
           <button v-for="item in suggested" :key="item" type="button" @click="chooseQuestion(item)">
@@ -99,13 +243,12 @@ function chooseQuestion(value: string): void {
           </button>
         </div>
 
-        <section class="rag-empty-state">
+        <section v-if="!answer && !refusal" class="rag-empty-state">
           <PhPauseCircle :size="28" weight="duotone" aria-hidden="true" />
           <div>
-            <h2>等待能力开启</h2>
+            <h2>{{ ragAvailable ? '等待问题' : '等待能力开启' }}</h2>
             <p>
-              正式回答将按“检索候选、证据阈值、引用式生成、匿名
-              Trace”四步执行。没有足够证据时会拒答。
+              正式回答按“检索候选、证据阈值、引用式生成、匿名 Trace”执行。没有足够证据时会拒答。
             </p>
           </div>
         </section>
@@ -115,9 +258,7 @@ function chooseQuestion(value: string): void {
         <div v-if="scopedArticle" class="ask-scope-card">
           <p>来自文章详情</p>
           <RouterLink :to="`/article/${scopedArticle.id}`">
-            {{
-              displayTitle(scopedArticle)
-            }}
+            {{ displayTitle(scopedArticle) }}
           </RouterLink>
         </div>
 
@@ -134,8 +275,8 @@ function chooseQuestion(value: string): void {
               <dd>{{ content.snapshot?.sourceCount ?? 0 }}</dd>
             </div>
             <div>
-              <dt>范围</dt>
-              <dd>静态演示快照</dd>
+              <dt>快照</dt>
+              <dd>{{ runtime.status?.rag.corpusSnapshotId ?? '静态演示' }}</dd>
             </div>
           </dl>
         </section>

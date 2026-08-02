@@ -28,6 +28,7 @@ describe('worker API', () => {
     expect(payload.data.mode).toBe('archive');
     expect(payload.data.content.sourceCount).toBe(0);
     expect(payload.data.ai.state).toBe('static-only');
+    expect(payload.data.rag.state).toBe('static-only');
     expect(payload.meta.requestId).toBeTruthy();
     expect(payload.meta.version).toBe('0.1.0-test');
   });

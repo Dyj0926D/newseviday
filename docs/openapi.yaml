@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: NewsEviday Public API
   version: 0.1.0
-  description: Current read-only API. RAG question endpoints are intentionally not published yet.
+  description: Public status plus gated profile enhancement and evidence-grounded RAG endpoints.
 servers:
   - url: /
 paths:
@@ -36,6 +36,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RuntimeConfigResponse'
+  /api/profile/enhance:
+    post:
+      operationId: enhanceProfile
+      description: Returns a reviewable profile suggestion. It never saves the profile.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileEnhanceRequest' }
+      responses:
+        '200':
+          description: Structured profile suggestion.
+          content:
+            application/json:
+              schema: { type: object }
+        '503': { description: AI is disabled or unavailable. }
+  /api/ask:
+    post:
+      operationId: askWithEvidence
+      description: Returns SSE for an answer or JSON for an evidence-threshold refusal.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AskRequest' }
+      responses:
+        '200':
+          description: SSE answer or structured refusal.
+          content:
+            text/event-stream:
+              schema: { type: string }
+            application/json:
+              schema: { type: object }
+        '503': { description: RAG is disabled or incomplete. }
 components:
   schemas:
     Meta:
@@ -69,7 +103,7 @@ components:
         ok: { const: true }
         data:
           type: object
-          required: [product, mode, content, ai]
+          required: [product, mode, content, ai, rag]
           properties:
             product: { const: NewsEviday }
             mode: { enum: [archive, warmup, interview] }
@@ -88,6 +122,13 @@ components:
                 state: { enum: [available, saving-mode, static-only, rate-limited, budget-paused] }
                 provider: { enum: [deepseek, null] }
                 model: { type: [string, 'null'] }
+            rag:
+              type: object
+              required: [state, retrievalMode, corpusSnapshotId]
+              properties:
+                state: { enum: [available, saving-mode, static-only, rate-limited, budget-paused] }
+                retrievalMode: { enum: [chunk_dense, article_dense, null] }
+                corpusSnapshotId: { type: [string, 'null'] }
         meta: { $ref: '#/components/schemas/Meta' }
     RuntimeConfigResponse:
       type: object
@@ -119,3 +160,20 @@ components:
                 requestBodyBytes: { type: integer, minimum: 1024 }
                 upstreamTimeoutMs: { type: integer, minimum: 1000 }
         meta: { $ref: '#/components/schemas/Meta' }
+    ProfileEnhanceRequest:
+      type: object
+      additionalProperties: false
+      required: [role, work, goal, description]
+      properties:
+        role: { type: string, maxLength: 80 }
+        work: { type: string, maxLength: 200 }
+        goal: { type: string, maxLength: 240 }
+        description: { type: string, maxLength: 500 }
+    AskRequest:
+      type: object
+      additionalProperties: false
+      required: [question, range]
+      properties:
+        question: { type: string, minLength: 2, maxLength: 300 }
+        range: { enum: [7d, 30d] }
+        articleId: { type: string, maxLength: 120 }

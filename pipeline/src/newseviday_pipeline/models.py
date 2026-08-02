@@ -45,6 +45,8 @@ class SourceConfig(ContractModel):
     enabled: bool = False
     usage_scope: str = Field(min_length=2)
     note: str | None = None
+    max_items: int = Field(default=12, ge=1, le=50)
+    request_timeout_seconds: int = Field(default=15, ge=3, le=30)
 
 
 class SourcesConfig(ContractModel):
@@ -86,6 +88,7 @@ class RawFeedItem(ContractModel):
     authors: list[str] = Field(default_factory=list)
     published_at: datetime | None = None
     language: str
+    content_html: str | None = None
 
 
 class ArticleFacts(ContractModel):
@@ -159,7 +162,17 @@ class Brief(ContractModel):
 
 
 PipelineStageName = Literal[
-    "fetch", "extract", "normalize", "exact_dedup", "fuzzy_dedup", "select", "snapshot"
+    "fetch",
+    "extract",
+    "normalize",
+    "exact_dedup",
+    "fuzzy_dedup",
+    "select",
+    "ai_enrich",
+    "chunk",
+    "index",
+    "eval",
+    "snapshot",
 ]
 
 
@@ -222,6 +235,9 @@ class EvalRun(ContractModel):
     sample_count: int = Field(ge=1)
     metrics: EvalMetrics
     gate: Literal["pass", "fail", "observe"]
+    dataset_kind: Literal["demo", "production"] = "production"
+    corpus_snapshot_id: str | None = None
+    embedding_model: str | None = None
 
 
 class RuntimeContractFeatures(ContractModel):
