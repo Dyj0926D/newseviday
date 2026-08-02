@@ -7,7 +7,7 @@ defineProps<{
 </script>
 
 <template>
-  <section class="page-intro">
+  <section class="page-intro" data-page-intro>
     <div class="page-container page-intro__inner">
       <p v-if="eyebrow" class="page-intro__eyebrow">{{ eyebrow }}</p>
       <h1>{{ title }}</h1>

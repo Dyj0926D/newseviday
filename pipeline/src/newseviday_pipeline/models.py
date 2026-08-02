@@ -97,6 +97,7 @@ class ArticleFacts(ContractModel):
 class GeneratedText(ContractModel):
     title_zh: str | None = None
     summary_zh: str | None = None
+    why_it_matters: str | None = None
     key_points: list[str] = Field(default_factory=list)
     provider: Literal["deepseek"] = "deepseek"
     model: str
@@ -253,13 +254,21 @@ class RuntimeContract(ContractModel):
     ai: RuntimeContractAi = Field(default_factory=RuntimeContractAi)
 
 
+class SnapshotTopic(ContractModel):
+    id: str
+    label: str
+
+
 class ContentSnapshot(ContractModel):
     schema_version: Literal["1.0.0"] = SCHEMA_VERSION
     snapshot_id: str
     generated_at: datetime
     pipeline_run_id: str
     state: Literal["empty", "ready", "stale"]
+    snapshot_kind: Literal["demo", "production"] = "production"
     source_count: int = Field(ge=0)
+    sources: list[Source] = Field(default_factory=list)
+    topics: list[SnapshotTopic] = Field(default_factory=list)
     articles: list[Article] = Field(default_factory=list)
     evidence: list[Evidence] = Field(default_factory=list)
     briefs: list[Brief] = Field(default_factory=list)

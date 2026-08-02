@@ -1,11 +1,311 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-bootstrap-v1",
-  "generatedAt": "2026-08-01T00:00:00Z",
-  "pipelineRunId": "pipeline-bootstrap-v1",
-  "state": "empty",
-  "sourceCount": 0,
-  "articles": [],
-  "evidence": [],
+  "snapshotId": "snapshot-demo-p3-v1",
+  "generatedAt": "2026-08-02T04:00:00Z",
+  "pipelineRunId": "pipeline-demo-p3-v1",
+  "state": "ready",
+  "snapshotKind": "demo",
+  "sourceCount": 6,
+  "sources": [
+    {
+      "schemaVersion": "1.0.0",
+      "id": "databricks",
+      "name": "Databricks",
+      "kind": "manual",
+      "homepageUrl": "https://www.databricks.com/blog",
+      "feedUrl": null,
+      "language": "en",
+      "region": "北美",
+      "active": true,
+      "usageScope": "演示快照仅保留标题级元数据与来源链接"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "dbt-labs",
+      "name": "dbt Labs",
+      "kind": "manual",
+      "homepageUrl": "https://www.getdbt.com/blog",
+      "feedUrl": null,
+      "language": "en",
+      "region": "北美",
+      "active": true,
+      "usageScope": "演示快照仅保留标题级元数据与来源链接"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "microsoft-fabric",
+      "name": "Microsoft Fabric",
+      "kind": "manual",
+      "homepageUrl": "https://blog.fabric.microsoft.com/",
+      "feedUrl": null,
+      "language": "en",
+      "region": "北美",
+      "active": true,
+      "usageScope": "演示快照仅保留标题级元数据与来源链接"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "google-cloud",
+      "name": "Google Cloud",
+      "kind": "manual",
+      "homepageUrl": "https://cloud.google.com/blog/products/data-analytics",
+      "feedUrl": null,
+      "language": "en",
+      "region": "北美",
+      "active": true,
+      "usageScope": "演示快照仅保留标题级元数据与来源链接"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "arxiv",
+      "name": "arXiv",
+      "kind": "atom",
+      "homepageUrl": "https://arxiv.org/",
+      "feedUrl": "https://export.arxiv.org/api/query",
+      "language": "en",
+      "region": "全球",
+      "active": true,
+      "usageScope": "开放论文元数据，正文版权遵循原始论文声明"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "github-trending",
+      "name": "GitHub Trending",
+      "kind": "html",
+      "homepageUrl": "https://github.com/trending",
+      "feedUrl": null,
+      "language": "mixed",
+      "region": "全球",
+      "active": true,
+      "usageScope": "演示快照仅保留仓库级元数据与来源链接"
+    }
+  ],
+  "topics": [
+    { "id": "data-agent", "label": "Data Agent" },
+    { "id": "semantic-layer", "label": "统一语义" },
+    { "id": "data-platform", "label": "数据中台" },
+    { "id": "lakehouse", "label": "智能数据湖" },
+    { "id": "rag-eval", "label": "RAG 与评测" }
+  ],
+  "articles": [
+    {
+      "schemaVersion": "1.0.0",
+      "id": "demo-semantic-agent",
+      "sourceId": "dbt-labs",
+      "canonicalUrl": "https://www.getdbt.com/blog",
+      "language": "en",
+      "publishedAt": "2026-08-02T01:10:00Z",
+      "collectedAt": "2026-08-02T03:45:00Z",
+      "facts": {
+        "title": "Demo: Semantic layers move closer to agent-ready metrics",
+        "authors": ["NewsEviday Demo"],
+        "abstract": "A demo intelligence item used to validate the homepage information hierarchy."
+      },
+      "ai": {
+        "titleZh": "语义层开始成为 Data Agent 的可信指标入口",
+        "summaryZh": "指标口径、权限与业务语义被收敛到统一层，Agent 可以基于受控语义执行查询与解释，减少同一指标多种答案的问题。",
+        "whyItMatters": "这会直接影响 Data Agent 的准确率、可解释性和企业落地边界。",
+        "keyPoints": ["指标口径集中治理", "Agent 查询受权限约束", "语义模型可追溯"],
+        "provider": "deepseek",
+        "model": "demo-fixture",
+        "promptVersion": "demo-p3-v1",
+        "generatedAt": "2026-08-02T03:50:00Z"
+      },
+      "evidenceIds": ["evidence-demo-semantic-agent"],
+      "topicScores": { "semantic-layer": 0.98, "data-agent": 0.92 },
+      "contentHash": "demo-semantic-agent-20260802"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "demo-lakehouse-governance",
+      "sourceId": "databricks",
+      "canonicalUrl": "https://www.databricks.com/blog",
+      "language": "en",
+      "publishedAt": "2026-08-01T22:20:00Z",
+      "collectedAt": "2026-08-02T03:30:00Z",
+      "facts": {
+        "title": "Demo: Lakehouse governance expands from data access to AI context",
+        "authors": ["NewsEviday Demo"],
+        "abstract": "A demo intelligence item used to validate source, region and topic metadata."
+      },
+      "ai": {
+        "titleZh": "湖仓治理从数据访问延伸到 AI 上下文",
+        "summaryZh": "治理对象开始覆盖模型可读取的表、指标、文档与检索上下文，数据权限和 AI 应用权限逐步走向统一。",
+        "whyItMatters": "统一治理能降低企业同时建设数据平台和 AI 平台时的重复成本。",
+        "keyPoints": ["治理范围扩展", "权限链路统一", "上下文可审计"],
+        "provider": "deepseek",
+        "model": "demo-fixture",
+        "promptVersion": "demo-p3-v1",
+        "generatedAt": "2026-08-02T03:50:00Z"
+      },
+      "evidenceIds": ["evidence-demo-lakehouse-governance"],
+      "topicScores": { "lakehouse": 0.96, "data-platform": 0.78 },
+      "contentHash": "demo-lakehouse-governance-20260802"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "demo-fabric-data-agent",
+      "sourceId": "microsoft-fabric",
+      "canonicalUrl": "https://blog.fabric.microsoft.com/",
+      "language": "en",
+      "publishedAt": "2026-08-01T15:40:00Z",
+      "collectedAt": "2026-08-02T03:20:00Z",
+      "facts": {
+        "title": "Demo: Data agents become a product layer above analytics platforms",
+        "authors": ["NewsEviday Demo"],
+        "abstract": "A demo intelligence item used to validate the compact feed component."
+      },
+      "ai": {
+        "titleZh": "Data Agent 正在成为分析平台之上的产品层",
+        "summaryZh": "自然语言问数、指标解释与后续动作逐渐被组合成完整工作流，产品重点从单轮回答转向任务完成率。",
+        "whyItMatters": "产品经理需要重新定义问数、分析和行动之间的边界与成功指标。",
+        "keyPoints": ["单轮问答转向任务", "需要统一语义", "评估任务完成率"],
+        "provider": "deepseek",
+        "model": "demo-fixture",
+        "promptVersion": "demo-p3-v1",
+        "generatedAt": "2026-08-02T03:50:00Z"
+      },
+      "evidenceIds": ["evidence-demo-fabric-data-agent"],
+      "topicScores": { "data-agent": 0.97, "data-platform": 0.73 },
+      "contentHash": "demo-fabric-data-agent-20260802"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "demo-rag-eval",
+      "sourceId": "google-cloud",
+      "canonicalUrl": "https://cloud.google.com/blog/products/data-analytics",
+      "language": "en",
+      "publishedAt": "2026-08-01T10:15:00Z",
+      "collectedAt": "2026-08-02T03:10:00Z",
+      "facts": {
+        "title": "Demo: RAG evaluation moves into continuous delivery gates",
+        "authors": ["NewsEviday Demo"],
+        "abstract": "A demo intelligence item used to validate why-it-matters and evidence states."
+      },
+      "ai": {
+        "titleZh": "RAG 评测开始进入持续交付门禁",
+        "summaryZh": "检索召回、答案引用、延迟和失败回退被纳入版本发布流程，评测从一次性报告转为持续质量控制。",
+        "whyItMatters": "这能让团队说明为什么某个检索版本可以上线，也能快速回滚。",
+        "keyPoints": ["离线集与线上 Trace 联动", "质量和延迟双门禁", "保留回滚路径"],
+        "provider": "deepseek",
+        "model": "demo-fixture",
+        "promptVersion": "demo-p3-v1",
+        "generatedAt": "2026-08-02T03:50:00Z"
+      },
+      "evidenceIds": ["evidence-demo-rag-eval"],
+      "topicScores": { "rag-eval": 0.99, "data-agent": 0.61 },
+      "contentHash": "demo-rag-eval-20260802"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "demo-arxiv-retrieval",
+      "sourceId": "arxiv",
+      "canonicalUrl": "https://arxiv.org/",
+      "language": "en",
+      "publishedAt": "2026-07-31T23:00:00Z",
+      "collectedAt": "2026-08-02T02:55:00Z",
+      "facts": {
+        "title": "Demo: Retrieval research focuses on evidence coverage and efficiency",
+        "authors": ["NewsEviday Demo"],
+        "abstract": "A demo research item used to validate cross-language presentation."
+      },
+      "ai": {
+        "titleZh": "检索研究开始同时关注证据覆盖与效率",
+        "summaryZh": "新的检索方案倾向于联合优化召回覆盖、排序质量与推理成本，避免只追求单一离线指标。",
+        "whyItMatters": "企业 RAG 的实际瓶颈往往来自质量、速度和成本的共同约束。",
+        "keyPoints": ["多目标评测", "关注证据覆盖", "控制端到端延迟"],
+        "provider": "deepseek",
+        "model": "demo-fixture",
+        "promptVersion": "demo-p3-v1",
+        "generatedAt": "2026-08-02T03:50:00Z"
+      },
+      "evidenceIds": ["evidence-demo-arxiv-retrieval"],
+      "topicScores": { "rag-eval": 0.94 },
+      "contentHash": "demo-arxiv-retrieval-20260802"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "demo-github-metadata",
+      "sourceId": "github-trending",
+      "canonicalUrl": "https://github.com/trending",
+      "language": "mixed",
+      "publishedAt": "2026-07-31T12:30:00Z",
+      "collectedAt": "2026-08-02T02:40:00Z",
+      "facts": {
+        "title": "Demo: Open-source metadata tools add agent interfaces",
+        "authors": ["NewsEviday Demo"],
+        "abstract": "A demo repository signal used to validate mixed-language and global source badges."
+      },
+      "ai": {
+        "titleZh": "开源元数据工具开始增加 Agent 接口",
+        "summaryZh": "目录、血缘和语义元数据被封装为可调用工具，Agent 可以在执行查询前理解数据资产和权限边界。",
+        "whyItMatters": "元数据层可能成为连接数据平台与企业 Agent 的关键基础设施。",
+        "keyPoints": ["元数据可调用", "强调血缘和权限", "连接现有数据栈"],
+        "provider": "deepseek",
+        "model": "demo-fixture",
+        "promptVersion": "demo-p3-v1",
+        "generatedAt": "2026-08-02T03:50:00Z"
+      },
+      "evidenceIds": ["evidence-demo-github-metadata"],
+      "topicScores": { "data-platform": 0.91, "data-agent": 0.82 },
+      "contentHash": "demo-github-metadata-20260802"
+    }
+  ],
+  "evidence": [
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-demo-semantic-agent",
+      "articleId": "demo-semantic-agent",
+      "sourceId": "dbt-labs",
+      "url": "https://www.getdbt.com/blog",
+      "excerpt": "演示证据片段，用于验证证据回链的信息结构。",
+      "retrievedAt": "2026-08-02T03:45:00Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-demo-lakehouse-governance",
+      "articleId": "demo-lakehouse-governance",
+      "sourceId": "databricks",
+      "url": "https://www.databricks.com/blog",
+      "excerpt": "演示证据片段，用于验证来源与主题关联。",
+      "retrievedAt": "2026-08-02T03:30:00Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-demo-fabric-data-agent",
+      "articleId": "demo-fabric-data-agent",
+      "sourceId": "microsoft-fabric",
+      "url": "https://blog.fabric.microsoft.com/",
+      "excerpt": "演示证据片段，用于验证连续信息流组件。",
+      "retrievedAt": "2026-08-02T03:20:00Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-demo-rag-eval",
+      "articleId": "demo-rag-eval",
+      "sourceId": "google-cloud",
+      "url": "https://cloud.google.com/blog/products/data-analytics",
+      "excerpt": "演示证据片段，用于验证为什么值得看与证据状态。",
+      "retrievedAt": "2026-08-02T03:10:00Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-demo-arxiv-retrieval",
+      "articleId": "demo-arxiv-retrieval",
+      "sourceId": "arxiv",
+      "url": "https://arxiv.org/",
+      "excerpt": "演示证据片段，用于验证跨语言研究条目。",
+      "retrievedAt": "2026-08-02T02:55:00Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-demo-github-metadata",
+      "articleId": "demo-github-metadata",
+      "sourceId": "github-trending",
+      "url": "https://github.com/trending",
+      "excerpt": "演示证据片段，用于验证开源信号条目。",
+      "retrievedAt": "2026-08-02T02:40:00Z"
+    }
+  ],
   "briefs": []
 }

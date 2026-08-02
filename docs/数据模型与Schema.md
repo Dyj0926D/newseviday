@@ -24,7 +24,7 @@ Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使�
 | `Evidence` | 结论可回链的证据片段 | `articleId`、`sourceId`、`url`、`excerpt` | Python 已生成 |
 | `Chunk` | RAG 的最小检索单元 | `articleId`、`position`、`contentHash` | 契约预留 |
 | `PipelineRun` | 每次采集处理的过程记录 | `stages`、计数、耗时、`errorCode` | 内存记录已实现，持久化待接入 |
-| `ContentSnapshot` | 可发布、可回滚的只读内容包 | `snapshotId`、`pipelineRunId`、文章/证据/简报 | 已实现 |
+| `ContentSnapshot` | 可发布、可回滚的只读内容包 | `snapshotKind`、来源/主题目录、文章/证据/简报 | 已实现 |
 | `Brief` | 趋势简报及引用关系 | `sections[].evidenceIds`、`generatedBy` | 契约预留 |
 | `RagTrace` | 检索与上下文注入过程 | 候选排名、注入 Chunk、fallback 原因 | 契约预留 |
 | `EvalRun` | 检索版本能否上线的证据 | 数据集版本、指标、时延、gate | 契约预留 |
@@ -35,9 +35,11 @@ Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使�
 `Article` 明确拆成两层：
 
 - `facts`：来源直接给出的标题、作者和摘要；
-- `ai`：翻译、中文摘要、关键点、模型、提示词版本和生成时间。
+- `ai`：翻译、中文摘要、为什么值得看、关键点、模型、提示词版本和生成时间。
 
 `ai=null` 是合法状态。关闭模型后，文章事实层、证据层和历史快照仍然可用。页面展示 AI 内容时必须有视觉标识，并保留原文链接。
+
+`snapshotKind=demo` 表示用于界面与信息结构验证的演示快照，页面必须显式提示，避免把样例内容误认为实时新闻。`sources` 和 `topics` 随快照发布，备用站无需额外 API 也能还原来源、区域和主题标签。
 
 ## 4. ID、时间与哈希
 

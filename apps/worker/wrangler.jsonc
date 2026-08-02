@@ -21,5 +21,8 @@
     "REQUEST_BODY_BYTES": "32768",
     "UPSTREAM_TIMEOUT_MS": "20000",
     "DEEPSEEK_MAX_RETRIES": "0",
+    "CONTENT_UPDATED_AT": "2026-08-02T04:00:00Z",
+    "CONTENT_SOURCE_COUNT": "6",
+    "SNAPSHOT_ID": "snapshot-demo-p3-v1",
   },
 }

@@ -37,3 +37,13 @@ def test_invalid_snapshot_never_replaces_current(tmp_path: Path) -> None:
         publisher.publish_payload({"schemaVersion": "1.0.0", "snapshotId": "broken"})
 
     assert (tmp_path / "current.json").read_text(encoding="utf-8") == before
+
+
+def test_published_web_snapshot_conforms_to_python_contract() -> None:
+    project_root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(project_root / "apps" / "web" / "public" / "data" / "current.json")
+
+    assert snapshot.snapshot_kind == "demo"
+    assert snapshot.source_count == len(snapshot.sources)
+    assert snapshot.articles[0].ai is not None
+    assert snapshot.articles[0].ai.why_it_matters

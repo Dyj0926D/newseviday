@@ -10,6 +10,7 @@ from newseviday_pipeline.models import (
     PipelineStageName,
     PipelineStageResult,
     RawFeedItem,
+    SnapshotTopic,
     TopicConfig,
 )
 from newseviday_pipeline.snapshot import SnapshotPublisher
@@ -96,6 +97,7 @@ def run_fixture_pipeline(
             pipeline_run_id=run.id,
             state="ready" if selected else "empty",
             source_count=1,
+            topics=[SnapshotTopic(id=topic.id, label=topic.label) for topic in topics],
             articles=selected,
             evidence=selected_evidence,
         )

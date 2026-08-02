@@ -123,11 +123,17 @@ export interface Evidence {
 export interface GeneratedText {
   titleZh: string | null;
   summaryZh: string | null;
+  whyItMatters?: string | null;
   keyPoints: string[];
   provider: 'deepseek';
   model: string;
   promptVersion: string;
   generatedAt: IsoDateTime;
+}
+
+export interface SnapshotTopic {
+  id: string;
+  label: string;
 }
 
 export interface Article {
@@ -202,7 +208,10 @@ export interface ContentSnapshot {
   generatedAt: IsoDateTime;
   pipelineRunId: string;
   state: 'empty' | 'ready' | 'stale';
+  snapshotKind?: 'demo' | 'production';
   sourceCount: number;
+  sources?: Source[];
+  topics?: SnapshotTopic[];
   articles: Article[];
   evidence: Evidence[];
   briefs: Brief[];
@@ -274,5 +283,16 @@ export function assertContentSnapshot(value: unknown): asserts value is ContentS
   }
   for (const field of ['articles', 'evidence', 'briefs']) {
     if (!Array.isArray(snapshot[field])) throw new Error(`${field}_must_be_array`);
+  }
+  for (const field of ['sources', 'topics']) {
+    if (snapshot[field] !== undefined && !Array.isArray(snapshot[field])) {
+      throw new Error(`${field}_must_be_array`);
+    }
+  }
+  if (
+    snapshot.snapshotKind !== undefined &&
+    !['demo', 'production'].includes(String(snapshot.snapshotKind))
+  ) {
+    throw new Error('invalid_snapshot_kind');
   }
 }
