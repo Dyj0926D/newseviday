@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">NewsEviday</title>
+  <desc id="description">有证据的 AI 产品与技术情报</desc>
+  <defs>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="translate(334 304) rotate(16) scale(470 360)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3c286f" stop-opacity=".58"/>
+      <stop offset="1" stop-color="#07091a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#07091a"/>
+  <rect width="1200" height="630" fill="url(#halo)"/>
+  <g transform="translate(132 179) scale(8.5)">
+    <path d="M6 26V7.7c0-1.35 1.62-2.03 2.58-1.08L13.9 12" fill="none" stroke="#f6f3ff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m18.1 19.75 5.32 5.63c.96.96 2.58.28 2.58-1.08V6" fill="none" stroke="#f6f3ff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="16" cy="16" r="3.25" fill="#07091a" stroke="#a88cff" stroke-width="2.25"/>
+  </g>
+  <text x="510" y="288" fill="#f6f3ff" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="84" font-weight="700" letter-spacing="-3">NewsEviday</text>
+  <text x="516" y="358" fill="#cbc4df" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="30" font-weight="400">有证据的 AI 产品与技术情报</text>
+  <rect x="516" y="401" width="88" height="4" rx="2" fill="#8b6fe8"/>
+</svg>

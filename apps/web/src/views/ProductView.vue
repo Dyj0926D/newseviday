@@ -16,7 +16,7 @@ import {
 } from '@phosphor-icons/vue';
 import { computed } from 'vue';
 
-import homePreviewUrl from '../../../../design/reference/实现回归/P6.5-文案与架构优化/首页-1440.png?url';
+import homePreviewUrl from '../../../../首页美观优化/reference/04-首页-PC-产品介绍预览-v1.png?url';
 import { displaySummary, displayTitle, resolveSource } from '../lib/intelligence';
 import { useContentStore } from '../stores/content';
 

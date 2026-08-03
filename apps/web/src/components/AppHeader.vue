@@ -3,16 +3,20 @@ import { PhList, PhMagnifyingGlass, PhUserCircle, PhX } from '@phosphor-icons/vu
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+import BrandMark from './BrandMark.vue';
+
 const route = useRoute();
 const isCompact = ref(false);
 const mobileOpen = ref(false);
 const menuButton = ref<HTMLButtonElement | null>(null);
 const drawer = ref<HTMLElement | null>(null);
 let heroObserver: IntersectionObserver | null = null;
+let observationFrame = 0;
 
 const currentSection = computed(() =>
   typeof route.meta.title === 'string' ? route.meta.title : '最新情报',
 );
+const isHome = computed(() => route.name === 'home');
 
 function observeHero(): void {
   heroObserver?.disconnect();
@@ -28,6 +32,12 @@ function observeHero(): void {
     { rootMargin: '-64px 0px 0px', threshold: 0.04 },
   );
   heroObserver.observe(intro);
+}
+
+async function scheduleHeroObservation(): Promise<void> {
+  await nextTick();
+  window.cancelAnimationFrame(observationFrame);
+  observationFrame = window.requestAnimationFrame(observeHero);
 }
 
 async function openMenu(): Promise<void> {
@@ -64,8 +74,7 @@ watch(
   () => route.fullPath,
   async () => {
     if (mobileOpen.value) closeMenu(false);
-    await nextTick();
-    observeHero();
+    await scheduleHeroObservation();
   },
 );
 
@@ -73,18 +82,27 @@ watch(mobileOpen, (open) => {
   document.body.style.overflow = open ? 'hidden' : '';
 });
 
-onMounted(observeHero);
+onMounted(() => {
+  void scheduleHeroObservation();
+});
 onBeforeUnmount(() => {
+  window.cancelAnimationFrame(observationFrame);
   heroObserver?.disconnect();
   document.body.style.overflow = '';
 });
 </script>
 
 <template>
-  <header class="app-header" :class="{ 'app-header--compact': isCompact }">
+  <header
+    class="app-header"
+    :class="{
+      'app-header--compact': isCompact,
+      'app-header--immersive': isHome && !isCompact,
+    }"
+  >
     <div class="page-container app-header__inner">
       <RouterLink class="brand" to="/" aria-label="NewsEviday 首页">
-        <span class="brand__mark" aria-hidden="true">N</span>
+        <BrandMark />
         <span>NewsEviday</span>
       </RouterLink>
 

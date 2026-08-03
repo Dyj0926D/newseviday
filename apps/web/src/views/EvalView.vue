@@ -57,7 +57,7 @@ const generatedAt = computed(() =>
     ? new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(
         new Date(report.value.run.createdAt),
       )
-    : '—',
+    : '暂无',
 );
 const retrievalMetrics = computed(() => {
   const metrics = report.value?.run.metrics;
@@ -77,7 +77,7 @@ const gateLabel = computed(() => {
   return '观察结果';
 });
 const retrievalModeLabel = computed(() => {
-  if (!report.value) return '—';
+  if (!report.value) return '暂无';
   if (report.value.run.retrievalMode === 'chunk_dense') return '分块检索基线';
   if (report.value.run.retrievalMode === 'article_dense') return '文章检索基线';
   return report.value.run.retrievalMode;
@@ -157,7 +157,7 @@ onMounted(async () => {
           </div>
           <div>
             <dt>数据版本</dt>
-            <dd>{{ report ? '验证集 v1' : '—' }}</dd>
+            <dd>{{ report ? '验证集 v1' : '暂无' }}</dd>
           </div>
           <div>
             <dt>质量结论</dt>
@@ -211,7 +211,7 @@ onMounted(async () => {
           <ul>
             <li>引用覆盖率：{{ report?.answerQuality.citationCoverage ?? '待评测' }}</li>
             <li>
-              无答案识别：{{ report ? percent.format(report.answerQuality.noAnswerAccuracy) : '—' }}
+              无答案识别：{{ report ? percent.format(report.answerQuality.noAnswerAccuracy) : '暂无' }}
             </li>
             <li>严重编造直接阻止发布</li>
           </ul>
