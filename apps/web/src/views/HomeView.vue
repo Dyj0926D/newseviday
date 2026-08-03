@@ -211,7 +211,7 @@ onMounted(async () => {
   <main id="main-content">
     <PageIntro
       eyebrow="AI & DATA INTELLIGENCE"
-      title="追踪值得关注的变化"
+      title="发现变化，看见脉络"
       description="汇集海内外 AI、数据与开发工具动态，提供中文整理、主题筛选和原文回链。"
     >
       <template #actions>
@@ -220,7 +220,7 @@ onMounted(async () => {
           设置关注偏好
         </RouterLink>
         <RouterLink class="hero-text-link" to="/product">
-          了解产品与技术
+          查看产品介绍
           <PhArrowRight :size="16" aria-hidden="true" />
         </RouterLink>
       </template>

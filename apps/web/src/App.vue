@@ -25,7 +25,7 @@ onMounted(() => {
     <div class="page-container site-footer__inner">
       <p>NewsEviday，有证据的 AI 产品与技术情报。</p>
       <nav aria-label="透明度与项目链接">
-        <RouterLink to="/product">产品与技术</RouterLink>
+        <RouterLink to="/product">产品介绍</RouterLink>
         <RouterLink to="/eval">质量评测</RouterLink>
         <RouterLink to="/status">更新状态</RouterLink>
       </nav>

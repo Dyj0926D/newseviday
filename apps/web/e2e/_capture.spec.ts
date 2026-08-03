@@ -17,7 +17,7 @@ test('capture approved implementation references', async ({ page }, testInfo) =>
 
   const captures = [
     { path: '/', width: 1440, height: 900, name: '首页-1440.png' },
-    { path: '/product', width: 1440, height: 900, name: '产品与技术-1440.png' },
+    { path: '/product', width: 1440, height: 900, name: '产品介绍-1440.png' },
     { path: '/article/demo-semantic-agent', width: 1440, height: 900, name: '情报详情-1440.png' },
     { path: '/profile', width: 390, height: 844, name: '关注偏好-390.png' },
     { path: '/brief', width: 390, height: 844, name: '趋势简报-390.png' },

@@ -57,7 +57,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/product',
     name: 'product',
     component: ProductView,
-    meta: { title: '产品与技术' },
+    meta: { title: '产品介绍' },
   },
   {
     path: '/:pathMatch(.*)*',

@@ -13,7 +13,7 @@ const publicPaths = [
 
 test('latest intelligence search and topic filters are reflected in the URL', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1, name: '追踪值得关注的变化' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: '发现变化，看见脉络' })).toBeVisible();
 
   await page.getByRole('button', { name: 'RAG 与评测' }).click();
   await expect(page).toHaveURL(/topic=rag-eval/);
@@ -153,7 +153,7 @@ test('mobile navigation opens and changes route', async ({ page }, testInfo) => 
   await page.getByRole('button', { name: '打开导航菜单' }).click();
   const drawer = page.getByRole('complementary', { name: '移动端导航' });
   await expect(drawer).toBeVisible();
-  await drawer.getByRole('link', { name: '产品与技术' }).click();
+  await drawer.getByRole('link', { name: '产品介绍' }).click();
   await expect(page).toHaveURL(/\/product$/);
 });
 

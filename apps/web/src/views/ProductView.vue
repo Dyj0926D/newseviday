@@ -117,7 +117,7 @@ const architectureLayers = [
       </div>
     </section>
 
-    <nav class="product-jump-nav" aria-label="产品与技术快速定位">
+    <nav class="product-jump-nav" aria-label="产品介绍快速定位">
       <div class="page-container">
         <a href="#product-perspective">产品视角</a>
         <a href="#technical-perspective">技术架构</a>

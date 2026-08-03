@@ -92,7 +92,7 @@ onBeforeUnmount(() => {
         <RouterLink to="/">最新情报</RouterLink>
         <RouterLink to="/brief">趋势简报</RouterLink>
         <RouterLink to="/ask">证据问答</RouterLink>
-        <RouterLink to="/product">产品与技术</RouterLink>
+        <RouterLink to="/product">产品介绍</RouterLink>
       </nav>
 
       <span class="header-context" aria-live="polite">{{ currentSection }}</span>
@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
               <RouterLink to="/">最新情报</RouterLink>
               <RouterLink to="/brief">趋势简报</RouterLink>
               <RouterLink to="/ask">证据问答</RouterLink>
-              <RouterLink to="/product">产品与技术</RouterLink>
+              <RouterLink to="/product">产品介绍</RouterLink>
               <RouterLink to="/profile">关注偏好</RouterLink>
               <RouterLink to="/eval">质量评测</RouterLink>
               <RouterLink to="/status">更新状态</RouterLink>
