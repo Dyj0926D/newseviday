@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="title">
+  <title id="title">NewsEviday Signal N</title>
+  <path d="M6 26V7.7c0-1.35 1.62-2.03 2.58-1.08L13.9 12" fill="none" stroke="#172042" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m18.1 19.75 5.32 5.63c.96.96 2.58.28 2.58-1.08V6" fill="none" stroke="#172042" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="16" cy="16" r="3.25" fill="none" stroke="#7257d5" stroke-width="2.25"/>
+</svg>

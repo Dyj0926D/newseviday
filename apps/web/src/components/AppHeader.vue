@@ -3,6 +3,8 @@ import { PhList, PhMagnifyingGlass, PhUserCircle, PhX } from '@phosphor-icons/vu
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+import BrandMark from './BrandMark.vue';
+
 const route = useRoute();
 const isCompact = ref(false);
 const mobileOpen = ref(false);
@@ -100,7 +102,7 @@ onBeforeUnmount(() => {
   >
     <div class="page-container app-header__inner">
       <RouterLink class="brand" to="/" aria-label="NewsEviday 首页">
-        <span class="brand__mark" aria-hidden="true">N</span>
+        <BrandMark />
         <span>NewsEviday</span>
       </RouterLink>
 

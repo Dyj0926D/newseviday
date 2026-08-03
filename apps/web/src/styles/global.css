@@ -118,8 +118,9 @@ button {
 }
 
 .app-header--immersive .brand__mark {
-  background: #7956df;
-  box-shadow: 0 0 1.5rem rgb(121 86 223 / 44%);
+  --brand-mark-node: #a88cff;
+
+  color: #f6f3ff;
 }
 
 .app-header--immersive .desktop-nav a:hover,
@@ -163,15 +164,28 @@ button {
 }
 
 .brand__mark {
-  display: inline-grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  place-items: center;
-  border-radius: var(--ne-radius-sm);
-  background: var(--ne-color-brand-default);
-  color: var(--ne-color-white);
-  font-size: var(--ne-font-size-label);
-  line-height: 1;
+  --brand-mark-node: var(--ne-color-brand-default);
+
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  overflow: visible;
+  color: #172042;
+}
+
+.brand__mark-line {
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.4;
+}
+
+.brand__mark-node {
+  fill: none;
+  stroke: var(--brand-mark-node);
+  stroke-width: 2.25;
 }
 
 .desktop-nav {
