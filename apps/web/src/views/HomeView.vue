@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { Article } from '@newseviday/contracts';
-import { PhArrowRight, PhSparkle } from '@phosphor-icons/vue';
+import { PhArrowRight } from '@phosphor-icons/vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import PageIntro from '../components/PageIntro.vue';
 import FeedControls from '../components/home/FeedControls.vue';
+import HomeImmersiveHero from '../components/home/HomeImmersiveHero.vue';
 import InlineNotice from '../components/home/InlineNotice.vue';
 import IntelligenceLead from '../components/home/IntelligenceLead.vue';
 import IntelligenceRow from '../components/home/IntelligenceRow.vue';
@@ -209,124 +209,129 @@ onMounted(async () => {
 
 <template>
   <main id="main-content">
-    <PageIntro
-      eyebrow="AI & DATA INTELLIGENCE"
-      title="发现变化，看见脉络"
-      description="汇集海内外 AI、数据与开发工具动态，提供中文整理、主题筛选和原文回链。"
-    >
-      <template #actions>
-        <RouterLink class="button button--primary" to="/profile">
-          <PhSparkle :size="17" weight="fill" aria-hidden="true" />
-          设置关注偏好
-        </RouterLink>
-        <RouterLink class="hero-text-link" to="/product">
-          查看产品介绍
-          <PhArrowRight :size="16" aria-hidden="true" />
-        </RouterLink>
-      </template>
-    </PageIntro>
+    <HomeImmersiveHero />
 
-    <section class="page-container intelligence-shell" aria-labelledby="feed-title">
-      <div class="intelligence-main">
-        <FeedControls
-          :query="query"
-          :view="view"
-          :topics="topics"
-          :topic="topic"
-          :region="region"
-          :source="source"
-          :time="time"
-          :regions="regions"
-          :sources="sources"
-          @search="submitSearch"
-          @update:query="query = $event"
-          @update:view="setView"
-          @update:topic="setFilter('topic', $event)"
-          @update:region="setFilter('region', $event)"
-          @update:source="setFilter('source', $event)"
-          @update:time="setFilter('time', $event)"
-        />
+    <div class="home-content-surface">
+      <section class="page-container intelligence-shell" aria-labelledby="feed-title">
+        <div class="intelligence-main">
+          <FeedControls
+            :query="query"
+            :view="view"
+            :topics="topics"
+            :topic="topic"
+            :region="region"
+            :source="source"
+            :time="time"
+            :regions="regions"
+            :sources="sources"
+            @search="submitSearch"
+            @update:query="query = $event"
+            @update:view="setView"
+            @update:topic="setFilter('topic', $event)"
+            @update:region="setFilter('region', $event)"
+            @update:source="setFilter('source', $event)"
+            @update:time="setFilter('time', $event)"
+          />
 
-        <div class="intelligence-feed-content">
-          <div class="section-heading intelligence-heading">
-            <div>
-              <p class="section-kicker">CURATED FEED</p>
-              <h2 id="feed-title">{{ view === 'recommended' ? '为你推荐' : '最新情报' }}</h2>
-              <p>{{ filteredArticles.length }} 条内容，按发布时间与主题相关度整理</p>
+          <div class="intelligence-feed-content">
+            <div class="section-heading intelligence-heading">
+              <div>
+                <p class="section-kicker">CURATED FEED</p>
+                <h2 id="feed-title">{{ view === 'recommended' ? '为你推荐' : '最新情报' }}</h2>
+                <p>{{ filteredArticles.length }} 条内容，按发布时间与主题相关度整理</p>
+              </div>
+              <RouterLink class="text-link" to="/brief">
+                查看趋势简报
+                <PhArrowRight :size="16" aria-hidden="true" />
+              </RouterLink>
             </div>
-            <RouterLink class="text-link" to="/brief">
-              查看趋势简报
-              <PhArrowRight :size="16" aria-hidden="true" />
-            </RouterLink>
-          </div>
 
-          <InlineNotice
-            v-if="content.isDemo"
-            title="当前为内容预览"
-            description="页面展示用于体验产品流程的示例内容，来源与结论不用于实时判断。"
-          />
-
-          <InlineNotice
-            v-if="view === 'recommended' && !profile.hasProfile"
-            title="当前使用通用推荐"
-            description="你还没有设置关注偏好，系统会按站点主题相关度排序。该功能完全可选。"
-          />
-
-          <div
-            v-if="content.state === 'loading'"
-            class="feed-loading"
-            role="status"
-            aria-label="正在读取情报快照"
-          >
-            <span></span><span></span><span></span>
-          </div>
-
-          <div v-else-if="leadArticle" class="intelligence-feed">
-            <IntelligenceLead
-              :article="leadArticle"
-              :source="resolveSource(leadArticle, sources)"
-              :topics="topics"
-              :saved="savedIds.has(leadArticle.id)"
-              :recommendation-reason="recommendationReason(leadArticle)"
-              @save="toggleSaved"
-            />
-            <IntelligenceRow
-              v-for="article in listArticles"
-              :key="article.id"
-              :article="article"
-              :source="resolveSource(article, sources)"
-              :topics="topics"
-              :saved="savedIds.has(article.id)"
-              :recommendation-reason="recommendationReason(article)"
-              @save="toggleSaved"
+            <InlineNotice
+              v-if="content.isDemo"
+              title="当前为内容预览"
+              description="页面展示用于体验产品流程的示例内容，来源与结论不用于实时判断。"
             />
 
-            <div v-if="visibleCount < filteredArticles.length" class="load-more">
-              <button class="button button--secondary" type="button" @click="visibleCount += 4">
-                加载更多情报
+            <InlineNotice
+              v-if="view === 'recommended' && !profile.hasProfile"
+              title="当前使用通用推荐"
+              description="你还没有设置关注偏好，系统会按站点主题相关度排序。该功能完全可选。"
+            />
+
+            <div
+              v-if="content.state === 'loading'"
+              class="feed-loading"
+              role="status"
+              aria-label="正在读取情报快照"
+            >
+              <span></span><span></span><span></span>
+            </div>
+
+            <div v-else-if="leadArticle" class="intelligence-feed">
+              <IntelligenceLead
+                :article="leadArticle"
+                :source="resolveSource(leadArticle, sources)"
+                :topics="topics"
+                :saved="savedIds.has(leadArticle.id)"
+                :recommendation-reason="recommendationReason(leadArticle)"
+                @save="toggleSaved"
+              />
+              <IntelligenceRow
+                v-for="article in listArticles"
+                :key="article.id"
+                :article="article"
+                :source="resolveSource(article, sources)"
+                :topics="topics"
+                :saved="savedIds.has(article.id)"
+                :recommendation-reason="recommendationReason(article)"
+                @save="toggleSaved"
+              />
+
+              <div v-if="visibleCount < filteredArticles.length" class="load-more">
+                <button class="button button--secondary" type="button" @click="visibleCount += 4">
+                  加载更多情报
+                </button>
+                <span>已展示 {{ visibleArticles.length }} / {{ filteredArticles.length }}</span>
+              </div>
+            </div>
+
+            <div v-else class="empty-state" role="status">
+              <h3>{{ content.state === 'error' ? '快照暂时无法读取' : '没有符合条件的情报' }}</h3>
+              <p>你可以调整筛选条件，或查看最近一次有效内容快照。</p>
+              <button class="button button--secondary" type="button" @click="clearFilters">
+                清除筛选
               </button>
-              <span>已展示 {{ visibleArticles.length }} / {{ filteredArticles.length }}</span>
             </div>
-          </div>
-
-          <div v-else class="empty-state" role="status">
-            <h3>{{ content.state === 'error' ? '快照暂时无法读取' : '没有符合条件的情报' }}</h3>
-            <p>你可以调整筛选条件，或查看最近一次有效内容快照。</p>
-            <button class="button button--secondary" type="button" @click="clearFilters">
-              清除筛选
-            </button>
           </div>
         </div>
-      </div>
 
-      <SignalOverview
-        :source-count="contributingSourceCount"
-        :overseas-count="overseasCount"
-        :new-count="snapshot?.articles.length ?? 0"
-        :updated-at="snapshot?.generatedAt ?? null"
-        :topics="topicSignals"
-        :demo="content.isDemo"
-      />
-    </section>
+        <SignalOverview
+          :source-count="contributingSourceCount"
+          :overseas-count="overseasCount"
+          :new-count="snapshot?.articles.length ?? 0"
+          :updated-at="snapshot?.generatedAt ?? null"
+          :topics="topicSignals"
+          :demo="content.isDemo"
+        />
+      </section>
+    </div>
   </main>
 </template>
+
+<style scoped>
+.home-content-surface {
+  position: relative;
+  z-index: 2;
+  margin-top: -2.75rem;
+  border-radius: 2.25rem 2.25rem 0 0;
+  background: var(--ne-color-bg-page);
+  box-shadow: 0 -1rem 3.5rem rgb(10 9 27 / 8%);
+}
+
+@media (max-width: 767px) {
+  .home-content-surface {
+    margin-top: -1.5rem;
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+}
+</style>

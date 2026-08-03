@@ -103,6 +103,41 @@ button {
   background: rgb(250 249 252 / 96%);
 }
 
+.app-header--immersive {
+  border-color: rgb(255 255 255 / 7%);
+  background: rgb(7 9 26 / 86%);
+  color: #f6f3ff;
+}
+
+.app-header--immersive .brand,
+.app-header--immersive .desktop-nav a,
+.app-header--immersive .header-context,
+.app-header--immersive .icon-link,
+.app-header--immersive .mobile-menu-button {
+  color: rgb(244 240 255 / 82%);
+}
+
+.app-header--immersive .brand__mark {
+  background: #7956df;
+  box-shadow: 0 0 1.5rem rgb(121 86 223 / 44%);
+}
+
+.app-header--immersive .desktop-nav a:hover,
+.app-header--immersive .desktop-nav a[aria-current='page'],
+.app-header--immersive .icon-link:hover,
+.app-header--immersive .mobile-menu-button:hover {
+  color: #fff;
+}
+
+.app-header--immersive .icon-link:hover,
+.app-header--immersive .mobile-menu-button:hover {
+  background: rgb(255 255 255 / 7%);
+}
+
+.app-header--immersive .desktop-nav a::after {
+  background: #a88cff;
+}
+
 .app-header__inner {
   display: grid;
   grid-template-columns: auto 1fr auto;
