@@ -1,10 +1,12 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
 from newseviday_pipeline.models import RawFeedItem, TopicConfig
 from newseviday_pipeline.stages import (
+    apply_content_quotas,
     canonicalize_url,
+    content_value_score,
     exact_deduplicate,
     fuzzy_deduplicate,
     normalize_item,
@@ -92,3 +94,21 @@ def test_topic_selection_does_not_penalize_topics_with_a_larger_vocabulary() -> 
 
     assert len(selected) == 1
     assert selected[0].topic_scores == {"foundation-models": 0.5}
+
+
+def test_content_value_score_balances_relevance_freshness_and_completeness() -> None:
+    recent = normalize_item(
+        item("https://example.com/recent", "Fresh semantic layer", "x" * 300),
+        collected_at=NOW,
+    )[0]
+    recent.published_at = NOW
+    recent.topic_scores = {"semantic-layer": 0.8}
+    stale = normalize_item(
+        item("https://example.com/stale", "Old semantic layer", "x" * 300),
+        collected_at=NOW,
+    )[0]
+    stale.published_at = NOW - timedelta(days=14)
+    stale.topic_scores = {"semantic-layer": 0.8}
+
+    assert content_value_score(recent, anchor=NOW) > content_value_score(stale, anchor=NOW)
+    assert apply_content_quotas([stale, recent])[0].id == recent.id

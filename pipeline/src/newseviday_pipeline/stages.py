@@ -189,10 +189,14 @@ def apply_content_quotas(
 ) -> list[Article]:
     if max_total < 1 or max_per_source < 1:
         raise ValueError("content_quotas_must_be_positive")
+    anchor = max(
+        (article.published_at or article.collected_at for article in articles),
+        default=datetime.now(UTC),
+    )
     ranked = sorted(
         articles,
         key=lambda article: (
-            max(article.topic_scores.values(), default=0),
+            content_value_score(article, anchor=anchor),
             article.published_at or article.collected_at,
         ),
         reverse=True,
@@ -207,3 +211,28 @@ def apply_content_quotas(
         result.append(article)
         counts[article.source_id] = counts.get(article.source_id, 0) + 1
     return result
+
+
+def content_value_score(article: Article, *, anchor: datetime) -> float:
+    """Rank feed candidates without spending model tokens.
+
+    The MVP score deliberately uses observable signals only: configured topic
+    relevance, freshness relative to the newest collected item, and content
+    completeness. Source quotas are applied separately to preserve diversity.
+    """
+
+    relevance = min(1.0, max(article.topic_scores.values(), default=0.0))
+    published = article.published_at or article.collected_at
+    age_hours = max(0.0, (anchor - published).total_seconds() / 3_600)
+    freshness = max(0.0, 1.0 - age_hours / (24 * 7))
+    abstract_length = len(article.facts.abstract or "")
+    completeness = (
+        1.0
+        if abstract_length >= 240
+        else 0.7
+        if abstract_length >= 80
+        else 0.4
+        if abstract_length > 0
+        else 0.1
+    )
+    return round(0.5 * relevance + 0.35 * freshness + 0.15 * completeness, 4)

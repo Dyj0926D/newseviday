@@ -43,7 +43,7 @@ def test_published_web_snapshot_conforms_to_python_contract() -> None:
     project_root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(project_root / "apps" / "web" / "public" / "data" / "current.json")
 
-    assert snapshot.snapshot_kind == "demo"
+    assert snapshot.snapshot_kind == "production"
     assert snapshot.source_count == len(snapshot.sources)
-    assert snapshot.articles[0].ai is not None
-    assert snapshot.articles[0].ai.why_it_matters
+    assert len(snapshot.articles) == 40
+    assert any(article.ai and article.ai.why_it_matters for article in snapshot.articles)

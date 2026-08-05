@@ -58,3 +58,19 @@ def test_enrich_rejects_call_cap_above_ten(capsys: CaptureFixture[str]) -> None:
         == 2
     )
     assert "between 0 and 10" in capsys.readouterr().out
+
+
+def test_publish_web_keeps_an_immutable_snapshot_version(
+    tmp_path: Path, capsys: CaptureFixture[str]
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = root / "apps" / "web" / "public" / "data" / "current.json"
+    snapshot_id = json.loads(snapshot.read_text(encoding="utf-8"))["snapshotId"]
+    web_data = tmp_path / "web-data"
+
+    assert main(["publish-web", str(snapshot), "--web-data", str(web_data)]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert (web_data / "current.json").read_bytes() == snapshot.read_bytes()
+    assert (web_data / "versions" / f"{snapshot_id}.json").read_bytes() == snapshot.read_bytes()
+    assert Path(payload["versionPath"]).name == f"{snapshot_id}.json"

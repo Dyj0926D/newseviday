@@ -346,6 +346,12 @@ def publish_web(args: argparse.Namespace) -> int:
     if snapshot.snapshot_kind == "demo" and not args.allow_demo:
         print("Refusing to publish a demo snapshot without --allow-demo.")
         return 2
+    version_path = args.web_data / "versions" / f"{snapshot.snapshot_id}.json"
+    if version_path.exists() and version_path.read_bytes() != args.snapshot.read_bytes():
+        print(f"Refusing to overwrite immutable snapshot version: {version_path}")
+        return 2
+    if not version_path.exists():
+        _atomic_copy(args.snapshot, version_path)
     _atomic_copy(args.snapshot, args.web_data / "current.json")
     if args.eval_report:
         _atomic_copy(args.eval_report, args.web_data / "eval" / "latest.json")
@@ -355,6 +361,7 @@ def publish_web(args: argparse.Namespace) -> int:
                 "ok": True,
                 "snapshotId": snapshot.snapshot_id,
                 "webData": str(args.web_data),
+                "versionPath": str(version_path),
                 "evalReport": bool(args.eval_report),
             },
             ensure_ascii=False,
