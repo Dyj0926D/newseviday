@@ -13,8 +13,9 @@ from pydantic import BaseModel
 
 from newseviday_pipeline.ai_models import ArticleEnrichment, ProfileEnhancement
 from newseviday_pipeline.models import ContentSnapshot, GeneratedText, TopicConfig
+from newseviday_pipeline.terminology import TerminologyConfig
 
-PROMPT_VERSION = "article-enrichment-v1"
+PROMPT_VERSION = "article-enrichment-v2"
 PROFILE_PROMPT_VERSION = "profile-enhancement-v1"
 SchemaModel = TypeVar("SchemaModel", bound=BaseModel)
 
@@ -132,12 +133,30 @@ def _cache_key(content_hash: str, model: str, prompt_version: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def _terminology_instruction(evidence: str, config: TerminologyConfig | None) -> str:
+    if config is None:
+        return ""
+    source_text = evidence.casefold()
+    relevant = [rule for rule in config.terms if rule.source.casefold() in source_text]
+    if not relevant:
+        return ""
+    mappings = "\n".join(
+        f"- {rule.source} -> {rule.preferred_zh}" for rule in relevant
+    )
+    return (
+        "\n术语规范：原文已经出现下列术语。titleZh 或 summaryZh 必须保留该概念，"
+        "并使用指定中文写法：\n"
+        f"{mappings}\n"
+    )
+
+
 def enrich_snapshot(
     snapshot: ContentSnapshot,
     *,
     client: StructuredCompletionClient,
     cache: FileAiCache,
     topics: list[TopicConfig],
+    terminology: TerminologyConfig | None = None,
     max_model_calls: int = 5,
     now: datetime | None = None,
 ) -> tuple[ContentSnapshot, int]:
@@ -149,12 +168,20 @@ def enrich_snapshot(
     allowed_topics = {topic.id for topic in topics}
     topic_description = ", ".join(f"{topic.id}={topic.label}" for topic in topics)
     for article in result.articles:
-        key = _cache_key(article.content_hash, client.model, PROMPT_VERSION)
+        evidence = article.facts.abstract or article.facts.title
+        terminology_instruction = _terminology_instruction(evidence, terminology)
+        terminology_signature = hashlib.sha256(
+            terminology_instruction.encode("utf-8")
+        ).hexdigest()[:12]
+        key = _cache_key(
+            article.content_hash,
+            client.model,
+            f"{PROMPT_VERSION}:{terminology_signature}",
+        )
         enrichment = cache.get(key, ArticleEnrichment)
         if enrichment is None:
             if model_calls >= max_model_calls:
                 continue
-            evidence = article.facts.abstract or article.facts.title
             payload = client.complete_json(
                 system=(
                     "你是 NewsEviday 的结构化情报编辑。只根据给定资料输出 JSON。"
@@ -166,6 +193,7 @@ def enrich_snapshot(
                     "<untrusted-evidence>\n"
                     f"{evidence[:8_000]}\n"
                     "</untrusted-evidence>\n"
+                    f"{terminology_instruction}"
                     "输出 titleZh、summaryZh、whyItMatters、keyPoints、topicIds。"
                 ),
             )
