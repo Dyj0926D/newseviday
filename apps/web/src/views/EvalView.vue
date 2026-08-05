@@ -10,6 +10,7 @@ import { computed, onMounted, ref } from 'vue';
 
 import InnerPageHero from '../components/InnerPageHero.vue';
 import InlineNotice from '../components/home/InlineNotice.vue';
+import { useContentStore } from '../stores/content';
 
 interface EvalReport {
   schemaVersion: '1.0.0';
@@ -51,6 +52,7 @@ interface EvalReport {
 
 const report = ref<EvalReport | null>(null);
 const state = ref<'loading' | 'ready' | 'error'>('loading');
+const content = useContentStore();
 const percent = new Intl.NumberFormat('zh-CN', { style: 'percent', maximumFractionDigits: 2 });
 const generatedAt = computed(() =>
   report.value
@@ -82,23 +84,34 @@ const retrievalModeLabel = computed(() => {
   if (report.value.run.retrievalMode === 'article_dense') return '文章检索基线';
   return report.value.run.retrievalMode;
 });
+const reportMatchesCurrentSnapshot = computed(
+  () => Boolean(report.value && report.value.run.corpusSnapshotId === content.snapshot?.snapshotId),
+);
+const reportNotice = computed(() => {
+  if (!report.value) return '';
+  if (reportMatchesCurrentSnapshot.value) return report.value.note;
+  return `该报告基于快照 ${report.value.run.corpusSnapshotId}，当前页面内容已更新为 ${content.snapshot?.snapshotId ?? '未知快照'}。指标仅代表固定语料基线，当前生产快照的黄金集仍在补充。`;
+});
 
 const datasetPlan = [
-  ['单一事实定位', 7],
-  ['多来源归纳', 7],
-  ['国内外对比', 5],
-  ['时间变化', 4],
-  ['兴趣主题筛选', 3],
+  ['单一事实定位', 6],
+  ['Agent 工程', 1],
+  ['AI 安全', 2],
+  ['RAG 与检索', 1],
+  ['多来源归纳', 2],
   ['无答案与越界', 4],
 ] as const;
 
 onMounted(async () => {
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
   try {
-    const response = await fetch(`${basePath}/data/eval/latest.json`, {
-      headers: { Accept: 'application/json' },
-      cache: 'no-cache',
-    });
+    const [response] = await Promise.all([
+      fetch(`${basePath}/data/eval/latest.json`, {
+        headers: { Accept: 'application/json' },
+        cache: 'no-cache',
+      }),
+      content.refresh(),
+    ]);
     if (!response.ok) throw new Error('eval_report_unavailable');
     const value = (await response.json()) as EvalReport;
     if (value.schemaVersion !== '1.0.0' || !value.run?.metrics) {
@@ -138,7 +151,11 @@ onMounted(async () => {
         title="评测报告当前不可用"
         description="页面不会用目标值代替实测结果。你仍可查看下方的评测方法和发布边界。"
       />
-      <InlineNotice v-else title="当前结果来自小规模验证集" :description="report?.note ?? ''" />
+      <InlineNotice
+        v-else
+        :title="reportMatchesCurrentSnapshot ? '当前结果来自小规模验证集' : '当前结果属于固定评测基线'"
+        :description="reportNotice"
+      />
 
       <header class="eval-run-header">
         <div>
@@ -157,7 +174,7 @@ onMounted(async () => {
           </div>
           <div>
             <dt>数据版本</dt>
-            <dd>{{ report ? '验证集 v1' : '暂无' }}</dd>
+            <dd>{{ report?.run.datasetVersion ?? '暂无' }}</dd>
           </div>
           <div>
             <dt>质量结论</dt>
@@ -170,7 +187,7 @@ onMounted(async () => {
         <div class="section-heading">
           <div>
             <p class="section-kicker">MEASURED RETRIEVAL</p>
-            <h2 id="retrieval-metrics-title">小规模数据集实测结果</h2>
+            <h2 id="retrieval-metrics-title">生产试运行集实测结果</h2>
             <p>{{ retrievalModeLabel }} · {{ report.run.embeddingModel }} · {{ generatedAt }}</p>
           </div>
         </div>
@@ -195,7 +212,7 @@ onMounted(async () => {
         <article>
           <PhFlask :size="24" weight="duotone" aria-hidden="true" />
           <h2>黄金测试集设计</h2>
-          <p>当前 30 题覆盖事实、多来源、时间变化和无答案拒答；人工复核完成前只作为观察结果。</p>
+          <p>当前 16 题固定在 Day 1 生产快照，覆盖事实定位、多来源归纳和无答案拒答；人工复核完成前不作为上线结论。</p>
           <dl class="dataset-plan">
             <div v-for="item in datasetPlan" :key="item[0]">
               <dt>{{ item[0] }}</dt>

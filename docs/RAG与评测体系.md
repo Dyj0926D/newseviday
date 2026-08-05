@@ -25,31 +25,32 @@ Worker 会从已发布内容快照中检索候选文章，按字符特征向量�
 - 可替换的 Hashing Baseline 和 OpenAI-compatible Embedding 适配层；
 - JSON 评测报告，供网页评测页和 CI 使用。
 
-## 当前演示结果
+## 当前生产试运行结果
 
 | 字段 | 当前值 |
 | --- | --- |
-| 数据集 | `rag-gold-demo-v1` |
-| 问题数 | 30，其中可回答 26、无答案 4 |
-| 语料 | 6 篇文章、6 个短分块 |
+| 数据集 | `rag-gold-trial-v1` |
+| 问题数 | 16，其中可回答 12、无答案 4 |
+| 语料 | Day 1 真实快照，40 篇文章、69 个分块 |
 | 检索器 | `hashing-chargram-v1` |
-| 评测状态 | `engineering_draft_pending_human_review` |
-| Gate | `observe` |
+| 评测状态 | `trial_draft_pending_human_review` |
+| Gate | `fail` |
 
 | 指标 | 结果 |
 | --- | ---: |
-| Recall@5 | 0.9615 |
-| Recall@10 | 1.0000 |
-| MRR | 0.7577 |
-| NDCG@10 | 0.8102 |
+| Recall@5 | 0.9167 |
+| Recall@10 | 0.9167 |
+| MRR | 0.7625 |
+| NDCG@10 | 0.7735 |
 | Hit@5 | 1.0000 |
-| 无答案识别准确率 | 0.5000 |
+| 无答案识别准确率 | 0.2500 |
+| 本地 p95 | 54 ms |
 
-这些数字只证明评测程序可以运行。语料规模小、题集未完成人工复核、线上文章级检索与离线分块检索尚未对齐，1ms 本地延迟也不代表生产链路延迟。
+语料健康检查和检索召回达到工程基线，但无答案识别未达到 80%，题集也未完成人工复核，所以 Gate 明确为 `fail`。线上文章级检索与离线分块检索尚未对齐，54ms 本地延迟也不代表云端生产链路延迟。原有 30 题 Demo 集保留用于回归评测程序，不再作为对外主指标。
 
 ## 下一轮正式评测
 
-下一版评测集计划扩展到 40–50 题，并按场景分层：
+下一版评测集计划从 16 题扩展到 40–50 题，并按场景分层：
 
 | 场景 | 目标 |
 | --- | --- |
@@ -79,5 +80,5 @@ Agentic RAG 只在 `eval-only` 轨道实现，计划增加：
 
 ```powershell
 python -m uv run --project pipeline newseviday-pipeline eval-rag `
-  apps/web/public/data/current.json pipeline/eval/rag-gold-demo-v1.json
+  apps/web/public/data/current.json pipeline/eval/rag-gold-trial-v1.json
 ```

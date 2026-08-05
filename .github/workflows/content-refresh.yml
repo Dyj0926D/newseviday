@@ -1,6 +1,9 @@
-name: Manual content refresh
+name: Controlled content refresh
 
 on:
+  schedule:
+    # 09:17 Asia/Shanghai. The repository variables below remain the kill switch.
+    - cron: '17 1 * * *'
   workflow_dispatch:
     inputs:
       allow_model:
@@ -42,18 +45,53 @@ jobs:
       DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
       DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' }}
       DEEPSEEK_THINKING_ENABLED: ${{ vars.DEEPSEEK_THINKING_ENABLED || 'false' }}
+      DAILY_REFRESH_ENABLED: ${{ vars.DAILY_REFRESH_ENABLED || 'false' }}
+      DAILY_REFRESH_ALLOW_MODEL: ${{ vars.DAILY_REFRESH_ALLOW_MODEL || 'false' }}
+      DAILY_REFRESH_MAX_MODEL_CALLS: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS || '3' }}
+      DAILY_REFRESH_OPEN_PULL_REQUEST: ${{ vars.DAILY_REFRESH_OPEN_PULL_REQUEST || 'true' }}
+      DAILY_REFRESH_END_DATE: ${{ vars.DAILY_REFRESH_END_DATE || '' }}
     steps:
+      - name: Resolve refresh policy
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "schedule" ]]; then
+            if [[ "$DAILY_REFRESH_ENABLED" != "true" ]]; then
+              echo "RUN_REFRESH=false" >> "$GITHUB_ENV"
+              echo "Scheduled refresh is paused by DAILY_REFRESH_ENABLED."
+              exit 0
+            fi
+            if [[ -n "$DAILY_REFRESH_END_DATE" && "$(date -u +%F)" > "$DAILY_REFRESH_END_DATE" ]]; then
+              echo "RUN_REFRESH=false" >> "$GITHUB_ENV"
+              echo "Scheduled trial window ended on $DAILY_REFRESH_END_DATE."
+              exit 0
+            fi
+            echo "RUN_REFRESH=true" >> "$GITHUB_ENV"
+            echo "ALLOW_MODEL=$DAILY_REFRESH_ALLOW_MODEL" >> "$GITHUB_ENV"
+            echo "MODEL_CALL_LIMIT=$DAILY_REFRESH_MAX_MODEL_CALLS" >> "$GITHUB_ENV"
+            echo "OPEN_PULL_REQUEST=$DAILY_REFRESH_OPEN_PULL_REQUEST" >> "$GITHUB_ENV"
+          else
+            echo "RUN_REFRESH=true" >> "$GITHUB_ENV"
+            echo "ALLOW_MODEL=${{ inputs.allow_model }}" >> "$GITHUB_ENV"
+            echo "MODEL_CALL_LIMIT=${{ inputs.max_model_calls }}" >> "$GITHUB_ENV"
+            echo "OPEN_PULL_REQUEST=${{ inputs.open_pull_request }}" >> "$GITHUB_ENV"
+          fi
       - uses: actions/checkout@v7
+        if: env.RUN_REFRESH == 'true'
       - uses: actions/setup-python@v7
+        if: env.RUN_REFRESH == 'true'
         with:
           python-version: '3.12'
       - uses: actions/setup-node@v7
+        if: env.RUN_REFRESH == 'true'
         with:
           node-version-file: .node-version
           cache: npm
-      - run: python -m pip install uv
-      - run: python -m uv sync --project pipeline --frozen
+      - if: env.RUN_REFRESH == 'true'
+        run: python -m pip install uv
+      - if: env.RUN_REFRESH == 'true'
+        run: python -m uv sync --project pipeline --frozen
       - name: Restore cumulative AI cache
+        if: env.RUN_REFRESH == 'true'
         uses: actions/cache@v4
         with:
           path: data/runtime/ai-cache
@@ -61,7 +99,7 @@ jobs:
           restore-keys: |
             ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'config/terminology.yaml') }}-
       - name: Restore cache from previous successful trial artifact
-        if: ${{ inputs.allow_model }}
+        if: env.RUN_REFRESH == 'true' && env.ALLOW_MODEL == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -81,13 +119,15 @@ jobs:
             fi
           fi
       - name: Collect configured public sources
+        if: env.RUN_REFRESH == 'true'
         run: >-
           python -m uv run --project pipeline newseviday-pipeline run
           --allow-network --output data/runtime/content-refresh
       - name: Select deterministic snapshot
+        if: env.RUN_REFRESH == 'true'
         run: echo "PUBLISH_SNAPSHOT=data/runtime/content-refresh/current.json" >> "$GITHUB_ENV"
       - name: Optional paid AI enrichment
-        if: ${{ inputs.allow_model }}
+        if: env.RUN_REFRESH == 'true' && env.ALLOW_MODEL == 'true'
         run: |
           test -n "$DEEPSEEK_API_KEY"
           test -n "$DEEPSEEK_MODEL"
@@ -96,29 +136,49 @@ jobs:
             --output data/runtime/content-enriched \
             --cache data/runtime/ai-cache \
             --allow-model \
-            --max-model-calls "${{ inputs.max_model_calls }}"
+            --max-model-calls "$MODEL_CALL_LIMIT"
           echo "PUBLISH_SNAPSHOT=data/runtime/content-enriched/current.json" >> "$GITHUB_ENV"
       - name: Validate and build retrieval artifacts
+        if: env.RUN_REFRESH == 'true'
         run: |
           python -m uv run --project pipeline newseviday-pipeline validate-snapshot "$PUBLISH_SNAPSHOT"
           python -m uv run --project pipeline newseviday-pipeline build-index \
             "$PUBLISH_SNAPSHOT" \
             --output data/runtime/rag/index.json \
             --vectorize-output data/runtime/rag/vectorize.ndjson
+      - name: Run compatible RAG evaluation
+        if: env.RUN_REFRESH == 'true'
+        run: |
+          dataset="pipeline/eval/rag-gold-trial-v1.json"
+          if [[ -f "$dataset" ]]; then
+            expected_snapshot="$(jq -r '.corpusSnapshotId' "$dataset")"
+            current_snapshot="$(jq -r '.snapshotId' "$PUBLISH_SNAPSHOT")"
+            if [[ "$expected_snapshot" == "$current_snapshot" ]]; then
+              python -m uv run --project pipeline newseviday-pipeline eval-rag \
+                "$PUBLISH_SNAPSHOT" \
+                "$dataset" \
+                --report data/runtime/rag/eval-latest.json
+            else
+              echo "Pinned eval corpus $expected_snapshot does not match $current_snapshot; keeping the last comparable report."
+            fi
+          fi
       - name: Publish into web workspace
-        if: ${{ inputs.open_pull_request }}
-        run: >-
-          python -m uv run --project pipeline newseviday-pipeline publish-web
-          "$PUBLISH_SNAPSHOT" --web-data apps/web/public/data
+        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true'
+        run: |
+          publish_args=("$PUBLISH_SNAPSHOT" --web-data apps/web/public/data)
+          if [[ -f data/runtime/rag/eval-latest.json ]]; then
+            publish_args+=(--eval-report data/runtime/rag/eval-latest.json)
+          fi
+          python -m uv run --project pipeline newseviday-pipeline publish-web "${publish_args[@]}"
       - name: Verify publish candidate
-        if: ${{ inputs.open_pull_request }}
+        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true'
         run: |
           npm ci
           npm run security:scan
           npm run test --workspace @newseviday/web
           npm run build --workspace @newseviday/web
       - name: Upload review artifacts
-        if: ${{ always() }}
+        if: always() && env.RUN_REFRESH == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: content-refresh-${{ github.run_id }}
@@ -129,8 +189,8 @@ jobs:
             data/runtime/rag/
           if-no-files-found: warn
           retention-days: 14
-      - name: Open snapshot pull request
-        if: ${{ inputs.open_pull_request }}
+      - name: Commit snapshot candidate
+        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -138,11 +198,23 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add apps/web/public/data/current.json
+          git add apps/web/public/data
+          if git diff --cached --quiet; then
+            echo "PUBLISH_HAS_CHANGES=false" >> "$GITHUB_ENV"
+            echo "No public snapshot changes to publish."
+            exit 0
+          fi
           git commit -m "content: refresh public snapshot"
           git push origin "$branch"
+          echo "PUBLISH_BRANCH=$branch" >> "$GITHUB_ENV"
+          echo "PUBLISH_HAS_CHANGES=true" >> "$GITHUB_ENV"
+      - name: Open snapshot pull request
+        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true' && env.PUBLISH_HAS_CHANGES == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           gh pr create \
             --base main \
-            --head "$branch" \
+            --head "$PUBLISH_BRANCH" \
             --title "content: refresh public snapshot" \
-            --body "Manual refresh run ${GITHUB_RUN_ID}. Review source quality and diff before merging."
+            --body "Controlled refresh run ${GITHUB_RUN_ID}. Review source quality, AI fields and the snapshot diff before merging."

@@ -160,11 +160,16 @@ def evaluate_rag(
         p50_latency_ms=_percentile(latencies, 0.5),
         p95_latency_ms=_percentile(latencies, 0.95),
     )
+    no_answer_accuracy = (
+        round(statistics.fmean(no_answer_results), 4) if no_answer_results else 0.0
+    )
     production_gate_passed = (
         health.passed
         and metrics.recall_at5 >= 0.75
         and metrics.hit_at5 >= 0.85
         and metrics.p95_latency_ms <= 4_000
+        and no_answer_accuracy >= 0.8
+        and dataset.review_status == "human_reviewed"
     )
     gate: Literal["pass", "fail", "observe"] = (
         "observe"
@@ -191,9 +196,7 @@ def evaluate_rag(
         corpus_health=health,
         answer_quality=AnswerQualityStatus(
             citation_coverage=None,
-            no_answer_accuracy=round(statistics.fmean(no_answer_results), 4)
-            if no_answer_results
-            else 0.0,
+            no_answer_accuracy=no_answer_accuracy,
             status="pending_generated_answer_review",
         ),
         note=(

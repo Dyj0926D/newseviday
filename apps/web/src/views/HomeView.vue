@@ -10,7 +10,7 @@ import InlineNotice from '../components/home/InlineNotice.vue';
 import IntelligenceLead from '../components/home/IntelligenceLead.vue';
 import IntelligenceRow from '../components/home/IntelligenceRow.vue';
 import SignalOverview from '../components/home/SignalOverview.vue';
-import { resolveSource } from '../lib/intelligence';
+import { formatDateTime, resolveSource } from '../lib/intelligence';
 import { useContentStore } from '../stores/content';
 import { useProfileStore } from '../stores/profile';
 
@@ -97,6 +97,13 @@ const overseasCount = computed(
 const contributingSourceCount = computed(
   () => new Set((snapshot.value?.articles ?? []).map((article) => article.sourceId)).size,
 );
+const aiArticleCount = computed(
+  () => (snapshot.value?.articles ?? []).filter((article) => Boolean(article.ai)).length,
+);
+const productionNoticeDescription = computed(() => {
+  if (!snapshot.value) return '';
+  return `数据整理于 ${formatDateTime(snapshot.value.generatedAt)}，来自 ${contributingSourceCount.value} 个实际贡献来源；${aiArticleCount.value} 篇经 AI 结构化整理，其余保留来源标题与摘要。重要判断请回到原文核验。`;
+});
 
 function readQuery(key: string): string {
   const value = route.query[key];
@@ -250,6 +257,11 @@ onMounted(async () => {
               v-if="content.isDemo"
               title="当前为内容预览"
               description="页面展示用于体验产品流程的示例内容，来源与结论不用于实时判断。"
+            />
+            <InlineNotice
+              v-else-if="snapshot"
+              title="当前为受控更新"
+              :description="productionNoticeDescription"
             />
 
             <InlineNotice

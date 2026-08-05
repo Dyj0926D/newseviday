@@ -2,37 +2,37 @@
   "schemaVersion": "1.0.0",
   "run": {
     "schemaVersion": "1.0.0",
-    "id": "eval-20260802085815",
-    "createdAt": "2026-08-02T08:58:15.430675Z",
-    "datasetVersion": "rag-gold-demo-v1",
+    "id": "eval-20260805071708",
+    "createdAt": "2026-08-05T07:17:08.404387Z",
+    "datasetVersion": "rag-gold-trial-v1",
     "retrievalMode": "chunk_dense",
-    "sampleCount": 30,
+    "sampleCount": 16,
     "metrics": {
-      "recallAt5": 0.9615,
-      "recallAt10": 1.0,
-      "mrr": 0.7577,
-      "ndcgAt10": 0.8102,
+      "recallAt5": 0.9167,
+      "recallAt10": 0.9167,
+      "mrr": 0.7625,
+      "ndcgAt10": 0.7735,
       "hitAt5": 1.0,
-      "p50LatencyMs": 1,
-      "p95LatencyMs": 1
+      "p50LatencyMs": 8,
+      "p95LatencyMs": 54
     },
-    "gate": "observe",
-    "datasetKind": "demo",
-    "corpusSnapshotId": "snapshot-demo-p3-v1",
+    "gate": "fail",
+    "datasetKind": "production",
+    "corpusSnapshotId": "snapshot-20260805T035314Z-a2c2f64d-ai-07822422",
     "embeddingModel": "hashing-chargram-v1"
   },
-  "datasetKind": "demo",
-  "reviewStatus": "engineering_draft_pending_human_review",
+  "datasetKind": "production",
+  "reviewStatus": "trial_draft_pending_human_review",
   "corpusHealth": {
     "passed": true,
-    "articleCount": 6,
-    "chunkCount": 6,
+    "articleCount": 40,
+    "chunkCount": 69,
     "chunkCoverage": 1.0,
     "missingExpectedArticleIds": []
   },
   "answerQuality": {
     "citationCoverage": null,
-    "noAnswerAccuracy": 0.5,
+    "noAnswerAccuracy": 0.25,
     "status": "pending_generated_answer_review"
   },
   "note": "当前结果来自小规模验证集，用于比较检索策略。黄金题仍待人工复核，回答引用覆盖率尚未评测，因此暂不作为正式发布结论。"

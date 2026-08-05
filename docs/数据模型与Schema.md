@@ -11,7 +11,8 @@
 | TypeScript | `packages/contracts/src/index.ts` | Vue、Worker 编译期类型和轻量运行时断言 |
 | JSON Schema | `packages/contracts/schema/newseviday.schema.json` | 跨语言交换、快照和外部工具校验 |
 | Python/Pydantic | `pipeline/src/newseviday_pipeline/models.py` | 配置、流水线、发布前强校验 |
-| 静态样例 | `apps/web/public/data/current.json` | Cloudflare/EdgeOne 均可读取的降级快照 |
+| 当前快照 | `apps/web/public/data/current.json` | Cloudflare/EdgeOne 均可读取的生产降级快照 |
+| 历史快照 | `apps/web/public/data/versions/{snapshotId}.json` | 不可变回滚与固定评测语料 |
 
 Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使用 snake_case，由 Pydantic 别名转换。
 
@@ -27,7 +28,7 @@ Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使�
 | `ContentSnapshot` | 可发布、可回滚的只读内容包 | `snapshotKind`、来源/主题目录、文章/证据/简报 | 已实现 |
 | `Brief` | 趋势简报及引用关系 | `sections[].evidenceIds`、`generatedBy` | 契约预留 |
 | `RagTrace` | 检索与上下文注入过程 | 候选排名、注入 Chunk、fallback 原因 | Worker 匿名日志已实现 |
-| `EvalRun` | 检索版本能否上线的证据 | 数据集版本、指标、时延、gate | Python Runner 与 Demo 报告已实现 |
+| `EvalRun` | 检索版本能否上线的证据 | 数据集版本、指标、时延、gate | Demo 与生产试运行报告已实现 |
 | `RuntimeConfig` | 开关、限额和模型选择 | `features`、`limits`、`ai` | Worker 公开子集已实现 |
 | `generation_requests` | 生成预算预留、结算和幂等 | request、匿名日键、预留/实际微元、状态 | D1 migration 已实现 |
 | `quota_counters` | 单 IP 与全站日额度 | scope、匿名键、UTC 日、count/limit | D1 migration 已实现 |
@@ -43,6 +44,8 @@ Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使�
 `ai=null` 是合法状态。关闭模型后，文章事实层、证据层和历史快照仍然可用。页面展示 AI 内容时必须有视觉标识，并保留原文链接。
 
 `snapshotKind=demo` 表示用于界面与信息结构验证的演示快照，页面必须显式提示，避免把样例内容误认为实时新闻。`sources` 和 `topics` 随快照发布，备用站无需额外 API 也能还原来源、区域和主题标签。
+
+`snapshotKind=production` 表示来自真实采集管道的受控生产快照。它仍然需要展示整理时间、实际贡献来源、AI 增强篇数和原文核验提示，不能等同于实时新闻流。
 
 ## 4. ID、时间与哈希
 

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 const publicPaths = [
   '/',
-  '/article/demo-semantic-agent',
+  '/article/article-0a5a098d6f2d01ba23d0',
   '/ask',
   '/brief',
   '/profile',
@@ -15,23 +15,33 @@ test('latest intelligence search and topic filters are reflected in the URL', as
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: '发现变化，看见脉络' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'RAG 与评测' }).click();
+  await page.getByRole('button', { name: 'RAG、检索与评测' }).click();
   await expect(page).toHaveURL(/topic=rag-eval/);
-  await expect(page.getByRole('heading', { name: 'RAG 评测开始进入持续交付门禁' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '推理大模型的测试时扩展：推理机制、评估与可复现性' }),
+  ).toBeVisible();
 
-  await page.getByPlaceholder('搜索主题、来源或关键信号').fill('GitHub');
+  await page.getByPlaceholder('搜索主题、来源或关键信号').fill('Copilot');
   await page.getByRole('button', { name: '搜索', exact: true }).click();
-  await expect(page).toHaveURL(/q=GitHub/);
-  await expect(page.getByRole('heading', { name: '没有符合条件的情报' })).toBeVisible();
+  await expect(page).toHaveURL(/q=Copilot/);
+  await expect(page.getByText(/Copilot/).first()).toBeVisible();
 });
 
 test('home, article and original evidence form a working route chain', async ({ page }) => {
   await page.goto('/?topic=rag-eval');
-  await page.getByRole('link', { name: 'RAG 评测开始进入持续交付门禁', exact: true }).click();
+  await page
+    .getByRole('link', {
+      name: '推理大模型的测试时扩展：推理机制、评估与可复现性',
+      exact: true,
+    })
+    .click();
 
-  await expect(page).toHaveURL(/\/article\/demo-rag-eval$/);
+  await expect(page).toHaveURL(/\/article\/article-0a5a098d6f2d01ba23d0$/);
   await expect(
-    page.getByRole('heading', { level: 1, name: 'RAG 评测开始进入持续交付门禁' }),
+    page.getByRole('heading', {
+      level: 1,
+      name: '推理大模型的测试时扩展：推理机制、评估与可复现性',
+    }),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: '查看原始来源' })).toHaveAttribute(
     'target',
@@ -41,29 +51,25 @@ test('home, article and original evidence form a working route chain', async ({ 
 
   await page.goBack();
   await expect(page).toHaveURL(/topic=rag-eval/);
-  await expect(page.getByRole('button', { name: 'RAG 与评测' })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'RAG、检索与评测' })).toHaveAttribute(
     'aria-pressed',
     'true',
   );
 });
 
-test('trend brief links every evidence signal back to an article', async ({ page }) => {
+test('trend brief stays honest until enough history exists', async ({ page }) => {
   await page.goto('/brief');
   await expect(
     page.getByRole('heading', { level: 1, name: '把分散信号整理成可验证的趋势' }),
   ).toBeVisible();
-  await expect(page.getByText('当前为趋势内容预览')).toBeVisible();
-
-  const firstEvidence = page.locator('.trend-evidence a').first();
-  await firstEvidence.click();
-  await expect(page).toHaveURL(/\/article\/demo-/);
-  await expect(page.getByText('AI 整理，请以原始来源为准')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '当前没有可用简报' })).toBeVisible();
+  await expect(page.getByText('内容不足或生成失败时不会覆盖上一版成功快照。')).toBeVisible();
 });
 
 test('optional profile saves locally and changes the recommendation view', async ({ page }) => {
   await page.goto('/profile');
   await page.getByPlaceholder('例如：AI 产品经理').fill('AI 产品经理');
-  await page.getByRole('button', { name: 'Data Agent' }).click();
+  await page.getByRole('button', { name: '基础模型与多模态' }).click();
   await page.getByRole('button', { name: '保存并查看推荐' }).click();
 
   await expect(page).toHaveURL(/view=recommended/);
@@ -106,8 +112,8 @@ test('product narrative connects architecture, evaluation and status pages', asy
   await expect(
     page.getByRole('heading', { level: 1, name: '用可复现评测约束检索质量' }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: '小规模数据集实测结果' })).toBeVisible();
-  await expect(page.getByText('96.15%')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '生产试运行集实测结果' })).toBeVisible();
+  await expect(page.getByText('91.67%').first()).toBeVisible();
 
   await page.goto('/status');
   await expect(
@@ -164,6 +170,7 @@ test('worker exposes the safe content snapshot status', async ({ request }) => {
   const payload = await response.json();
   expect(payload.ok).toBe(true);
   expect(payload.data.mode).toBe('archive');
-  expect(payload.data.content.sourceCount).toBe(6);
+  expect(payload.data.content.sourceCount).toBe(0);
+  expect(payload.data.content.snapshotId).toBeNull();
   expect(payload.data.ai.state).toBe('static-only');
 });

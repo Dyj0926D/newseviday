@@ -23,6 +23,9 @@ const contributingSources = computed(() => {
   const sourceIds = new Set((content.snapshot?.articles ?? []).map((article) => article.sourceId));
   return (content.snapshot?.sources ?? []).filter((source) => sourceIds.has(source.id));
 });
+const aiArticleCount = computed(
+  () => (content.snapshot?.articles ?? []).filter((article) => Boolean(article.ai)).length,
+);
 const ragAvailable = computed(
   () => runtime.status?.rag.state === 'available' || runtime.status?.rag.state === 'saving-mode',
 );
@@ -144,12 +147,20 @@ async function refreshStatus(): Promise<void> {
         </div>
         <ul>
           <li>
-            <strong>内容预览</strong><span>当前
-              {{ content.snapshot?.articles.length ?? 0 }}
-              条内容用于体验产品流程，不用于实时判断。</span>
+            <template v-if="content.isDemo">
+              <strong>内容预览</strong><span>当前
+                {{ content.snapshot?.articles.length ?? 0 }}
+                条内容用于体验产品流程，不用于实时判断。</span>
+            </template>
+            <template v-else>
+              <strong>受控生产快照</strong><span>当前
+                {{ content.snapshot?.articles.length ?? 0 }} 条内容来自
+                {{ contributingSources.length }} 个实际贡献来源，其中
+                {{ aiArticleCount }} 篇经 AI 结构化整理。</span>
+            </template>
           </li>
           <li>
-            <strong>更新方式</strong><span>内容经过人工检查后发布，并保留最近一次有效快照。</span>
+            <strong>更新方式</strong><span>定时采集候选内容，质量检查通过后发布；任务失败或暂停时保留最近一次有效快照。</span>
           </li>
           <li>
             <strong>备用访问</strong><span>主站异常时可使用静态备用站浏览最近一次内容。</span>
