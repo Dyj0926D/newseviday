@@ -198,3 +198,36 @@ def test_terminology_consistency_is_measurable(tmp_path: Path) -> None:
         terms=[TermRule(source="Semantic", preferredZh="语义层", allowedAliases=[])],
     )
     assert terminology_consistency(snapshot.articles, config) == 1.0
+
+
+def test_terminology_consistency_does_not_penalize_omitted_concepts() -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    article = snapshot.articles[0]
+    assert article.ai is not None
+    article.facts.title = "Metadata platform update"
+    article.facts.abstract = "A new metadata catalog is available."
+    article.ai.title_zh = "平台目录更新"
+    article.ai.summary_zh = "新版本调整了目录体验。"
+    config = TerminologyConfig(
+        version=1,
+        terms=[TermRule(source="Metadata", preferredZh="元数据", allowedAliases=[])],
+    )
+
+    assert terminology_consistency([article], config) == 1.0
+
+
+def test_terminology_consistency_rejects_unapproved_retained_terms() -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    article = snapshot.articles[0]
+    assert article.ai is not None
+    article.facts.title = "Metadata platform update"
+    article.ai.title_zh = "Metadata 平台更新"
+    article.ai.summary_zh = "新版本调整了目录体验。"
+    config = TerminologyConfig(
+        version=1,
+        terms=[TermRule(source="Metadata", preferredZh="元数据", allowedAliases=[])],
+    )
+
+    assert terminology_consistency([article], config) == 0.0

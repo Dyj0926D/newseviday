@@ -90,14 +90,16 @@ jobs:
           npm run test --workspace @newseviday/web
           npm run build --workspace @newseviday/web
       - name: Upload review artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: content-refresh-${{ github.run_id }}
           path: |
             data/runtime/content-refresh/
             data/runtime/content-enriched/
+            data/runtime/ai-cache/
             data/runtime/rag/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
       - name: Open snapshot pull request
         if: ${{ inputs.open_pull_request }}
