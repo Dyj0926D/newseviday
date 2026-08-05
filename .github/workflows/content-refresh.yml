@@ -13,6 +13,16 @@ on:
         required: true
         type: boolean
         default: false
+      max_model_calls:
+        description: 'Hard cap for paid enrichment calls in this run'
+        required: true
+        type: choice
+        default: '5'
+        options:
+          - '1'
+          - '3'
+          - '5'
+          - '10'
 
 permissions:
   contents: write
@@ -28,7 +38,7 @@ jobs:
     timeout-minutes: 20
     env:
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-      DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL }}
+      DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
       DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' }}
       DEEPSEEK_THINKING_ENABLED: ${{ vars.DEEPSEEK_THINKING_ENABLED || 'false' }}
     steps:
@@ -57,7 +67,8 @@ jobs:
             data/runtime/content-refresh/current.json \
             --output data/runtime/content-enriched \
             --cache data/runtime/ai-cache \
-            --allow-model
+            --allow-model \
+            --max-model-calls "${{ inputs.max_model_calls }}"
           echo "PUBLISH_SNAPSHOT=data/runtime/content-enriched/current.json" >> "$GITHUB_ENV"
       - name: Validate and build retrieval artifacts
         run: |

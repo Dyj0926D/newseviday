@@ -77,6 +77,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Explicitly permit paid model calls for uncached articles.",
     )
+    enrich_parser.add_argument(
+        "--max-model-calls",
+        type=int,
+        default=5,
+        help="Hard cap for paid calls in one run (0-10, default: 5).",
+    )
     index_parser = subparsers.add_parser(
         "build-index", help="Build a versioned dense retrieval artifact"
     )
@@ -216,6 +222,9 @@ def enrich(args: argparse.Namespace) -> int:
     if not args.allow_model:
         print("AI enrichment requires an explicit --allow-model flag.")
         return 2
+    if not 0 <= args.max_model_calls <= 10:
+        print("--max-model-calls must be between 0 and 10.")
+        return 2
     _runtime, _sources, topics = load_project_config()
     snapshot = load_snapshot(args.snapshot)
     result, model_calls = enrich_snapshot(
@@ -223,6 +232,7 @@ def enrich(args: argparse.Namespace) -> int:
         client=DeepSeekStructuredClient.from_environment(),
         cache=FileAiCache(args.cache),
         topics=topics.topics,
+        max_model_calls=args.max_model_calls,
     )
     terminology_score = terminology_consistency(
         result.articles,
@@ -251,6 +261,7 @@ def enrich(args: argparse.Namespace) -> int:
                 "snapshotId": result.snapshot_id,
                 "articleCount": len(result.articles),
                 "modelCalls": model_calls,
+                "modelCallLimit": args.max_model_calls,
                 "terminologyConsistency": round(terminology_score, 4),
                 "output": str(args.output / "current.json"),
             },

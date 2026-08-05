@@ -39,3 +39,22 @@ def test_fixture_run_remains_offline_and_model_free(
     assert payload["networkAccess"] is False
     assert payload["modelCalls"] is False
     assert (tmp_path / "current.json").exists()
+
+
+def test_enrich_rejects_call_cap_above_ten(capsys: CaptureFixture[str]) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = root / "apps" / "web" / "public" / "data" / "current.json"
+
+    assert (
+        main(
+            [
+                "enrich",
+                str(snapshot),
+                "--allow-model",
+                "--max-model-calls",
+                "11",
+            ]
+        )
+        == 2
+    )
+    assert "between 0 and 10" in capsys.readouterr().out

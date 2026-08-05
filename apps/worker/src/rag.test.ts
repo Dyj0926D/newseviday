@@ -153,16 +153,25 @@ describe('RAG endpoint', () => {
 
   it('streams citation metadata before provider answer chunks', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(
-        async () =>
-          new Response('data: {"choices":[{"delta":{"content":"回答 [1]"}}]}\n\ndata: [DONE]\n\n', {
-            status: 200,
-            headers: { 'Content-Type': 'text/event-stream' },
-          }),
-      ),
-    );
+    const fetcher = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const payload = JSON.parse(String(init?.body)) as {
+        model: string;
+        thinking: { type: string };
+        messages: Array<{ role: string; content: string }>;
+      };
+      expect(payload.model).toBe('mock-model');
+      expect(payload.thinking).toEqual({ type: 'disabled' });
+      expect(payload.messages[0]?.content).toContain('只使用提供的证据回答');
+      expect(payload.messages[0]?.content).not.toContain('�');
+      return new Response(
+        'data: {"choices":[{"delta":{"content":"回答 [1]"}}]}\n\ndata: [DONE]\n\n',
+        {
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream' },
+        },
+      );
+    });
+    vi.stubGlobal('fetch', fetcher);
     const response = await handleRequest(generationRequest('RAG 评测进入什么门禁？'), baseEnv, {
       guardrailStore: allowingGuardrailStore,
     });

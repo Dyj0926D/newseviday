@@ -116,7 +116,7 @@ Vue 请求 Worker 失败时读取 `/data/current.json`。Cloudflare 和 EdgeOne 
 
 MVP 优先存元数据、摘要、证据摘录、来源 URL 和运行指标。来源的版权与使用范围由 `usageScope` 记录。
 
-## 9. P7 D1 内部模型
+## 9. D1 生成保护内部模型
 
 D1 表属于 Worker 内部保护模型，不进入公开 ContentSnapshot，也不返回给浏览器：
 

@@ -6,6 +6,6 @@ features:
   rag_enabled: false
   trend_brief_enabled: false
 limits:
-  daily_questions_per_ip: 3
-  monthly_budget_cny: 35
-  hard_budget_cny: 50
+  daily_questions_per_ip: 2
+  monthly_budget_cny: 5
+  hard_budget_cny: 10
