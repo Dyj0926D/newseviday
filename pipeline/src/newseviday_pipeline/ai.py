@@ -15,7 +15,7 @@ from newseviday_pipeline.ai_models import ArticleEnrichment, ProfileEnhancement
 from newseviday_pipeline.models import ContentSnapshot, GeneratedText, TopicConfig
 from newseviday_pipeline.terminology import TerminologyConfig
 
-PROMPT_VERSION = "article-enrichment-v2"
+PROMPT_VERSION = "article-enrichment-v3"
 PROFILE_PROMPT_VERSION = "profile-enhancement-v1"
 SchemaModel = TypeVar("SchemaModel", bound=BaseModel)
 
@@ -195,6 +195,9 @@ def enrich_snapshot(
                     "</untrusted-evidence>\n"
                     f"{terminology_instruction}"
                     "输出 titleZh、summaryZh、whyItMatters、keyPoints、topicIds。"
+                    "summaryZh 控制在 120–220 个中文字符，提炼主要变化，避免复述整段摘要；"
+                    "whyItMatters 控制在 40–100 个中文字符；"
+                    "keyPoints 输出 2–4 条，每条不超过 40 个中文字符。"
                 ),
             )
             enrichment = ArticleEnrichment.model_validate(payload)

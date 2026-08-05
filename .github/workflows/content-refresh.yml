@@ -17,7 +17,7 @@ on:
         description: 'Hard cap for paid enrichment calls in this run'
         required: true
         type: choice
-        default: '5'
+        default: '3'
         options:
           - '1'
           - '3'
