@@ -19,9 +19,11 @@ class FakeStructuredClient:
 
     def __init__(self) -> None:
         self.calls = 0
+        self.users: list[str] = []
 
     def complete_json(self, *, system: str, user: str) -> dict[str, Any]:
         self.calls += 1
+        self.users.append(user)
         if "用户输入" in user:
             return {
                 "role": "AI 产品经理",
@@ -125,6 +127,30 @@ def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
     assert result.articles[0].ai.model == "deepseek-test"
     assert result.articles[2].ai is not None
     assert result.articles[2].ai.model == original_third_model
+
+
+def test_article_enrichment_injects_relevant_terminology(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    snapshot.articles[0].facts.title = "RAG evaluation update"
+    snapshot.articles[0].facts.abstract = "RAG systems need reproducible evaluation."
+    client = FakeStructuredClient()
+    terminology = TerminologyConfig(
+        version=1,
+        terms=[TermRule(source="RAG", preferredZh="RAG", allowedAliases=[])],
+    )
+
+    enrich_snapshot(
+        snapshot,
+        client=client,
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        terminology=terminology,
+    )
+
+    assert "RAG -> RAG" in client.users[0]
+    assert "titleZh 或 summaryZh 必须保留该概念" in client.users[0]
 
 
 def test_article_enrichment_rejects_call_cap_above_ten(tmp_path: Path) -> None:

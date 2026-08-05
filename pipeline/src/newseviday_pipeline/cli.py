@@ -227,16 +227,18 @@ def enrich(args: argparse.Namespace) -> int:
         return 2
     _runtime, _sources, topics = load_project_config()
     snapshot = load_snapshot(args.snapshot)
+    terminology = load_terminology(args.terminology)
     result, model_calls = enrich_snapshot(
         snapshot,
         client=DeepSeekStructuredClient.from_environment(),
         cache=FileAiCache(args.cache),
         topics=topics.topics,
+        terminology=terminology,
         max_model_calls=args.max_model_calls,
     )
     terminology_score = terminology_consistency(
         result.articles,
-        load_terminology(args.terminology),
+        terminology,
     )
     if terminology_score < args.terminology_threshold:
         print(
