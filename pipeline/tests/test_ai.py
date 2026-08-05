@@ -66,7 +66,7 @@ def test_deepseek_v4_request_explicitly_disables_thinking(monkeypatch: Any) -> N
         return FakeResponse()
 
     monkeypatch.setattr("newseviday_pipeline.ai.httpx.post", fake_post)
-    client = DeepSeekStructuredClient(api_key="test-key", model="deepseek-v4-pro")
+    client = DeepSeekStructuredClient(api_key="test-key", model="deepseek-v4-flash")
 
     assert client.complete_json(system="system", user="user") == {"ok": True}
     assert captured["thinking"] == {"type": "disabled"}
@@ -101,6 +101,48 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
     assert first.articles[0].ai is not None
     assert second.articles[0].ai == first.articles[0].ai
     assert first.articles[0].topic_scores["data-agent"] == 1.0
+
+
+def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:3]
+    original_third_model = snapshot.articles[2].ai.model if snapshot.articles[2].ai else None
+    client = FakeStructuredClient()
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=client,
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        max_model_calls=2,
+        now=datetime(2026, 8, 5, tzinfo=UTC),
+    )
+
+    assert model_calls == 2
+    assert client.calls == 2
+    assert result.articles[0].ai is not None
+    assert result.articles[0].ai.model == "deepseek-test"
+    assert result.articles[2].ai is not None
+    assert result.articles[2].ai.model == original_third_model
+
+
+def test_article_enrichment_rejects_call_cap_above_ten(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+
+    try:
+        enrich_snapshot(
+            snapshot,
+            client=FakeStructuredClient(),
+            cache=FileAiCache(tmp_path),
+            topics=[topic()],
+            max_model_calls=11,
+        )
+    except ValueError as error:
+        assert str(error) == "max_model_calls_must_be_between_0_and_10"
+    else:
+        raise AssertionError("call cap above ten must be rejected")
 
 
 def test_profile_enhancement_drops_topics_outside_public_configuration() -> None:

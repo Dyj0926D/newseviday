@@ -44,3 +44,19 @@ Desktop.ini
 # Logs
 *.log
 npm-debug.log*
+
+# Local product history and portfolio working papers
+/archive/
+/prd/
+/首页美观优化/
+/design/reference/实现回归/
+/docs/AI一周试运行评估.md
+/docs/Cloudflare运行手册.md
+/docs/P4-P6待手动操作清单.md
+/docs/P7验收与手动操作清单.md
+/docs/P8-简历项目介绍.md
+/docs/P8-项目面试准备.md
+/docs/开发环境与迁移说明.md
+/docs/网址优化评估.md
+/docs/网站文案与技术架构审查报告.md
+/docs/项目实施计划与进度跟踪.md

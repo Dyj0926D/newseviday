@@ -138,8 +138,11 @@ def enrich_snapshot(
     client: StructuredCompletionClient,
     cache: FileAiCache,
     topics: list[TopicConfig],
+    max_model_calls: int = 5,
     now: datetime | None = None,
 ) -> tuple[ContentSnapshot, int]:
+    if not 0 <= max_model_calls <= 10:
+        raise ValueError("max_model_calls_must_be_between_0_and_10")
     generated_at = now or datetime.now(UTC)
     result = snapshot.model_copy(deep=True)
     model_calls = 0
@@ -149,6 +152,8 @@ def enrich_snapshot(
         key = _cache_key(article.content_hash, client.model, PROMPT_VERSION)
         enrichment = cache.get(key, ArticleEnrichment)
         if enrichment is None:
+            if model_calls >= max_model_calls:
+                continue
             evidence = article.facts.abstract or article.facts.title
             payload = client.complete_json(
                 system=(

@@ -3,7 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const outputDirectory = fileURLToPath(
-  new URL('../../../design/reference/实现回归/P6.5-文案与架构优化/', import.meta.url),
+  new URL('../../../test-results/approved-visuals/', import.meta.url),
 );
 
 test('capture approved implementation references', async ({ page }, testInfo) => {
