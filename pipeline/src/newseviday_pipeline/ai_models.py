@@ -5,8 +5,8 @@ from newseviday_pipeline.models import ContractModel
 
 class ArticleEnrichment(ContractModel):
     title_zh: str = Field(min_length=2, max_length=160)
-    summary_zh: str = Field(min_length=20, max_length=800)
-    why_it_matters: str = Field(min_length=10, max_length=300)
+    summary_zh: str = Field(min_length=20, max_length=320)
+    why_it_matters: str = Field(min_length=10, max_length=180)
     key_points: list[str] = Field(min_length=2, max_length=5)
     topic_ids: list[str] = Field(default_factory=list, max_length=6)
 

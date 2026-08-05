@@ -190,6 +190,23 @@ def test_article_enrichment_schema_rejects_incomplete_payload() -> None:
         raise AssertionError("incomplete model output must be rejected")
 
 
+def test_article_enrichment_schema_rejects_overlong_summary() -> None:
+    payload = {
+        "titleZh": "结构化标题",
+        "summaryZh": "测" * 321,
+        "whyItMatters": "这会影响模型评测结果的可比性和复现成本。",
+        "keyPoints": ["统一评测口径", "记录推理协议"],
+        "topicIds": ["data-agent"],
+    }
+
+    try:
+        ArticleEnrichment.model_validate(payload)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("overlong summary must be rejected")
+
+
 def test_terminology_consistency_is_measurable(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
