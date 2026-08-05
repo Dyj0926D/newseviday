@@ -12,7 +12,7 @@ import httpx
 from pydantic import BaseModel
 
 from newseviday_pipeline.ai_models import ArticleEnrichment, ProfileEnhancement
-from newseviday_pipeline.models import ContentSnapshot, GeneratedText, TopicConfig
+from newseviday_pipeline.models import Article, ContentSnapshot, GeneratedText, TopicConfig
 from newseviday_pipeline.terminology import TerminologyConfig
 
 PROMPT_VERSION = "article-enrichment-v3"
@@ -150,6 +150,19 @@ def _terminology_instruction(evidence: str, config: TerminologyConfig | None) ->
     )
 
 
+def _source_diverse_order(articles: list[Article]) -> list[Article]:
+    groups: dict[str, list[Article]] = {}
+    for article in articles:
+        groups.setdefault(article.source_id, []).append(article)
+    maximum = max((len(group) for group in groups.values()), default=0)
+    return [
+        group[index]
+        for index in range(maximum)
+        for group in groups.values()
+        if index < len(group)
+    ]
+
+
 def enrich_snapshot(
     snapshot: ContentSnapshot,
     *,
@@ -167,7 +180,7 @@ def enrich_snapshot(
     model_calls = 0
     allowed_topics = {topic.id for topic in topics}
     topic_description = ", ".join(f"{topic.id}={topic.label}" for topic in topics)
-    for article in result.articles:
+    for article in _source_diverse_order(result.articles):
         evidence = article.facts.abstract or article.facts.title
         terminology_instruction = _terminology_instruction(evidence, terminology)
         terminology_signature = hashlib.sha256(

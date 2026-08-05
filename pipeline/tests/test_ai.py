@@ -129,6 +129,35 @@ def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
     assert result.articles[2].ai.model == original_third_model
 
 
+def test_article_enrichment_rotates_across_sources(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:4]
+    snapshot.articles[0].source_id = "source-a"
+    snapshot.articles[1].source_id = "source-a"
+    snapshot.articles[2].source_id = "source-b"
+    snapshot.articles[3].source_id = "source-c"
+    original_second_model = snapshot.articles[1].ai.model if snapshot.articles[1].ai else None
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        max_model_calls=3,
+    )
+
+    assert model_calls == 3
+    assert result.articles[0].ai is not None
+    assert result.articles[0].ai.model == "deepseek-test"
+    assert result.articles[1].ai is not None
+    assert result.articles[1].ai.model == original_second_model
+    assert result.articles[2].ai is not None
+    assert result.articles[2].ai.model == "deepseek-test"
+    assert result.articles[3].ai is not None
+    assert result.articles[3].ai.model == "deepseek-test"
+
+
 def test_article_enrichment_injects_relevant_terminology(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
