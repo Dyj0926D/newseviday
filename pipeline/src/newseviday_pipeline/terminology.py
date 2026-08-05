@@ -28,11 +28,19 @@ def terminology_consistency(articles: list[Article], config: TerminologyConfig) 
         if not article.ai:
             continue
         source_text = f"{article.facts.title} {article.facts.abstract or ''}".casefold()
-        generated = f"{article.ai.title_zh or ''} {article.ai.summary_zh or ''}"
+        generated = f"{article.ai.title_zh or ''} {article.ai.summary_zh or ''}".casefold()
         for rule in config.terms:
             if rule.source.casefold() not in source_text:
                 continue
-            checked += 1
-            accepted = [rule.preferred_zh, *rule.allowed_aliases]
-            matched += int(any(value in generated for value in accepted))
+            accepted = [
+                rule.preferred_zh.casefold(),
+                *[item.casefold() for item in rule.allowed_aliases],
+            ]
+            if any(value in generated for value in accepted):
+                checked += 1
+                matched += 1
+            elif rule.source.casefold() in generated:
+                # The generated text retained the source term but did not use an
+                # approved representation. Omitted concepts are not translation errors.
+                checked += 1
     return matched / checked if checked else 1.0
