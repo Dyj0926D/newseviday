@@ -129,6 +129,34 @@ def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
     assert result.articles[2].ai.model == original_third_model
 
 
+def test_article_enrichment_skips_thin_source_evidence(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:2]
+    thin, supported = snapshot.articles
+    thin.source_id = "source-thin"
+    thin.content_score = 1.0
+    thin.facts.abstract = "Only a short announcement is available."
+    thin.ai = None
+    supported.source_id = "source-supported"
+    supported.content_score = 0.9
+    supported.facts.abstract = "A sufficiently detailed source excerpt. " * 8
+    supported.ai = None
+    client = FakeStructuredClient()
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=client,
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        max_model_calls=1,
+    )
+
+    assert model_calls == 1
+    assert result.articles[0].ai is None
+    assert result.articles[1].ai is not None
+
+
 def test_article_enrichment_rotates_across_sources(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
@@ -163,7 +191,10 @@ def test_article_enrichment_injects_relevant_terminology(tmp_path: Path) -> None
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:1]
     snapshot.articles[0].facts.title = "RAG evaluation update"
-    snapshot.articles[0].facts.abstract = "RAG systems need reproducible evaluation."
+    snapshot.articles[0].facts.abstract = (
+        "RAG systems need reproducible evaluation across retrieval, ranking, citation, "
+        "latency, and refusal cases. The source describes a complete repeatable protocol."
+    )
     client = FakeStructuredClient()
     terminology = TerminologyConfig(
         version=1,
