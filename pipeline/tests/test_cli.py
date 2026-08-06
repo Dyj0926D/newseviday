@@ -74,3 +74,7 @@ def test_publish_web_keeps_an_immutable_snapshot_version(
     assert (web_data / "current.json").read_bytes() == snapshot.read_bytes()
     assert (web_data / "versions" / f"{snapshot_id}.json").read_bytes() == snapshot.read_bytes()
     assert Path(payload["versionPath"]).name == f"{snapshot_id}.json"
+    manifest = json.loads((web_data / "archive" / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["snapshots"][0]["snapshotId"] == snapshot_id
+    assert len(manifest["articles"]) == 40
+    assert manifest["articles"][0]["snapshotPath"] == f"versions/{snapshot_id}.json"

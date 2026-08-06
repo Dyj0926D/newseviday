@@ -1,0 +1,334 @@
+{
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-08-05T03:53:16.478467Z",
+  "snapshots": [
+    {
+      "snapshotId": "snapshot-20260805T035314Z-a2c2f64d-ai-07822422",
+      "generatedAt": "2026-08-05T03:53:16.478467Z",
+      "path": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json",
+      "articleCount": 40
+    }
+  ],
+  "articles": [
+    {
+      "id": "article-f1d4877545a986a0c734",
+      "title": "How the GitHub legal team used Copilot CLI to streamline their workflows",
+      "originalTitle": "How the GitHub legal team used Copilot CLI to streamline their workflows",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-08-04T19:02:34Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-c99ec862b4e71599bc42",
+      "title": "Third-party cyber evaluations involving OpenAI models",
+      "originalTitle": "Third-party cyber evaluations involving OpenAI models",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-08-04T19:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-0a5a098d6f2d01ba23d0",
+      "title": "推理大模型的测试时扩展：推理机制、评估与可复现性",
+      "originalTitle": "Test-Time Scaling in Reasoning LLMs: Inference Regimes, Evaluation, and Reproducibility",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-04T17:57:20Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-af08829140d823983fcb",
+      "title": "大语言模型能否恢复编译器遗漏的语义优化机会？",
+      "originalTitle": "Can Large Language Models Recover Semantic Optimization Opportunities That Compilers Miss?",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-04T17:47:25Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-aa9f3addc6b0fbb2a1a0",
+      "title": "视频深度研究：迈向下一代多模态深度研究智能体",
+      "originalTitle": "Video-DeepResearch: Towards the Next-Generation Multimodal Deepresearch Agent",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-04T17:45:16Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-f262dbb4dd3de681c85a",
+      "title": "ReflectRL: Learning from Golden Negative Trajectories via Reflective-to-Direct Reasoning",
+      "originalTitle": "ReflectRL: Learning from Golden Negative Trajectories via Reflective-to-Direct Reasoning",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-04T17:40:08Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-23e6aac6995ffc44ddb8",
+      "title": "Separating quantum circuits from classical LLMs",
+      "originalTitle": "Separating quantum circuits from classical LLMs",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-04T17:28:24Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-acbc0e1e95e9dd96c838",
+      "title": "Interpretable Adaptive Sampling for LLM Test-Time Scaling",
+      "originalTitle": "Interpretable Adaptive Sampling for LLM Test-Time Scaling",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-04T17:27:21Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-2cef17a870e41b9254aa",
+      "title": "TACT: Taxonomy-Aligned Post-Training for Pedagogically Adaptive English Tutoring",
+      "originalTitle": "TACT: Taxonomy-Aligned Post-Training for Pedagogically Adaptive English Tutoring",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-04T17:16:14Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-9955f8abb115717c2864",
+      "title": "Logic Before Language: Pre-pretraining on Formal Derivations Fosters Skill Acquisition and Compressibility",
+      "originalTitle": "Logic Before Language: Pre-pretraining on Formal Derivations Fosters Skill Acquisition and Compressibility",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-04T17:02:34Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-129511f54188e7df4ed8",
+      "title": "New ways to learn and teach with ChatGPT Work and Codex",
+      "originalTitle": "New ways to learn and teach with ChatGPT Work and Codex",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-08-04T00:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-deec56a13e2b9b57f5b5",
+      "title": "How we built a realtime system for responsive voice AI in six months",
+      "originalTitle": "How we built a realtime system for responsive voice AI in six months",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-08-03T07:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-cd88270c00622dafecb0",
+      "title": "Univé builds an AI-ready workforce",
+      "originalTitle": "Univé builds an AI-ready workforce",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-07-31T07:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-ff7c1653ce2eb767fcfc",
+      "title": "Disrupting a Criminal Scam Operation",
+      "originalTitle": "Disrupting a Criminal Scam Operation",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-07-31T00:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-994add5868193c37f04d",
+      "title": "Agentic media buying cannot scale without the right foundation. See how buyers and sellers get there on Databricks.",
+      "originalTitle": "Agentic media buying cannot scale without the right foundation. See how buyers and sellers get there on Databricks.",
+      "sourceId": "databricks-blog",
+      "publishedAt": "2026-07-30T19:10:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-44555fb737bc2545bd6b",
+      "title": "Stacked sessions and pull requests in the GitHub Copilot app",
+      "originalTitle": "Stacked sessions and pull requests in the GitHub Copilot app",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-07-30T17:30:24Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-3bbd8b07cb5a7e5a4148",
+      "title": "GitHub Copilot app for Beginners: Getting started",
+      "originalTitle": "GitHub Copilot app for Beginners: Getting started",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-07-27T16:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-98b061f178880396da02",
+      "title": "Copilot vs. raw API access: What are you actually paying for?",
+      "originalTitle": "Copilot vs. raw API access: What are you actually paying for?",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-07-22T19:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-c8dc1df614610019c8cf",
+      "title": "Better tools made Copilot code review worse. Here’s how we actually improved it.",
+      "originalTitle": "Better tools made Copilot code review worse. Here’s how we actually improved it.",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-07-10T15:57:47Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-2e0b2f76a5b7e197d60e",
+      "title": "Evaluating performance and efficiency of the GitHub Copilot agentic harness across models and tasks",
+      "originalTitle": "Evaluating performance and efficiency of the GitHub Copilot agentic harness across models and tasks",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-06-25T22:59:45Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-9173cc726336dababfa0",
+      "title": "Qwen3Guard: Real-time Safety for Your Token Stream",
+      "originalTitle": "Qwen3Guard: Real-time Safety for Your Token Stream",
+      "sourceId": "qwen-blog",
+      "publishedAt": "2025-09-22T20:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-2c308d1299a47f0fd6c1",
+      "title": "Qwen-Image: Crafting with Native Text Rendering",
+      "originalTitle": "Qwen-Image: Crafting with Native Text Rendering",
+      "sourceId": "qwen-blog",
+      "publishedAt": "2025-08-04T14:08:30Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-45b66faad922efd28827",
+      "title": "Qwen3-Coder: Agentic Coding in the World",
+      "originalTitle": "Qwen3-Coder: Agentic Coding in the World",
+      "sourceId": "qwen-blog",
+      "publishedAt": "2025-07-22T13:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-740aa8b36f962c482d6b",
+      "title": "Qwen VLo: From \"Understanding\" the World to \"Depicting\" It",
+      "originalTitle": "Qwen VLo: From \"Understanding\" the World to \"Depicting\" It",
+      "sourceId": "qwen-blog",
+      "publishedAt": "2025-06-26T14:00:04Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-7ef09c4eb01cd0d7c241",
+      "title": "Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models",
+      "originalTitle": "Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models",
+      "sourceId": "qwen-blog",
+      "publishedAt": "2025-06-05T13:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-380631352b9e2cac6f0b",
+      "title": "Qwen3: Think Deeper, Act Faster",
+      "originalTitle": "Qwen3: Think Deeper, Act Faster",
+      "sourceId": "qwen-blog",
+      "publishedAt": "2025-04-28T20:00:00Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-7d620e492d990b3c0dc3",
+      "title": "Qwen2.5 Omni: See, Hear, Talk, Write, Do It All!",
+      "originalTitle": "Qwen2.5 Omni: See, Hear, Talk, Write, Do It All!",
+      "sourceId": "qwen-blog",
+      "publishedAt": "2025-03-26T16:00:45Z",
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-c34a327604b5be4a7c98",
+      "title": "Introducing Claude Opus 5",
+      "originalTitle": "Introducing Claude Opus 5",
+      "sourceId": "anthropic-news",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-4307222bc7e5f2e47115",
+      "title": "Introducing Claude Sonnet 5",
+      "originalTitle": "Introducing Claude Sonnet 5",
+      "sourceId": "anthropic-news",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-8b96329aed14643e23bf",
+      "title": "Investigating three real-world incidents in our cybersecurity evaluations",
+      "originalTitle": "Investigating three real-world incidents in our cybersecurity evaluations",
+      "sourceId": "anthropic-news",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-7b68f4f0be7a0fcc3726",
+      "title": "Cognizant and Anthropic expand their partnership to bring Claude to enterprise clients",
+      "originalTitle": "Cognizant and Anthropic expand their partnership to bring Claude to enterprise clients",
+      "sourceId": "anthropic-news",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-a66075dc0af41a686afe",
+      "title": "Ask Claude about the Anthropic Economic Index",
+      "originalTitle": "Ask Claude about the Anthropic Economic Index",
+      "sourceId": "anthropic-news",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-fd600cc958ac3fcb8eeb",
+      "title": "DeepSeek-V4-Flash Update",
+      "originalTitle": "DeepSeek-V4-Flash Update",
+      "sourceId": "deepseek-updates",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-9cb994c900dd494fae54",
+      "title": "DeepSeek-V4",
+      "originalTitle": "DeepSeek-V4",
+      "sourceId": "deepseek-updates",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-e40d53fb24759935a81c",
+      "title": "DeepSeek-V3.2",
+      "originalTitle": "DeepSeek-V3.2",
+      "sourceId": "deepseek-updates",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-d12926ddba7ab466df98",
+      "title": "DeepSeek-V3.2-Speciale",
+      "originalTitle": "DeepSeek-V3.2-Speciale",
+      "sourceId": "deepseek-updates",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-167937abe4f015bb8f9e",
+      "title": "DeepSeek-V3.2-Exp",
+      "originalTitle": "DeepSeek-V3.2-Exp",
+      "sourceId": "deepseek-updates",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-625b3d5c37fc39d886f2",
+      "title": "DeepSeek-V3.1-Terminus",
+      "originalTitle": "DeepSeek-V3.1-Terminus",
+      "sourceId": "deepseek-updates",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-faecdee00290f14e03c3",
+      "title": "DeepSeek-V3.1",
+      "originalTitle": "DeepSeek-V3.1",
+      "sourceId": "deepseek-updates",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    },
+    {
+      "id": "article-3d7b702ae4535a131393",
+      "title": "deepseek-reasoner",
+      "originalTitle": "deepseek-reasoner",
+      "sourceId": "deepseek-updates",
+      "publishedAt": null,
+      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+    }
+  ]
+}

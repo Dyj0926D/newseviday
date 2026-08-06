@@ -21,13 +21,13 @@ Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使�
 | 模型 | 解决的问题 | 关键字段 | 当前实现 |
 |---|---|---|---|
 | `Source` | 来源身份、类型和使用边界 | `kind`、`language`、`region`、`usageScope` | 契约已定义 |
-| `Article` | 规范化文章主记录 | `facts`、`ai`、`contentHash`、`topicScores` | Python 已生成 |
+| `Article` | 规范化文章主记录 | `facts`、`ai`、`contentHash`、`topicScores`、`contentScore` | Python 已生成 |
 | `Evidence` | 结论可回链的证据片段 | `articleId`、`sourceId`、`url`、`excerpt` | Python 已生成 |
 | `Chunk` | RAG 的最小检索单元 | `articleId`、`position`、`contentHash` | Python/Worker 基线已生成 |
 | `PipelineRun` | 每次采集处理的过程记录 | `stages`、计数、耗时、`errorCode` | JSON 持久化已实现 |
 | `ContentSnapshot` | 可发布、可回滚的只读内容包 | `snapshotKind`、来源/主题目录、文章/证据/简报 | 已实现 |
 | `Brief` | 趋势简报及引用关系 | `sections[].evidenceIds`、`generatedBy` | 契约预留 |
-| `RagTrace` | 检索与上下文注入过程 | 候选排名、注入 Chunk、fallback 原因 | Worker 匿名日志已实现 |
+| `RagTrace` | 检索与上下文注入过程 | 路由、轮次、候选排名、注入 Chunk、停止原因 | Worker 匿名日志已实现 |
 | `EvalRun` | 检索版本能否上线的证据 | 数据集版本、指标、时延、gate | Demo 与生产试运行报告已实现 |
 | `RuntimeConfig` | 开关、限额和模型选择 | `features`、`limits`、`ai` | Worker 公开子集已实现 |
 | `generation_requests` | 生成预算预留、结算和幂等 | request、匿名日键、预留/实际微元、状态 | D1 migration 已实现 |
@@ -42,6 +42,8 @@ Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使�
 - `ai`：翻译、中文摘要、为什么值得看、关键点、模型、提示词版本和生成时间。
 
 `ai=null` 是合法状态。关闭模型后，文章事实层、证据层和历史快照仍然可用。页面展示 AI 内容时必须有视觉标识，并保留原文链接。
+
+`contentScore` 与 `selectionReasons` 由 Python 根据主题相关度、时效和摘要完整度确定性计算，不是模型判断。旧快照缺少这些可选字段时，前端使用兼容排序，不修改不可变历史文件。
 
 `snapshotKind=demo` 表示用于界面与信息结构验证的演示快照，页面必须显式提示，避免把样例内容误认为实时新闻。`sources` 和 `topics` 随快照发布，备用站无需额外 API 也能还原来源、区域和主题标签。
 
@@ -85,6 +87,8 @@ flowchart LR
 ```text
 data/
 ├─ current.json
+├─ archive/manifest.json
+├─ quality/latest.json
 └─ versions/
    ├─ snapshot-....json
    └─ snapshot-....json

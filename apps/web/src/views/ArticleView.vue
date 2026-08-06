@@ -6,7 +6,8 @@ import {
   PhSparkle,
   PhWarningCircle,
 } from '@phosphor-icons/vue';
-import { computed } from 'vue';
+import type { ContentSnapshot } from '@newseviday/contracts';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import Breadcrumbs from '../components/Breadcrumbs.vue';
@@ -24,19 +25,28 @@ import { useContentStore } from '../stores/content';
 const route = useRoute();
 const content = useContentStore();
 const articleId = computed(() => String(route.params.id ?? ''));
+const archivedSnapshot = ref<ContentSnapshot | null>(null);
+const archiveLoading = ref(false);
+const activeSnapshot = computed(() => {
+  if (content.snapshot?.articles.some((item) => item.id === articleId.value)) {
+    return content.snapshot;
+  }
+  return archivedSnapshot.value;
+});
+const isArchived = computed(() => Boolean(archivedSnapshot.value && activeSnapshot.value));
 const article = computed(
-  () => content.snapshot?.articles.find((item) => item.id === articleId.value) ?? null,
+  () => activeSnapshot.value?.articles.find((item) => item.id === articleId.value) ?? null,
 );
 const source = computed(() =>
-  article.value ? resolveSource(article.value, content.snapshot?.sources ?? []) : undefined,
+  article.value ? resolveSource(article.value, activeSnapshot.value?.sources ?? []) : undefined,
 );
 const evidence = computed(() =>
-  (content.snapshot?.evidence ?? []).filter((item) => article.value?.evidenceIds.includes(item.id)),
+  (activeSnapshot.value?.evidence ?? []).filter((item) => article.value?.evidenceIds.includes(item.id)),
 );
 const related = computed(() => {
   if (!article.value) return [];
   const topicIds = new Set(Object.keys(article.value.topicScores));
-  return (content.snapshot?.articles ?? [])
+  return (activeSnapshot.value?.articles ?? [])
     .filter(
       (item) =>
         item.id !== article.value?.id &&
@@ -44,18 +54,30 @@ const related = computed(() => {
     )
     .slice(0, 3);
 });
+
+watch(
+  [articleId, () => content.state],
+  async () => {
+    archivedSnapshot.value = null;
+    if (content.state !== 'ready' || article.value) return;
+    archiveLoading.value = true;
+    archivedSnapshot.value = await content.loadArchivedSnapshotForArticle(articleId.value);
+    archiveLoading.value = false;
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
   <main id="main-content">
-    <div v-if="content.state === 'loading'" class="page-container inner-loading" role="status">
+    <div v-if="content.state === 'loading' || archiveLoading" class="page-container inner-loading" role="status">
       <span></span><span></span><span></span>
     </div>
 
     <section v-else-if="!article" class="page-container not-found" data-page-intro>
       <p class="not-found__code">404</p>
       <h1>没有找到这条情报</h1>
-      <p>链接可能已失效，或该内容不在当前公开快照中。</p>
+      <p>当前快照和公开历史索引中都没有找到这条内容。</p>
       <RouterLink class="button button--primary" to="/">
         <PhArrowLeft :size="17" aria-hidden="true" />
         返回最新情报
@@ -76,6 +98,9 @@ const related = computed(() => {
           <h1>{{ displayTitle(article) }}</h1>
           <p class="article-original-title">原始标题：{{ article.facts.title }}</p>
           <p class="article-deck">{{ displaySummary(article) }}</p>
+          <p v-if="isArchived" class="article-archive-notice">
+            这是历史快照内容，整理时间为 {{ formatDateTime(activeSnapshot?.generatedAt ?? null) }}。
+          </p>
           <div class="article-hero__actions">
             <a
               class="button button--primary"
@@ -89,8 +114,9 @@ const related = computed(() => {
             <a class="button button--secondary" href="#article-ask">追问这篇文章</a>
           </div>
           <div class="ai-disclosure">
-            <PhSparkle :size="17" weight="fill" aria-hidden="true" />
-            <span>AI 整理，请以原始来源为准</span>
+            <PhSparkle v-if="article.ai" :size="17" weight="fill" aria-hidden="true" />
+            <PhCheckCircle v-else :size="17" aria-hidden="true" />
+            <span>{{ article.ai ? 'AI 结构化整理，请以原始来源为准' : '来源标题与摘要，未经 AI 改写' }}</span>
             <small v-if="article.ai">
               {{ article.ai.model === 'demo-fixture' ? '演示整理' : article.ai.model }} ·
               {{ formatDateTime(article.ai.generatedAt) }}
@@ -126,7 +152,7 @@ const related = computed(() => {
             <h2>相关主题</h2>
             <p>
               这条信号与
-              {{ topicLabels(article, content.snapshot?.topics ?? []).join('、') }}
+              {{ topicLabels(article, activeSnapshot?.topics ?? []).join('、') }}
               相关。你可以结合原始来源和关联证据判断它是否值得继续跟进。
             </p>
           </section>
@@ -160,7 +186,7 @@ const related = computed(() => {
             <div class="related-list">
               <RouterLink v-for="item in related" :key="item.id" :to="`/article/${item.id}`">
                 <span>{{
-                  resolveSource(item, content.snapshot?.sources ?? [])?.name ?? item.sourceId
+                  resolveSource(item, activeSnapshot?.sources ?? [])?.name ?? item.sourceId
                 }}</span>
                 <strong>{{ displayTitle(item) }}</strong>
                 <PhArrowUpRight :size="17" aria-hidden="true" />

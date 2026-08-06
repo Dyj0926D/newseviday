@@ -154,6 +154,23 @@ def _source_diverse_order(articles: list[Article]) -> list[Article]:
     groups: dict[str, list[Article]] = {}
     for article in articles:
         groups.setdefault(article.source_id, []).append(article)
+    topic_counts: dict[str, int] = {}
+    for article in articles:
+        for topic_id in article.topic_scores:
+            topic_counts[topic_id] = topic_counts.get(topic_id, 0) + 1
+
+    def priority(article: Article) -> float:
+        if article.content_score is None:
+            return 0.0
+        underrepresented_bonus = max(
+            (1 / max(1, topic_counts.get(topic_id, 1)) for topic_id in article.topic_scores),
+            default=0.0,
+        )
+        cross_language_bonus = 0.08 if article.language.casefold().startswith("en") else 0.0
+        return article.content_score + 0.12 * underrepresented_bonus + cross_language_bonus
+
+    for group in groups.values():
+        group.sort(key=priority, reverse=True)
     maximum = max((len(group) for group in groups.values()), default=0)
     return [
         group[index]

@@ -24,6 +24,23 @@ interface LocalChunk {
   score: number;
 }
 
+type AgentRoute = 'single_fact' | 'comparison' | 'timeline' | 'policy_scope';
+type StopReason = 'evidence_sufficient' | 'evidence_insufficient' | 'policy_scope' | 'round_limit';
+
+interface QueryPlan {
+  agentMode: 'bounded_v1';
+  route: AgentRoute;
+  subqueries: string[];
+  requirements: string[];
+  preflightReason: string | null;
+}
+
+interface EvidenceAssessment {
+  sufficient: boolean;
+  reason: string;
+  stopReason: StopReason;
+}
+
 export type PreparedRagResponse =
   { kind: 'refusal'; data: RagRefusalData } | { kind: 'stream'; response: Response };
 
@@ -105,8 +122,8 @@ function inRange(
   return Number.isFinite(age) && age <= maximumDays * 86_400_000;
 }
 
-function retrieve(snapshot: ContentSnapshot, input: AskRequest): LocalChunk[] {
-  const queryVector = embed(input.question);
+function retrieve(snapshot: ContentSnapshot, input: AskRequest, query: string): LocalChunk[] {
+  const queryVector = embed(query);
   return snapshot.articles
     .filter(
       (article) =>
@@ -126,6 +143,173 @@ function retrieve(snapshot: ContentSnapshot, input: AskRequest): LocalChunk[] {
     })
     .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
     .slice(0, 10);
+}
+
+function planQuestion(question: string, snapshot: ContentSnapshot): QueryPlan {
+  const normalized = question.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
+  const policyPatterns = [
+    /处方/,
+    /诊断/,
+    /治疗方案/,
+    /legal advice/,
+    /法律意见/,
+    /保证.*股票/,
+    /股票.*保证/,
+    /保证.*上涨/,
+    /guarantee.*stock/,
+  ];
+  if (policyPatterns.some((pattern) => pattern.test(normalized))) {
+    return {
+      agentMode: 'bounded_v1',
+      route: 'policy_scope',
+      subqueries: [question],
+      requirements: [],
+      preflightReason: 'policy_scope',
+    };
+  }
+  if (
+    ['天气', '下雨', 'weather', '世界杯', '比分', '赛季', 'sports score'].some((term) =>
+      normalized.includes(term),
+    )
+  ) {
+    return {
+      agentMode: 'bounded_v1',
+      route: 'policy_scope',
+      subqueries: [question],
+      requirements: [],
+      preflightReason: 'outside_product_scope',
+    };
+  }
+  const years = [...normalized.matchAll(/\b(20\d{2})\b/g)].map((match) => Number(match[1]));
+  const snapshotYear = new Date(snapshot.generatedAt).getUTCFullYear();
+  const requirements: string[] = [];
+  const futureYear = years.filter((year) => year > snapshotYear).sort((left, right) => right - left)[0];
+  if (futureYear) requirements.push(`future_year:${futureYear}`);
+  if (['价格', '订阅', 'price', 'pricing', 'cost'].some((term) => normalized.includes(term))) {
+    requirements.push('price');
+  }
+  if (['收购', 'acquire', 'acquisition'].some((term) => normalized.includes(term))) {
+    requirements.push('acquisition');
+  }
+  if (['多少', 'how many', '数量'].some((term) => normalized.includes(term))) {
+    requirements.push('numeric');
+  }
+  const route: AgentRoute = ['分别', '对比', '比较', '共同', '和', '与'].some((term) =>
+    normalized.includes(term),
+  )
+    ? 'comparison'
+    : futureYear || ['何时', '时间线', '最新', 'when'].some((term) => normalized.includes(term))
+      ? 'timeline'
+      : 'single_fact';
+  const expansions: Array<[string, string]> = [
+    ['价格', 'price pricing cost subscription'],
+    ['订阅', 'subscription pricing monthly price'],
+    ['收购', 'acquisition acquire buyer'],
+    ['评测', 'evaluation benchmark eval harness'],
+    ['语义', 'semantic layer semantics'],
+    ['智能体', 'agent agentic'],
+    ['数据湖', 'data lake lakehouse'],
+  ];
+  const expansion = expansions
+    .filter(([term]) => normalized.includes(term))
+    .map(([, value]) => value)
+    .join(' ');
+  return {
+    agentMode: 'bounded_v1',
+    route,
+    subqueries: expansion ? [question, `${question} ${expansion}`] : [question],
+    requirements,
+    preflightReason: null,
+  };
+}
+
+function mergeRetrievalRounds(rounds: LocalChunk[][]): LocalChunk[] {
+  const merged = new Map<string, LocalChunk>();
+  for (const candidates of rounds) {
+    for (const candidate of candidates) {
+      const current = merged.get(candidate.id);
+      if (!current || candidate.score > current.score) merged.set(candidate.id, candidate);
+    }
+  }
+  return [...merged.values()]
+    .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
+    .slice(0, 10);
+}
+
+function assessEvidence(
+  plan: QueryPlan,
+  ranked: LocalChunk[],
+  minimumScore: number,
+): EvidenceAssessment {
+  if (plan.preflightReason === 'policy_scope') {
+    return { sufficient: false, reason: 'policy_scope', stopReason: 'policy_scope' };
+  }
+  if (plan.preflightReason === 'outside_product_scope') {
+    return {
+      sufficient: false,
+      reason: 'outside_product_scope',
+      stopReason: 'evidence_insufficient',
+    };
+  }
+  if (!ranked[0] || ranked[0].score < minimumScore * 0.75) {
+    return {
+      sufficient: false,
+      reason: 'retrieval_score_below_floor',
+      stopReason: 'evidence_insufficient',
+    };
+  }
+  const evidenceText = ranked
+    .slice(0, 5)
+    .map((item) => item.text)
+    .join('\n')
+    .toLocaleLowerCase();
+  const futureYear = plan.requirements
+    .find((item) => item.startsWith('future_year:'))
+    ?.split(':', 2)[1];
+  if (futureYear && !evidenceText.includes(futureYear)) {
+    return {
+      sufficient: false,
+      reason: 'required_future_date_evidence_missing',
+      stopReason: 'evidence_insufficient',
+    };
+  }
+  if (plan.requirements.includes('price')) {
+    const hasPriceLanguage = ['price', 'pricing', 'cost', 'subscription', '价格', '订阅', '费用'].some(
+      (term) => evidenceText.includes(term),
+    );
+    const hasPriceValue = /(?:[$¥￥]\s?\d|\d+(?:\.\d+)?\s?(?:元|美元|usd|cny))/.test(
+      evidenceText,
+    );
+    if (!hasPriceLanguage || !hasPriceValue) {
+      return {
+        sufficient: false,
+        reason: 'required_price_evidence_missing',
+        stopReason: 'evidence_insufficient',
+      };
+    }
+  }
+  if (
+    plan.requirements.includes('acquisition') &&
+    !['acquire', 'acquisition', '收购'].some((term) => evidenceText.includes(term))
+  ) {
+    return {
+      sufficient: false,
+      reason: 'required_acquisition_evidence_missing',
+      stopReason: 'evidence_insufficient',
+    };
+  }
+  if (plan.requirements.includes('numeric') && !/\d/.test(evidenceText)) {
+    return {
+      sufficient: false,
+      reason: 'required_numeric_evidence_missing',
+      stopReason: 'evidence_insufficient',
+    };
+  }
+  return {
+    sufficient: true,
+    reason: 'evidence_requirements_satisfied',
+    stopReason: 'evidence_sufficient',
+  };
 }
 
 function assembleContext(chunks: LocalChunk[], maximumChars: number): LocalChunk[] {
@@ -234,6 +418,9 @@ function traceLog(
   chunks: LocalChunk[],
   injected: LocalChunk[],
   fallbackReason: string | null,
+  plan: QueryPlan,
+  retrievalRounds: number,
+  assessment: EvidenceAssessment,
   startedAt: number,
 ): void {
   console.log(
@@ -249,6 +436,11 @@ function traceLog(
       })),
       injectedChunkIds: injected.map((chunk) => chunk.id),
       fallbackReason,
+      agentMode: plan.agentMode,
+      route: plan.route,
+      retrievalRounds,
+      sufficiencyReason: assessment.reason,
+      stopReason: assessment.stopReason,
       latencyMs: Math.max(0, Math.round(performance.now() - startedAt)),
     }),
   );
@@ -276,12 +468,27 @@ export async function prepareRagResponse(
     throw new RagUnavailableError();
   }
   const snapshot = await loadSnapshot(request, env);
-  const ranked = retrieve(snapshot, input);
+  const plan = planQuestion(input.question, snapshot);
+  const retrievalResults = plan.preflightReason
+    ? []
+    : plan.subqueries.slice(0, 2).map((query) => retrieve(snapshot, input, query));
+  const ranked = mergeRetrievalRounds(retrievalResults);
+  const assessment = assessEvidence(plan, ranked, config.minimumScore);
+  const retrievalRounds = retrievalResults.length;
   const traceId = crypto.randomUUID();
   const queryFingerprint = await fingerprint(input.question, config.traceSecret);
-  const bestScore = ranked[0]?.score ?? -1;
-  if (bestScore < config.minimumScore) {
-    traceLog(traceId, queryFingerprint, ranked, [], 'evidence_insufficient', startedAt);
+  if (!assessment.sufficient) {
+    traceLog(
+      traceId,
+      queryFingerprint,
+      ranked,
+      [],
+      assessment.reason,
+      plan,
+      retrievalRounds,
+      assessment,
+      startedAt,
+    );
     return {
       kind: 'refusal',
       data: {
@@ -322,13 +529,26 @@ export async function prepareRagResponse(
   const meta: RagStreamMeta = {
     traceId,
     retrievalMode: 'article_dense',
+    agentMode: plan.agentMode,
+    route: plan.route,
+    retrievalRounds,
     citations: sourceCitations,
   };
   return {
     kind: 'stream',
     response: new Response(
       prependMetaStream(stream.body, meta, (reason) =>
-        traceLog(traceId, queryFingerprint, ranked, injected, reason, startedAt),
+        traceLog(
+          traceId,
+          queryFingerprint,
+          ranked,
+          injected,
+          reason,
+          plan,
+          retrievalRounds,
+          assessment,
+          startedAt,
+        ),
       ),
       {
         status: 200,

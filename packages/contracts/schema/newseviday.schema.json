@@ -114,6 +114,12 @@
           "type": "object",
           "additionalProperties": { "type": "number", "minimum": 0 }
         },
+        "contentScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "selectionReasons": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "maxItems": 5
+        },
         "contentHash": { "type": "string", "minLength": 16 }
       }
     },
@@ -279,6 +285,13 @@
         "injectedChunkIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
         "answerId": { "type": ["string", "null"] },
         "fallbackReason": { "type": ["string", "null"] },
+        "agentMode": { "enum": ["bounded_v1"] },
+        "route": { "enum": ["single_fact", "comparison", "timeline", "policy_scope"] },
+        "retrievalRounds": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "sufficiencyReason": { "type": ["string", "null"] },
+        "stopReason": {
+          "enum": ["evidence_sufficient", "evidence_insufficient", "policy_scope", "round_limit"]
+        },
         "latencyMs": { "type": "integer", "minimum": 0 }
       }
     },

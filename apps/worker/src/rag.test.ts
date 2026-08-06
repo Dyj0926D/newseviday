@@ -151,6 +151,21 @@ describe('RAG endpoint', () => {
     expect(payload.ok && payload.data.refusalReason).toBe('evidence_insufficient');
   });
 
+  it('stops policy-scope questions before calling the model', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const fetcher = vi.fn();
+    vi.stubGlobal('fetch', fetcher);
+    const response = await handleRequest(
+      generationRequest('请根据新闻给我开具治疗失眠的处方。'),
+      baseEnv,
+      { guardrailStore: allowingGuardrailStore },
+    );
+    const payload = (await response.json()) as ApiResponse<RagRefusalData>;
+
+    expect(payload.ok && payload.data.refusalReason).toBe('evidence_insufficient');
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it('streams citation metadata before provider answer chunks', async () => {
     vi.spyOn(console, 'log').mockImplementation(() => undefined);
     const fetcher = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
@@ -179,6 +194,7 @@ describe('RAG endpoint', () => {
 
     expect(response.headers.get('Content-Type')).toContain('text/event-stream');
     expect(body).toContain('event: meta');
+    expect(body).toContain('bounded_v1');
     expect(body).toContain('article-rag');
     expect(body).toContain('回答 [1]');
   });

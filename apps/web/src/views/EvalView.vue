@@ -45,6 +45,10 @@ interface EvalReport {
   answerQuality: {
     citationCoverage: number | null;
     noAnswerAccuracy: number;
+    lowScoreRefusalAccuracy?: number;
+    answerablePassRate?: number;
+    agentMode?: string;
+    averageRetrievalRounds?: number;
     status: string;
   };
   note: string;
@@ -99,7 +103,7 @@ const datasetPlan = [
   ['AI 安全', 2],
   ['RAG 与检索', 1],
   ['多来源归纳', 2],
-  ['无答案与越界', 4],
+  ['无答案、越界与安全边界', 12],
 ] as const;
 
 onMounted(async () => {
@@ -161,7 +165,7 @@ onMounted(async () => {
         <div>
           <p class="section-kicker">{{ report ? 'MEASURED' : 'NO RUN' }}</p>
           <h2>{{ report ? '最近一次可复现检索评测' : '评测方法已就绪' }}</h2>
-          <p>离线评测使用版本化分块检索基线；在线证据问答需要单独通过发布验证。</p>
+          <p>离线评测使用版本化分块检索与有限步骤证据门禁；在线证据问答需要单独通过发布验证。</p>
         </div>
         <dl>
           <div>
@@ -212,7 +216,7 @@ onMounted(async () => {
         <article>
           <PhFlask :size="24" weight="duotone" aria-hidden="true" />
           <h2>黄金测试集设计</h2>
-          <p>当前 16 题固定在 Day 1 生产快照，覆盖事实定位、多来源归纳和无答案拒答；人工复核完成前不作为上线结论。</p>
+          <p>验证集固定在同一生产快照，覆盖事实定位、多来源归纳和无答案拒答；人工复核完成前不作为上线结论。</p>
           <dl class="dataset-plan">
             <div v-for="item in datasetPlan" :key="item[0]">
               <dt>{{ item[0] }}</dt>
@@ -223,12 +227,21 @@ onMounted(async () => {
 
         <article>
           <PhGauge :size="24" weight="duotone" aria-hidden="true" />
-          <h2>端到端质量</h2>
-          <p>检索基线已经运行；生成回答的引用覆盖率仍待人工评测，暂不形成发布结论。</p>
+          <h2>证据充分性门禁</h2>
+          <p>系统最多进行两轮检索，并检查问题范围、时间边界和必需证据；生成回答的引用覆盖率仍待人工评测。</p>
           <ul>
             <li>引用覆盖率：{{ report?.answerQuality.citationCoverage ?? '待评测' }}</li>
             <li>
-              无答案识别：{{ report ? percent.format(report.answerQuality.noAnswerAccuracy) : '暂无' }}
+              证据门禁无答案识别：{{ report ? percent.format(report.answerQuality.noAnswerAccuracy) : '暂无' }}
+            </li>
+            <li v-if="report?.answerQuality.lowScoreRefusalAccuracy !== undefined">
+              旧阈值拒答基线：{{ percent.format(report.answerQuality.lowScoreRefusalAccuracy) }}
+            </li>
+            <li v-if="report?.answerQuality.answerablePassRate !== undefined">
+              可回答问题通过率：{{ percent.format(report.answerQuality.answerablePassRate) }}
+            </li>
+            <li v-if="report?.answerQuality.averageRetrievalRounds !== undefined">
+              平均检索轮次：{{ report.answerQuality.averageRetrievalRounds.toFixed(2) }} / 2
             </li>
             <li>严重编造直接阻止发布</li>
           </ul>

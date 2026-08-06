@@ -7,7 +7,7 @@ import {
   PhShieldCheck,
   PhWarningCircle,
 } from '@phosphor-icons/vue';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import InnerPageHero from '../components/InnerPageHero.vue';
 import { formatDateTime } from '../lib/intelligence';
@@ -16,6 +16,16 @@ import { useRuntimeStore } from '../stores/runtime';
 
 const content = useContentStore();
 const runtime = useRuntimeStore();
+interface QualityReport {
+  snapshotId: string;
+  gate: 'pass' | 'observe' | 'fail';
+  missingAbstractCount: number;
+  missingAbstractRate: number;
+  topicGaps: string[];
+  potentialStoryClusters: Array<{ id: string; articleIds: string[]; sourceCount: number }>;
+  issues: string[];
+}
+const quality = ref<QualityReport | null>(null);
 const isRefreshing = computed(
   () => content.state === 'loading' || runtime.requestState === 'loading',
 );
@@ -37,7 +47,28 @@ const protectionReady = computed(
 
 async function refreshStatus(): Promise<void> {
   await Promise.all([content.refresh(true), runtime.refresh()]);
+  await refreshQuality();
 }
+
+async function refreshQuality(): Promise<void> {
+  const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+  try {
+    const response = await fetch(`${basePath}/data/quality/latest.json`, {
+      headers: { Accept: 'application/json' },
+      cache: 'no-cache',
+    });
+    if (!response.ok) return;
+    const value = (await response.json()) as QualityReport;
+    quality.value = value.snapshotId === content.snapshot?.snapshotId ? value : null;
+  } catch {
+    quality.value = null;
+  }
+}
+
+onMounted(async () => {
+  await content.refresh();
+  await refreshQuality();
+});
 </script>
 
 <template>
@@ -115,6 +146,37 @@ async function refreshStatus(): Promise<void> {
             <dd>{{ content.snapshot?.briefs.length ?? 0 }}</dd>
           </div>
         </dl>
+      </section>
+
+      <section v-if="quality" class="status-details">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">CONTENT QUALITY GATE</p>
+            <h2>内容运营质量</h2>
+            <p>由确定性规则生成，用于发现来源、摘要和主题覆盖缺口。</p>
+          </div>
+        </div>
+        <dl class="status-facts">
+          <div>
+            <dt>质量门禁</dt>
+            <dd>{{ quality.gate === 'pass' ? '通过' : quality.gate === 'observe' ? '观察' : '未通过' }}</dd>
+          </div>
+          <div>
+            <dt>缺少来源摘要</dt>
+            <dd>{{ quality.missingAbstractCount }} 条（{{ Math.round(quality.missingAbstractRate * 100) }}%）</dd>
+          </div>
+          <div>
+            <dt>空白主题</dt>
+            <dd>{{ quality.topicGaps.length }}</dd>
+          </div>
+          <div>
+            <dt>潜在多来源事件</dt>
+            <dd>{{ quality.potentialStoryClusters.length }}</dd>
+          </div>
+        </dl>
+        <ul v-if="quality.issues.length" class="quality-issues">
+          <li v-for="issue in quality.issues" :key="issue">{{ issue }}</li>
+        </ul>
       </section>
 
       <section class="source-status-section">

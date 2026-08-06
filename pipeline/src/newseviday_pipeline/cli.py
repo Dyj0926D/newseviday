@@ -5,12 +5,15 @@ import shutil
 import tempfile
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 from newseviday_pipeline import __version__
 from newseviday_pipeline.ai import DeepSeekStructuredClient, FileAiCache, enrich_snapshot
 from newseviday_pipeline.dedup_eval import evaluate_dedup_dataset, write_dedup_report
 from newseviday_pipeline.embeddings import HashingEmbedder, OpenAICompatibleEmbedder
 from newseviday_pipeline.evaluation import evaluate_rag, load_gold_dataset, write_eval_report
+from newseviday_pipeline.models import ContentSnapshot
+from newseviday_pipeline.quality import audit_snapshot, write_quality_report
 from newseviday_pipeline.rag import build_dense_index, vectorize_ndjson, write_index
 from newseviday_pipeline.runner import run_fixture_pipeline, run_network_pipeline
 from newseviday_pipeline.settings import load_project_config
@@ -105,12 +108,20 @@ def build_parser() -> argparse.ArgumentParser:
         "--report", type=Path, default=Path("data/runtime/eval/latest.json")
     )
     eval_parser.add_argument("--minimum-score", type=float, default=0.08)
+    audit_parser = subparsers.add_parser(
+        "audit-snapshot", help="Create a deterministic content operations quality report"
+    )
+    audit_parser.add_argument("snapshot", type=Path)
+    audit_parser.add_argument(
+        "--report", type=Path, default=Path("data/runtime/quality/latest.json")
+    )
     publish_parser = subparsers.add_parser(
         "publish-web", help="Atomically publish a validated snapshot and optional Eval report"
     )
     publish_parser.add_argument("snapshot", type=Path)
     publish_parser.add_argument("--web-data", type=Path, default=Path("apps/web/public/data"))
     publish_parser.add_argument("--eval-report", type=Path)
+    publish_parser.add_argument("--quality-report", type=Path)
     publish_parser.add_argument(
         "--allow-demo",
         action="store_true",
@@ -329,6 +340,13 @@ def eval_rag(args: argparse.Namespace) -> int:
     return 0
 
 
+def audit(args: argparse.Namespace) -> int:
+    report = audit_snapshot(load_snapshot(args.snapshot))
+    write_quality_report(report, args.report)
+    print(report.model_dump_json(by_alias=True, indent=2))
+    return 1 if report.gate == "fail" else 0
+
+
 def _atomic_copy(source: Path, target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     handle, name = tempfile.mkstemp(dir=target.parent, prefix="publish-", suffix=".tmp")
@@ -339,6 +357,80 @@ def _atomic_copy(source: Path, target: Path) -> None:
         temporary.replace(target)
     finally:
         temporary.unlink(missing_ok=True)
+
+
+def _atomic_json(value: object, target: Path) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    handle, name = tempfile.mkstemp(dir=target.parent, prefix="publish-", suffix=".tmp")
+    temporary = Path(name)
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8", newline="\n") as stream:
+            json.dump(value, stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+        temporary.replace(target)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def _update_archive_manifest(snapshot: ContentSnapshot, web_data: Path) -> Path:
+    manifest_path = web_data / "archive" / "manifest.json"
+    existing: dict[str, Any] = {}
+    if manifest_path.exists():
+        try:
+            parsed = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if isinstance(parsed, dict):
+                existing = parsed
+        except (json.JSONDecodeError, OSError):
+            existing = {}
+    snapshot_id = snapshot.snapshot_id
+    snapshots = [
+        item
+        for item in existing.get("snapshots", [])
+        if isinstance(item, dict) and item.get("snapshotId") != snapshot_id
+    ]
+    snapshots.append(
+        {
+            "snapshotId": snapshot_id,
+            "generatedAt": snapshot.generated_at.isoformat().replace("+00:00", "Z"),
+            "path": f"versions/{snapshot_id}.json",
+            "articleCount": len(snapshot.articles),
+        }
+    )
+    snapshots.sort(key=lambda item: str(item.get("generatedAt", "")), reverse=True)
+    article_entries = {
+        str(item.get("id")): item
+        for item in existing.get("articles", [])
+        if isinstance(item, dict) and item.get("id")
+    }
+    for article in snapshot.articles:
+        article_entries[article.id] = {
+            "id": article.id,
+            "title": (
+                article.ai.title_zh
+                if article.ai and article.ai.title_zh
+                else article.facts.title
+            ),
+            "originalTitle": article.facts.title,
+            "sourceId": article.source_id,
+            "publishedAt": (
+                article.published_at.isoformat().replace("+00:00", "Z")
+                if article.published_at
+                else None
+            ),
+            "snapshotPath": f"versions/{snapshot_id}.json",
+        }
+    manifest = {
+        "schemaVersion": "1.0.0",
+        "updatedAt": snapshot.generated_at.isoformat().replace("+00:00", "Z"),
+        "snapshots": snapshots,
+        "articles": sorted(
+            article_entries.values(),
+            key=lambda item: str(item.get("publishedAt") or ""),
+            reverse=True,
+        ),
+    }
+    _atomic_json(manifest, manifest_path)
+    return manifest_path
 
 
 def publish_web(args: argparse.Namespace) -> int:
@@ -353,8 +445,11 @@ def publish_web(args: argparse.Namespace) -> int:
     if not version_path.exists():
         _atomic_copy(args.snapshot, version_path)
     _atomic_copy(args.snapshot, args.web_data / "current.json")
+    manifest_path = _update_archive_manifest(snapshot, args.web_data)
     if args.eval_report:
         _atomic_copy(args.eval_report, args.web_data / "eval" / "latest.json")
+    if args.quality_report:
+        _atomic_copy(args.quality_report, args.web_data / "quality" / "latest.json")
     print(
         json.dumps(
             {
@@ -362,7 +457,9 @@ def publish_web(args: argparse.Namespace) -> int:
                 "snapshotId": snapshot.snapshot_id,
                 "webData": str(args.web_data),
                 "versionPath": str(version_path),
+                "archiveManifest": str(manifest_path),
                 "evalReport": bool(args.eval_report),
+                "qualityReport": bool(args.quality_report),
             },
             ensure_ascii=False,
             indent=2,
@@ -385,6 +482,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return build_index(args)
     if args.command == "eval-rag":
         return eval_rag(args)
+    if args.command == "audit-snapshot":
+        return audit(args)
     if args.command == "publish-web":
         return publish_web(args)
     if args.command == "run" and args.dry_run:

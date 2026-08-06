@@ -193,10 +193,13 @@ def apply_content_quotas(
         (article.published_at or article.collected_at for article in articles),
         default=datetime.now(UTC),
     )
+    for article in articles:
+        article.content_score = content_value_score(article, anchor=anchor)
+        article.selection_reasons = content_selection_reasons(article, anchor=anchor)
     ranked = sorted(
         articles,
         key=lambda article: (
-            content_value_score(article, anchor=anchor),
+            article.content_score or 0.0,
             article.published_at or article.collected_at,
         ),
         reverse=True,
@@ -236,3 +239,26 @@ def content_value_score(article: Article, *, anchor: datetime) -> float:
         else 0.1
     )
     return round(0.5 * relevance + 0.35 * freshness + 0.15 * completeness, 4)
+
+
+def content_selection_reasons(article: Article, *, anchor: datetime) -> list[str]:
+    """Expose the observable ranking signals without pretending they are AI judgments."""
+
+    reasons: list[str] = []
+    relevance = max(article.topic_scores.values(), default=0.0)
+    published = article.published_at or article.collected_at
+    age_hours = max(0.0, (anchor - published).total_seconds() / 3_600)
+    abstract_length = len(article.facts.abstract or "")
+    if relevance >= 0.7:
+        reasons.append("主题高度相关")
+    elif relevance > 0:
+        reasons.append("主题相关")
+    if age_hours <= 24:
+        reasons.append("24 小时内发布")
+    elif age_hours <= 72:
+        reasons.append("近期发布")
+    if abstract_length >= 240:
+        reasons.append("来源摘要完整")
+    elif abstract_length == 0:
+        reasons.append("仅保留来源标题")
+    return reasons[:5]

@@ -59,8 +59,8 @@ const architectureLayers = [
   {
     name: '检索与质量评测',
     icon: PhFlowArrow,
-    summary: '检索候选、证据阈值、引用生成和版本化评测。',
-    detail: '当前基线按文章召回；生产级分块检索需要通过独立数据集和质量门槛。',
+    summary: '有限步骤检索、证据门禁、引用生成和版本化评测。',
+    detail: '问题先路由，最多执行两轮检索，再检查范围、时间与必需证据；公开问答仍受人工质量门槛控制。',
   },
   {
     name: 'Worker API',
@@ -239,8 +239,8 @@ const architectureLayers = [
               <dd>{{ exampleArticle.facts.title }}</dd>
             </div>
             <div>
-              <dt>AI 整理</dt>
-              <dd>中文标题、摘要、关键点和为什么值得看</dd>
+              <dt>{{ exampleArticle.ai ? 'AI 整理' : '内容状态' }}</dt>
+              <dd>{{ exampleArticle.ai ? '中文标题、摘要、关键点和为什么值得看' : '保留来源标题与摘要，未经 AI 改写' }}</dd>
             </div>
             <div>
               <dt>可追溯性</dt>
@@ -340,20 +340,20 @@ const architectureLayers = [
         <div class="product-section-heading">
           <p class="product-eyebrow">TRACEABLE RAG</p>
           <h2>RAG 负责把问题连接到可引用的证据</h2>
-          <p>检索、阈值判断、生成和 Trace 分开记录，任何一步失败都能说明原因并回退。</p>
+          <p>路由、检索、证据充分性判断、生成和 Trace 分开记录，任何一步失败都能说明原因并回退。</p>
         </div>
         <ol class="rag-flow">
           <li>
             <span>Query</span><strong>校验问题与范围</strong>
-            <p>最近 30 天，默认单轮，限制 300 字。</p>
+            <p>限制 300 字，并识别问题类型、时间边界和产品范围。</p>
           </li>
           <li>
             <span>Retrieve</span><strong>召回相关候选</strong>
-            <p>当前基线按文章召回，后续策略沿用同一套质量评测。</p>
+            <p>按需补充跨语言表达，最多两轮检索，不允许无限循环。</p>
           </li>
           <li>
-            <span>Gate</span><strong>判断证据阈值</strong>
-            <p>相关性不足时拒答，不进入生成。</p>
+            <span>Gate</span><strong>检查证据是否够用</strong>
+            <p>同时检查相关性和必需事实，缺少价格、数量等直接证据时拒答。</p>
           </li>
           <li>
             <span>Generate</span><strong>引用式回答</strong>
@@ -402,7 +402,7 @@ const architectureLayers = [
         <PhFlask :size="24" weight="duotone" aria-hidden="true" />
         <div>
           <strong>可复现检索基线</strong>
-          <p>30 题结果可以重复运行；正式开放前还需完成人工复核和引用质量评测。</p>
+          <p>24 题生产试运行集可以重复运行；正式开放前还需完成人工复核和引用质量评测。</p>
         </div>
         <RouterLink class="button button--secondary" to="/eval">查看质量评测</RouterLink>
       </div>

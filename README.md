@@ -18,12 +18,12 @@ NewsEviday 面向产品经理、AI 产品经理和数据产品从业者，整理
 
 - Vue 3、Vite 与 TypeScript 构建响应式 Web；
 - Cloudflare Workers Static Assets 承载同源静态站和 API，EdgeOne 保留静态备用构建；
-- Python 管道负责来源采集、正文清洗、规则去重、主题筛选、AI 增强和原子发布；
+- Python 管道负责来源采集、正文清洗、规则去重、确定性价值排序、内容质量审计、AI 增强和原子发布；
 - DeepSeek V4 Flash 通过服务端适配层调用，显式使用非思考模式；
 - D1 实现匿名 IP 配额、全站限额、并发租约、幂等请求和月度预算台账；
 - Turnstile、精确 CORS、安全响应头和服务端 Secret 降低公开站的滥用风险；
-- 引用式 RAG 在证据不足时拒绝回答，并输出可点击来源和匿名 Trace；
-- Eval Harness 管理版本化题集、检索指标、无答案测试、语料健康检查和发布 Gate。
+- 有限步骤 Agentic RAG 先路由问题，最多进行两轮检索，再按时间、范围和必需证据判断是否回答；
+- Eval Harness 管理版本化题集、检索指标、证据门禁、语料健康检查和发布 Gate。
 
 ## 架构
 
@@ -35,7 +35,7 @@ flowchart LR
     Web --> Worker["Cloudflare Worker API"]
     Worker --> Guardrails["Turnstile + D1 配额 / 预算 / 并发"]
     Worker --> Model["DeepSeek V4 Flash"]
-    Worker --> RAG["检索 / 证据组装 / 引用式回答"]
+    Worker --> RAG["问题路由 / 最多两轮检索 / 证据缺口检查"]
     RAG --> Trace["匿名 RAG Trace"]
     Snapshot --> Eval["Eval Harness + 质量 Gate"]
     Worker -. "AI 关闭或异常" .-> Snapshot
@@ -45,7 +45,7 @@ flowchart LR
 
 ## RAG 评测基线
 
-当前仓库保留 30 题 Demo 工程集，并新增固定在 Day 1 真实快照上的 16 题生产试运行集。公开结果如下：
+当前仓库保留 30 题 Demo 工程集，并维护固定在首个真实生产快照上的 24 题试运行集。公开结果如下：
 
 | 指标 | 结果 |
 | --- | ---: |
@@ -54,10 +54,12 @@ flowchart LR
 | MRR | 0.7625 |
 | NDCG@10 | 0.7735 |
 | Hit@5 | 1.0000 |
-| 无答案识别准确率 | 0.2500 |
-| 本地 p95 | 54 ms |
+| 证据门禁无答案识别 | 1.0000 |
+| 旧单阈值拒答基线 | 0.2500 |
+| 可回答问题通过率 | 1.0000 |
+| 本地 p95 | 26 ms |
 
-这些结果来自 40 篇真实文章、69 个分块和 `hashing-chargram-v1` 基线。题集仍待人工复核，且无答案识别未达到 80% Gate，因此线上 RAG 继续关闭。线上文章级检索与离线分块评测也尚未完全对齐。指标、边界和下一轮评测设计见 [RAG 与评测体系](./docs/RAG与评测体系.md)。
+这些结果来自 40 篇真实文章、69 个分块和 `hashing-chargram-v1` 基线。证据门禁已经达到工程草稿线，但题集仍待人工复核，生成回答的引用覆盖率也没有完成，因此总 Gate 仍为 `fail`，线上 RAG 继续关闭。线上文章级检索与离线分块评测尚未完全对齐。指标、边界和下一轮评测设计见 [RAG 与评测体系](./docs/RAG与评测体系.md)。
 
 ## 本地运行
 
@@ -84,7 +86,7 @@ Python 离线评测：
 
 ```powershell
 python -m uv run --project pipeline newseviday-pipeline eval-rag `
-  apps/web/public/data/current.json pipeline/eval/rag-gold-trial-v1.json
+  apps/web/public/data/current.json pipeline/eval/rag-gold-trial-v2.json
 ```
 
 ## 安全默认值
@@ -101,7 +103,7 @@ MONTHLY_BUDGET_CNY=5
 HARD_BUDGET_CNY=10
 ```
 
-内容批处理支持手动或受控定时触发。定时任务有总开关、截止日期和每日模型调用上限；试运行第 1–2 天限制为 3 次，后续需人工确认后才调整到 5 次。更多配置见 [安全与成本控制](./docs/安全与成本控制.md)。
+内容批处理支持手动或受控定时触发。定时任务有总开关、截止日期和每日模型调用上限；初始批次最多 3 次模型调用，通过内容质量检查后才能调整到 5 次。更多配置见 [安全与成本控制](./docs/安全与成本控制.md)。
 
 ## 工程目录
 
@@ -119,10 +121,10 @@ migrations/             D1 数据库迁移
 
 ## 当前边界
 
-- 当前公开候选为 Day 1 受控生产快照，定时刷新仍需要通过 Pull Request 审查后发布；
+- 当前公开内容来自首个受控生产快照，定时刷新仍需要通过 Pull Request 审查后发布；
 - DeepSeek 已配置为 V4 Flash，但生产 AI 总开关保持关闭，受控试运行通过后再逐项开放；
-- 当前实现属于引用式 RAG；有限步骤的 Agentic RAG 只作为后续 `eval-only` 实验方向；
-- RAG Trace 当前输出到 Worker 可观测日志；生产试运行集已建立，但拒答 Gate 未通过；
+- 已实现 `bounded_v1` 有限步骤 Agentic RAG 编排；它是有固定步数和成本上限的 MVP，不宣称为开放式研究 Agent；
+- RAG Trace 当前输出到 Worker 可观测日志；证据门禁通过草稿线，但人工黄金集和回答引用 Gate 未通过；
 - `workers.dev` 在部分中国大陆网络下可能无法直连；
 - 开源许可证和信息源使用条款需在仓库转为公开前单独确认。
 
