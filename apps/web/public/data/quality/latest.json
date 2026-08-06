@@ -6,7 +6,7 @@
   "articleCount": 40,
   "configuredSourceCount": 9,
   "contributingSourceCount": 8,
-  "aiArticleCount": 6,
+  "aiArticleCount": 5,
   "missingAbstractCount": 12,
   "missingAbstractRate": 0.3,
   "sourceCounts": {
@@ -20,7 +20,7 @@
     "qwen-blog": 8
   },
   "topicCounts": {
-    "data-platform": 4,
+    "data-platform": 3,
     "data-agent": 0,
     "semantic-layer": 0,
     "intelligent-lakehouse": 1,

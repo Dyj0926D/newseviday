@@ -594,26 +594,12 @@
         "authors": [],
         "abstract": "Today, we are thrilled to announce that Databricks has officially completed the acquisition..."
       },
-      "ai": {
-        "titleZh": "Databricks完成对Panther的收购，加速安全湖仓时代",
-        "summaryZh": "Databricks宣布正式完成对安全数据湖公司Panther的收购，此举将强化其安全湖仓（Security Lakehouse）能力。通过整合Panther的威胁检测与安全分析技术，Databricks旨在为企业提供统一的数据与安全平台，简化安全运营并提升威胁响应效率。",
-        "whyItMatters": "标志Databricks正式进军安全分析领域，强化数据平台安全能力。",
-        "keyPoints": [
-          "收购完成，整合Panther技术",
-          "强化安全湖仓解决方案",
-          "提升威胁检测与响应效率"
-        ],
-        "provider": "deepseek",
-        "model": "deepseek-v4-flash",
-        "promptVersion": "article-enrichment-v3",
-        "generatedAt": "2026-08-06T02:44:16.206297Z"
-      },
+      "ai": null,
       "evidenceIds": [
         "evidence-fbc70d9588cb16b17836"
       ],
       "topicScores": {
-        "intelligent-lakehouse": 1.0,
-        "data-platform": 1.0
+        "intelligent-lakehouse": 0.6
       },
       "contentScore": 0.6264,
       "selectionReasons": [
