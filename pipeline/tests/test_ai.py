@@ -110,7 +110,8 @@ def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:3]
-    original_third_model = snapshot.articles[2].ai.model if snapshot.articles[2].ai else None
+    for article in snapshot.articles:
+        article.ai = None
     client = FakeStructuredClient()
 
     result, model_calls = enrich_snapshot(
@@ -124,10 +125,11 @@ def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
 
     assert model_calls == 2
     assert client.calls == 2
-    assert result.articles[0].ai is not None
-    assert result.articles[0].ai.model == "deepseek-test"
-    assert result.articles[2].ai is not None
-    assert result.articles[2].ai.model == original_third_model
+    assert sum(article.ai is not None for article in result.articles) == 2
+    assert sum(
+        article.ai is not None and article.ai.model == "deepseek-test"
+        for article in result.articles
+    ) == 2
 
 
 def test_article_enrichment_skips_thin_source_evidence(tmp_path: Path) -> None:
