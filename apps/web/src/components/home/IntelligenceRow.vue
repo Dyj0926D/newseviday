@@ -7,7 +7,7 @@ import {
   displayTitle,
   displayWhy,
   formatDateTime,
-  languageLabel,
+  translationStatus,
   topicLabels,
 } from '../../lib/intelligence';
 
@@ -30,7 +30,7 @@ const emit = defineEmits<{ save: [articleId: string] }>();
       <span>{{ source?.region ?? '区域未知' }}</span>
       <span v-if="article.language !== 'zh-CN'" class="translation-badge">
         <PhTranslate :size="14" aria-hidden="true" />
-        {{ languageLabel(article.language) }}已整理
+        {{ translationStatus(article) }}
       </span>
       <span>{{ formatDateTime(article.publishedAt) }}</span>
     </div>

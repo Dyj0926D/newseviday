@@ -11,6 +11,7 @@ from newseviday_pipeline.ai import (
 from newseviday_pipeline.ai_models import ArticleEnrichment
 from newseviday_pipeline.models import TopicConfig
 from newseviday_pipeline.snapshot import load_snapshot
+from newseviday_pipeline.stages import apply_article_scoring
 from newseviday_pipeline.terminology import TerminologyConfig, TermRule, terminology_consistency
 
 
@@ -184,6 +185,49 @@ def test_article_enrichment_rotates_across_sources(tmp_path: Path) -> None:
     assert result.articles[2].ai.model == "deepseek-test"
     assert result.articles[3].ai is not None
     assert result.articles[3].ai.model == "deepseek-test"
+
+
+def test_article_enrichment_translates_key_candidate_before_a_higher_raw_score(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:2]
+    key_candidate, other = snapshot.articles
+    key_candidate.source_id = "official-platform"
+    key_candidate.language = "en"
+    key_candidate.facts.title = (
+        "Open-source data agent platform benchmark improves production latency by 35%"
+    )
+    key_candidate.facts.abstract = (
+        "We introduce a general-purpose framework, API, deployment workflow and dataset. "
+        "Evaluation across models shows higher throughput and lower cost than baseline. "
+    ) * 3
+    key_candidate.topic_scores = {"data-agent": 1.0, "semantic-layer": 0.8}
+    key_candidate.ai = None
+    apply_article_scoring(key_candidate, anchor=key_candidate.collected_at)
+
+    other.source_id = "other-source"
+    other.language = "en"
+    other.facts.title = "Modern Greek specialist dataset"
+    other.facts.abstract = "A narrow specialist language dataset and benchmark. " * 5
+    other.topic_scores = {"foundation-models": 0.8}
+    other.ai = None
+    apply_article_scoring(other, anchor=other.collected_at)
+    other.content_score = 0.99
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        max_model_calls=1,
+    )
+
+    assert model_calls == 1
+    assert result.articles[0].ai is not None
+    assert result.articles[0].ai.model == "deepseek-test"
+    assert result.articles[1].ai is None
 
 
 def test_article_enrichment_injects_relevant_terminology(tmp_path: Path) -> None:

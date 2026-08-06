@@ -20,7 +20,7 @@ on:
         description: 'Hard cap for paid enrichment calls in this run'
         required: true
         type: choice
-        default: '3'
+        default: '5'
         options:
           - '1'
           - '3'
@@ -47,7 +47,7 @@ jobs:
       DEEPSEEK_THINKING_ENABLED: ${{ vars.DEEPSEEK_THINKING_ENABLED || 'false' }}
       DAILY_REFRESH_ENABLED: ${{ vars.DAILY_REFRESH_ENABLED || 'false' }}
       DAILY_REFRESH_ALLOW_MODEL: ${{ vars.DAILY_REFRESH_ALLOW_MODEL || 'false' }}
-      DAILY_REFRESH_MAX_MODEL_CALLS: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS || '3' }}
+      DAILY_REFRESH_MAX_MODEL_CALLS: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS || '5' }}
       DAILY_REFRESH_OPEN_PULL_REQUEST: ${{ vars.DAILY_REFRESH_OPEN_PULL_REQUEST || 'true' }}
       DAILY_REFRESH_END_DATE: ${{ vars.DAILY_REFRESH_END_DATE || '' }}
     steps:

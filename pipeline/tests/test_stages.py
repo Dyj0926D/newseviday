@@ -4,9 +4,11 @@ import pytest
 
 from newseviday_pipeline.models import GeneratedText, RawFeedItem, TopicConfig
 from newseviday_pipeline.stages import (
+    CHINESE_READINESS_FAILURE,
     apply_article_scoring,
     apply_content_quotas,
     canonicalize_url,
+    chinese_display_ready,
     content_score_breakdown,
     content_value_score,
     exact_deduplicate,
@@ -236,3 +238,29 @@ def test_key_signal_rejects_a_narrow_low_relevance_paper() -> None:
     assert candidate.key_signal is not None
     assert not candidate.key_signal.eligible
     assert "目标用户相关性低于 65" in candidate.key_signal.gate_failures
+
+
+def test_chinese_source_satisfies_display_gate_without_model_output() -> None:
+    candidate = normalize_item(
+        RawFeedItem(
+            source_id="official-cn",
+            url="https://example.cn/release",
+            title="数据智能体平台发布统一语义能力",
+            summary=(
+                "该平台发布统一指标口径、权限治理和可追溯查询能力，"
+                "面向企业生产环境提供接口与评测结果。"
+            )
+            * 3,
+            language="zh-CN",
+        ),
+        collected_at=NOW,
+    )[0]
+    candidate.published_at = NOW
+    candidate.topic_scores = {"data-agent": 1.0, "semantic-layer": 0.8}
+
+    apply_article_scoring(candidate, anchor=NOW)
+
+    assert chinese_display_ready(candidate)
+    assert candidate.ai is None
+    assert candidate.key_signal is not None
+    assert CHINESE_READINESS_FAILURE not in candidate.key_signal.gate_failures

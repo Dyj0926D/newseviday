@@ -167,6 +167,8 @@ QUANTITATIVE_PATTERN = re.compile(
     r"(?:\b\d+(?:\.\d+)?\s*(?:%|x|ms|million|billion)|\b\d+(?:\.\d+)?\s*s\b|\d+(?:\.\d+)?\s*倍)",
     re.IGNORECASE,
 )
+CHINESE_CHARACTER_PATTERN = re.compile(r"[\u3400-\u9fff]")
+CHINESE_READINESS_FAILURE = "缺少可展示的中文标题或导读"
 
 
 def normalize_text(value: str) -> str:
@@ -375,6 +377,24 @@ def _article_text(article: Article) -> str:
     return f"{article.facts.title}\n{article.facts.abstract or ''}".casefold()
 
 
+def _contains_chinese(value: str | None) -> bool:
+    return bool(value and CHINESE_CHARACTER_PATTERN.search(value))
+
+
+def chinese_display_ready(article: Article) -> bool:
+    """Return whether the feed can show a Chinese title and digest without another call."""
+
+    if (
+        article.ai is not None
+        and _contains_chinese(article.ai.title_zh)
+        and _contains_chinese(article.ai.summary_zh)
+    ):
+        return True
+    if article.language.casefold().startswith("zh"):
+        return _contains_chinese(article.facts.title) and _contains_chinese(article.facts.abstract)
+    return False
+
+
 def content_score_breakdown(
     article: Article,
     *,
@@ -534,12 +554,8 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
     )
 
     gate_failures: list[str] = []
-    has_chinese_title = bool(article.ai and article.ai.title_zh and article.ai.title_zh.strip())
-    has_chinese_digest = bool(
-        article.ai and article.ai.summary_zh and article.ai.summary_zh.strip()
-    )
-    if not (has_chinese_title and has_chinese_digest):
-        gate_failures.append("缺少中文标题或中文导读")
+    if not chinese_display_ready(article):
+        gate_failures.append(CHINESE_READINESS_FAILURE)
     if (article.content_score or 0.0) < 0.75:
         gate_failures.append("内容总分低于 75")
     if values.target_relevance < 0.65:
@@ -574,6 +590,13 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
         reasons=reasons[:5],
         gate_failures=gate_failures[:8],
     )
+
+
+def key_signal_waiting_for_chinese(article: Article) -> bool:
+    """Return whether Chinese presentation is the candidate's only Key Signal blocker."""
+
+    assessment = article.key_signal or key_signal_assessment(article)
+    return assessment.gate_failures == [CHINESE_READINESS_FAILURE]
 
 
 def apply_article_scoring(article: Article, *, anchor: datetime) -> Article:

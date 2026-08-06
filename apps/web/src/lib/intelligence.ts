@@ -19,6 +19,14 @@ export function languageLabel(language: string): string {
   return language;
 }
 
+export function translationStatus(article: Article): string {
+  if (article.language === 'zh-CN') return '中文原文';
+  const chineseReady = Boolean(article.ai?.titleZh?.trim() && article.ai?.summaryZh?.trim());
+  return chineseReady
+    ? `${languageLabel(article.language)}已整理`
+    : `${languageLabel(article.language)}待整理`;
+}
+
 export function formatDateTime(value: string | null): string {
   if (!value) return '时间未知';
   return new Intl.DateTimeFormat('zh-CN', {
