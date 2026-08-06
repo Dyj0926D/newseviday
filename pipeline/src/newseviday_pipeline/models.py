@@ -115,6 +115,29 @@ class GeneratedText(ContractModel):
     generated_at: datetime
 
 
+class ContentScoreBreakdown(ContractModel):
+    target_relevance: float = Field(ge=0, le=1)
+    technical_advancement: float = Field(ge=0, le=1)
+    engineering_applicability: float = Field(ge=0, le=1)
+    technical_generality: float = Field(ge=0, le=1)
+    product_industry_impact: float = Field(ge=0, le=1)
+    freshness: float = Field(ge=0, le=1)
+    evidence_maturity: float = Field(ge=0, le=1)
+    completeness: float = Field(ge=0, le=1)
+
+
+class KeySignalAssessment(ContractModel):
+    eligible: bool
+    score: float = Field(ge=0, le=1)
+    user_value: float = Field(ge=0, le=1)
+    change_magnitude: float = Field(ge=0, le=1)
+    actionability: float = Field(ge=0, le=1)
+    generality: float = Field(ge=0, le=1)
+    freshness: float = Field(ge=0, le=1)
+    reasons: list[str] = Field(default_factory=list, max_length=5)
+    gate_failures: list[str] = Field(default_factory=list, max_length=8)
+
+
 class Article(ContractModel):
     schema_version: Literal["1.0.0"] = SCHEMA_VERSION
     id: str
@@ -128,7 +151,9 @@ class Article(ContractModel):
     evidence_ids: list[str] = Field(default_factory=list)
     topic_scores: dict[str, float] = Field(default_factory=dict)
     content_score: float | None = Field(default=None, ge=0, le=1)
+    content_score_breakdown: ContentScoreBreakdown | None = None
     selection_reasons: list[str] = Field(default_factory=list, max_length=5)
+    key_signal: KeySignalAssessment | None = None
     content_hash: str
 
 

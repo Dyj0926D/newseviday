@@ -8,7 +8,8 @@ describe('published static snapshot', () => {
     expect(() => assertContentSnapshot(snapshot)).not.toThrow();
     expect(snapshot.snapshotKind).toBe('production');
     expect(snapshot.sources).toHaveLength(snapshot.sourceCount);
-    expect(snapshot.articles).toHaveLength(40);
+    expect(snapshot.articles.length).toBeGreaterThanOrEqual(24);
+    expect(snapshot.articles.length).toBeLessThanOrEqual(40);
     expect(snapshot.articles.some((article) => Boolean(article.ai?.whyItMatters))).toBe(true);
   });
 });

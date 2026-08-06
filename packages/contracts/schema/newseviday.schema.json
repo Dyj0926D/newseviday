@@ -36,6 +36,64 @@
         "generatedAt": { "$ref": "#/$defs/isoDateTime" }
       }
     },
+    "contentScoreBreakdown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetRelevance",
+        "technicalAdvancement",
+        "engineeringApplicability",
+        "technicalGenerality",
+        "productIndustryImpact",
+        "freshness",
+        "evidenceMaturity",
+        "completeness"
+      ],
+      "properties": {
+        "targetRelevance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "technicalAdvancement": { "type": "number", "minimum": 0, "maximum": 1 },
+        "engineeringApplicability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "technicalGenerality": { "type": "number", "minimum": 0, "maximum": 1 },
+        "productIndustryImpact": { "type": "number", "minimum": 0, "maximum": 1 },
+        "freshness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidenceMaturity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "completeness": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "keySignalAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eligible",
+        "score",
+        "userValue",
+        "changeMagnitude",
+        "actionability",
+        "generality",
+        "freshness",
+        "reasons",
+        "gateFailures"
+      ],
+      "properties": {
+        "eligible": { "type": "boolean" },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "userValue": { "type": "number", "minimum": 0, "maximum": 1 },
+        "changeMagnitude": { "type": "number", "minimum": 0, "maximum": 1 },
+        "actionability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "generality": { "type": "number", "minimum": 0, "maximum": 1 },
+        "freshness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reasons": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "maxItems": 5
+        },
+        "gateFailures": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "maxItems": 8
+        }
+      }
+    },
     "source": {
       "type": "object",
       "additionalProperties": false,
@@ -115,11 +173,13 @@
           "additionalProperties": { "type": "number", "minimum": 0 }
         },
         "contentScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "contentScoreBreakdown": { "$ref": "#/$defs/contentScoreBreakdown" },
         "selectionReasons": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "maxItems": 5
         },
+        "keySignal": { "$ref": "#/$defs/keySignalAssessment" },
         "contentHash": { "type": "string", "minLength": 16 }
       }
     },

@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from newseviday_pipeline.ai_models import ArticleEnrichment, ProfileEnhancement
 from newseviday_pipeline.models import Article, ContentSnapshot, GeneratedText, TopicConfig
+from newseviday_pipeline.stages import key_signal_assessment
 from newseviday_pipeline.terminology import TerminologyConfig
 
 PROMPT_VERSION = "article-enrichment-v3"
@@ -251,6 +252,9 @@ def enrich_snapshot(
     suffix = hashlib.sha256(
         f"{snapshot.snapshot_id}:{client.model}:{PROMPT_VERSION}".encode()
     ).hexdigest()[:8]
+    for article in result.articles:
+        if article.content_score_breakdown is not None:
+            article.key_signal = key_signal_assessment(article)
     result.snapshot_id = f"{snapshot.snapshot_id}-ai-{suffix}"
     result.generated_at = generated_at
     return result, model_calls

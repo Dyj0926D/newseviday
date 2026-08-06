@@ -156,6 +156,29 @@ export interface GeneratedText {
   generatedAt: IsoDateTime;
 }
 
+export interface ContentScoreBreakdown {
+  targetRelevance: number;
+  technicalAdvancement: number;
+  engineeringApplicability: number;
+  technicalGenerality: number;
+  productIndustryImpact: number;
+  freshness: number;
+  evidenceMaturity: number;
+  completeness: number;
+}
+
+export interface KeySignalAssessment {
+  eligible: boolean;
+  score: number;
+  userValue: number;
+  changeMagnitude: number;
+  actionability: number;
+  generality: number;
+  freshness: number;
+  reasons: string[];
+  gateFailures: string[];
+}
+
 export interface SnapshotTopic {
   id: string;
   label: string;
@@ -179,8 +202,12 @@ export interface Article {
   topicScores: Record<string, number>;
   /** Deterministic 0-1 score used for feed ordering; never model-generated. */
   contentScore?: number;
+  /** Observable sub-scores used to calculate contentScore. */
+  contentScoreBreakdown?: ContentScoreBreakdown;
   /** Human-readable deterministic signals behind contentScore. */
   selectionReasons?: string[];
+  /** Independent editorial gate and score for the homepage Key Signal slot. */
+  keySignal?: KeySignalAssessment;
   contentHash: string;
 }
 
