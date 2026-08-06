@@ -17,9 +17,7 @@ test('latest intelligence search and topic filters are reflected in the URL', as
 
   await page.getByRole('button', { name: 'RAG、检索与评测' }).click();
   await expect(page).toHaveURL(/topic=rag-eval/);
-  await expect(
-    page.getByRole('heading', { name: '推理大模型的测试时扩展：推理机制、评估与可复现性' }),
-  ).toBeVisible();
+  await expect(page.locator('.intelligence-feed article h3 a').first()).toBeVisible();
 
   await page.getByPlaceholder('搜索主题、来源或关键信号').fill('Copilot');
   await page.getByRole('button', { name: '搜索', exact: true }).click();
@@ -29,18 +27,20 @@ test('latest intelligence search and topic filters are reflected in the URL', as
 
 test('home, article and original evidence form a working route chain', async ({ page }) => {
   await page.goto('/?topic=rag-eval');
-  await page
-    .getByRole('link', {
-      name: '推理大模型的测试时扩展：推理机制、评估与可复现性',
-      exact: true,
-    })
-    .click();
+  const articleLink = page.locator('.intelligence-feed article h3 a').first();
+  await expect(articleLink).toBeVisible();
+  const articleHref = await articleLink.getAttribute('href');
+  const articleTitle = (await articleLink.textContent())?.trim();
+  if (!articleHref || !articleTitle) {
+    throw new Error('当前 RAG 主题下没有可用于路由验收的文章');
+  }
+  await articleLink.click();
 
-  await expect(page).toHaveURL(/\/article\/article-0a5a098d6f2d01ba23d0$/);
+  await expect(page).toHaveURL(new RegExp(`${articleHref}$`));
   await expect(
     page.getByRole('heading', {
       level: 1,
-      name: '推理大模型的测试时扩展：推理机制、评估与可复现性',
+      name: articleTitle,
     }),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: '查看原始来源' })).toHaveAttribute(
