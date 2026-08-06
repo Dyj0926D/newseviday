@@ -1,41 +1,40 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260806T024414Z-19fc303e-ai-50816643",
-  "generatedAt": "2026-08-06T02:44:23.785101Z",
+  "snapshotId": "snapshot-20260806T084432Z-9adae754-ai-bb56da47",
+  "generatedAt": "2026-08-06T08:44:51.880563Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 9,
   "contributingSourceCount": 8,
-  "aiArticleCount": 5,
-  "missingAbstractCount": 12,
-  "missingAbstractRate": 0.3,
+  "aiArticleCount": 8,
+  "missingAbstractCount": 10,
+  "missingAbstractRate": 0.25,
   "sourceCounts": {
     "anthropic-news": 4,
-    "arxiv-cs-ai": 8,
+    "arxiv-cs-ai": 6,
     "databricks-blog": 2,
     "dbt-labs-blog": 2,
-    "deepseek-updates": 8,
-    "github-ai-ml": 6,
-    "openai-news": 2,
+    "deepseek-updates": 6,
+    "github-ai-ml": 8,
+    "openai-news": 4,
     "qwen-blog": 8
   },
   "topicCounts": {
     "data-platform": 3,
-    "data-agent": 0,
+    "data-agent": 1,
     "semantic-layer": 0,
-    "intelligent-lakehouse": 1,
-    "rag-eval": 7,
+    "intelligent-lakehouse": 2,
+    "rag-eval": 10,
     "metadata-governance": 0,
-    "foundation-models": 32,
-    "ai-products-agents": 12
+    "foundation-models": 28,
+    "ai-products-agents": 16
   },
   "topicGaps": [
-    "data-agent",
     "metadata-governance",
     "semantic-layer"
   ],
   "potentialStoryClusters": [],
   "issues": [
-    "3 个配置主题暂时没有入选内容"
+    "2 个配置主题暂时没有入选内容"
   ]
 }

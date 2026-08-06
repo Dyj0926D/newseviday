@@ -1,7 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "updatedAt": "2026-08-06T02:44:16.206297Z",
+  "updatedAt": "2026-08-06T08:44:34.047524Z",
   "snapshots": [
+    {
+      "snapshotId": "snapshot-20260806T084432Z-9adae754-ai-bb56da47",
+      "generatedAt": "2026-08-06T08:44:34.047524Z",
+      "path": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json",
+      "articleCount": 40
+    },
     {
       "snapshotId": "snapshot-20260806T024414Z-19fc303e-ai-50816643",
       "generatedAt": "2026-08-06T02:44:16.206297Z",
@@ -17,12 +23,60 @@
   ],
   "articles": [
     {
+      "id": "article-410456543f831dcbef23",
+      "title": "Argus：面向长时程推理的通用智能体运行时",
+      "originalTitle": "Argus: A General-Purpose Agentic Runtime for Long-Horizon Reasoning",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-05T17:58:58Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-a0a859470205fccb3c47",
+      "title": "OctoLong：跨仓库代码上下文训练增强长上下文建模",
+      "originalTitle": "OctoLong: Mid-Training On Cross-Repository Code Contexts Enhances Long-Context Modeling",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-05T17:58:15Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-ede451c2a3cb8a2fee61",
+      "title": "教授 Nemotron 希腊语：跨专业领域挖掘语料、适配检索与生成",
+      "originalTitle": "Teaching Nemotron Greek: Mining a Corpus, Adapting Retrieval, and Grounding Generation for Modern Greek across Specialist Domains",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-05T17:56:40Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-d27b0f31fedb3aef1a62",
+      "title": "面向LLM智能体的层级图记忆：路径级定位与重写",
+      "originalTitle": "Hierarchical Graph Memory for LLM Agents with Path-level Localization and Rewrite",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-05T17:32:43Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-73a3e253adbaf3266387",
+      "title": "Item Response Theory for AI Safety",
+      "originalTitle": "Item Response Theory for AI Safety",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-05T17:25:27Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-257bca0618ae37df5bf5",
+      "title": "Provable Limits and Certified Deferral for Verbalized Uncertainty in Small Language Models",
+      "originalTitle": "Provable Limits and Certified Deferral for Verbalized Uncertainty in Small Language Models",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-05T17:11:04Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
       "id": "article-f1d4877545a986a0c734",
-      "title": "GitHub 法律团队用 Copilot CLI 简化工作流",
+      "title": "GitHub 法律团队用 Copilot CLI 简化工作流程",
       "originalTitle": "How the GitHub legal team used Copilot CLI to streamline their workflows",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-04T19:02:34Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-c99ec862b4e71599bc42",
@@ -110,15 +164,15 @@
       "originalTitle": "New ways to learn and teach with ChatGPT Work and Codex",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-04T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-a50fcff3a21f9aca662b",
-      "title": "Databricks完成对Panther的收购，加速安全湖仓时代",
+      "title": "Databricks Completes Acquisition of Panther: Accelerating the Security Lakehouse Era",
       "originalTitle": "Databricks Completes Acquisition of Panther: Accelerating the Security Lakehouse Era",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-08-03T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-deec56a13e2b9b57f5b5",
@@ -126,7 +180,7 @@
       "originalTitle": "How we built a realtime system for responsive voice AI in six months",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-03T07:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-cd88270c00622dafecb0",
@@ -134,7 +188,7 @@
       "originalTitle": "Univé builds an AI-ready workforce",
       "sourceId": "openai-news",
       "publishedAt": "2026-07-31T07:00:00Z",
-      "snapshotPath": "versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-ff7c1653ce2eb767fcfc",
@@ -161,12 +215,28 @@
       "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
     },
     {
+      "id": "article-dca7adc62d79fe1cd1f1",
+      "title": "Advancing the price-performance frontier with GPT-5.6",
+      "originalTitle": "Advancing the price-performance frontier with GPT-5.6",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-07-30T10:00:00Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
       "id": "article-439c007cd71f15603404",
       "title": "Convert proprietary code to open ANSI SQL with Genie Code",
       "originalTitle": "Convert proprietary code to open ANSI SQL with Genie Code",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-07-30T01:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-4e90420c69645ce576fc",
+      "title": "The harness is all you need (mostly)",
+      "originalTitle": "The harness is all you need (mostly)",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-07-27T18:00:00Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-3bbd8b07cb5a7e5a4148",
@@ -174,7 +244,7 @@
       "originalTitle": "GitHub Copilot app for Beginners: Getting started",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-27T16:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-98b061f178880396da02",
@@ -182,15 +252,31 @@
       "originalTitle": "Copilot vs. raw API access: What are you actually paying for?",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-22T19:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-24abb84d61b2e52549cc",
+      "title": "How to build interactive experiences with canvases",
+      "originalTitle": "How to build interactive experiences with canvases",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-07-21T16:00:00Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-c8dc1df614610019c8cf",
-      "title": "Better tools made Copilot code review worse. Here’s how we actually improved it.",
+      "title": "更好的工具反而让 Copilot 代码审查变差？我们是这样改进的",
       "originalTitle": "Better tools made Copilot code review worse. Here’s how we actually improved it.",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-10T15:57:47Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-2a7072ece5f3372bd87b",
+      "title": "Automating cross-repo documentation with GitHub Agentic Workflows",
+      "originalTitle": "Automating cross-repo documentation with GitHub Agentic Workflows",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-07-08T21:11:56Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-5b150c21cc84194b8733",
@@ -198,7 +284,7 @@
       "originalTitle": "The productivity gains hiding in your data infrastructure",
       "sourceId": "dbt-labs-blog",
       "publishedAt": "2026-07-08T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-db7f684905efdc853b1f",
@@ -206,15 +292,15 @@
       "originalTitle": "Data platforms were built to store. Intelligence platforms are built to reason.",
       "sourceId": "dbt-labs-blog",
       "publishedAt": "2026-07-02T15:24:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-2e0b2f76a5b7e197d60e",
-      "title": "Evaluating performance and efficiency of the GitHub Copilot agentic harness across models and tasks",
+      "title": "评估 GitHub Copilot 代理框架在多种模型和任务上的性能与效率",
       "originalTitle": "Evaluating performance and efficiency of the GitHub Copilot agentic harness across models and tasks",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-06-25T22:59:45Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-9173cc726336dababfa0",
@@ -222,7 +308,7 @@
       "originalTitle": "Qwen3Guard: Real-time Safety for Your Token Stream",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-09-22T20:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-2c308d1299a47f0fd6c1",
@@ -230,7 +316,7 @@
       "originalTitle": "Qwen-Image: Crafting with Native Text Rendering",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-08-04T14:08:30Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-2a193a141e55541a5d0e",
@@ -238,7 +324,7 @@
       "originalTitle": "Qwen-MT: Where Speed Meets Smart Translation",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-07-24T14:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-45b66faad922efd28827",
@@ -246,7 +332,15 @@
       "originalTitle": "Qwen3-Coder: Agentic Coding in the World",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-07-22T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-c775f203f583e33b82a3",
+      "title": "Time to Speak Some Dialects, Qwen-TTS!",
+      "originalTitle": "Time to Speak Some Dialects, Qwen-TTS!",
+      "sourceId": "qwen-blog",
+      "publishedAt": "2025-06-27T07:01:30Z",
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-740aa8b36f962c482d6b",
@@ -262,7 +356,7 @@
       "originalTitle": "Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-06-05T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-380631352b9e2cac6f0b",
@@ -270,7 +364,7 @@
       "originalTitle": "Qwen3: Think Deeper, Act Faster",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-04-28T20:00:00Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-7d620e492d990b3c0dc3",
@@ -278,7 +372,7 @@
       "originalTitle": "Qwen2.5 Omni: See, Hear, Talk, Write, Do It All!",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-03-26T16:00:45Z",
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-c34a327604b5be4a7c98",
@@ -286,7 +380,7 @@
       "originalTitle": "Introducing Claude Opus 5",
       "sourceId": "anthropic-news",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-4307222bc7e5f2e47115",
@@ -294,7 +388,7 @@
       "originalTitle": "Introducing Claude Sonnet 5",
       "sourceId": "anthropic-news",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-8b96329aed14643e23bf",
@@ -310,7 +404,7 @@
       "originalTitle": "Cognizant and Anthropic expand their partnership to bring Claude to enterprise clients",
       "sourceId": "anthropic-news",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-a66075dc0af41a686afe",
@@ -318,7 +412,7 @@
       "originalTitle": "Ask Claude about the Anthropic Economic Index",
       "sourceId": "anthropic-news",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-fd600cc958ac3fcb8eeb",
@@ -326,7 +420,7 @@
       "originalTitle": "DeepSeek-V4-Flash Update",
       "sourceId": "deepseek-updates",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-9cb994c900dd494fae54",
@@ -334,7 +428,7 @@
       "originalTitle": "DeepSeek-V4",
       "sourceId": "deepseek-updates",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-e40d53fb24759935a81c",
@@ -342,7 +436,7 @@
       "originalTitle": "DeepSeek-V3.2",
       "sourceId": "deepseek-updates",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-d12926ddba7ab466df98",
@@ -350,7 +444,7 @@
       "originalTitle": "DeepSeek-V3.2-Speciale",
       "sourceId": "deepseek-updates",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-167937abe4f015bb8f9e",
@@ -358,7 +452,7 @@
       "originalTitle": "DeepSeek-V3.2-Exp",
       "sourceId": "deepseek-updates",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-625b3d5c37fc39d886f2",
@@ -366,7 +460,7 @@
       "originalTitle": "DeepSeek-V3.1-Terminus",
       "sourceId": "deepseek-updates",
       "publishedAt": null,
-      "snapshotPath": "versions/snapshot-20260806T024414Z-19fc303e-ai-50816643.json"
+      "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
       "id": "article-faecdee00290f14e03c3",
