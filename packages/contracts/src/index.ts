@@ -177,6 +177,10 @@ export interface Article {
   ai: GeneratedText | null;
   evidenceIds: string[];
   topicScores: Record<string, number>;
+  /** Deterministic 0-1 score used for feed ordering; never model-generated. */
+  contentScore?: number;
+  /** Human-readable deterministic signals behind contentScore. */
+  selectionReasons?: string[];
   contentHash: string;
 }
 
@@ -267,6 +271,11 @@ export interface RagTrace {
   injectedChunkIds: string[];
   answerId: string | null;
   fallbackReason: string | null;
+  agentMode?: 'bounded_v1';
+  route?: 'single_fact' | 'comparison' | 'timeline' | 'policy_scope';
+  retrievalRounds?: number;
+  sufficiencyReason?: string | null;
+  stopReason?: 'evidence_sufficient' | 'evidence_insufficient' | 'policy_scope' | 'round_limit';
   latencyMs: number;
 }
 
@@ -332,6 +341,9 @@ export interface RagCitation {
 export interface RagStreamMeta {
   traceId: string;
   retrievalMode: 'chunk_dense' | 'article_dense';
+  agentMode?: 'bounded_v1';
+  route?: 'single_fact' | 'comparison' | 'timeline' | 'policy_scope';
+  retrievalRounds?: number;
   citations: RagCitation[];
 }
 

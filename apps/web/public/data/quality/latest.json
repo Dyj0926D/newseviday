@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0.0",
+  "snapshotId": "snapshot-20260805T035314Z-a2c2f64d-ai-07822422",
+  "generatedAt": "2026-08-06T02:00:20.123433Z",
+  "gate": "observe",
+  "articleCount": 40,
+  "configuredSourceCount": 9,
+  "contributingSourceCount": 7,
+  "aiArticleCount": 3,
+  "missingAbstractCount": 13,
+  "missingAbstractRate": 0.325,
+  "sourceCounts": {
+    "anthropic-news": 5,
+    "arxiv-cs-ai": 8,
+    "databricks-blog": 1,
+    "deepseek-updates": 8,
+    "github-ai-ml": 6,
+    "openai-news": 5,
+    "qwen-blog": 7
+  },
+  "topicCounts": {
+    "data-platform": 0,
+    "data-agent": 0,
+    "semantic-layer": 0,
+    "intelligent-lakehouse": 0,
+    "rag-eval": 16,
+    "metadata-governance": 0,
+    "foundation-models": 32,
+    "ai-products-agents": 14
+  },
+  "topicGaps": [
+    "data-agent",
+    "data-platform",
+    "intelligent-lakehouse",
+    "metadata-governance",
+    "semantic-layer"
+  ],
+  "potentialStoryClusters": [],
+  "issues": [
+    "5 个配置主题暂时没有入选内容"
+  ]
+}

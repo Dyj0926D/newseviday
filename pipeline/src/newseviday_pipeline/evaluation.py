@@ -10,6 +10,7 @@ from typing import Literal
 
 from pydantic import Field
 
+from newseviday_pipeline.agentic import retrieve_with_agent
 from newseviday_pipeline.embeddings import EmbeddingProvider
 from newseviday_pipeline.models import ContentSnapshot, ContractModel, EvalMetrics, EvalRun
 from newseviday_pipeline.rag import DenseIndexArtifact, retrieve_dense
@@ -42,6 +43,10 @@ class CorpusHealth(ContractModel):
 class AnswerQualityStatus(ContractModel):
     citation_coverage: float | None = None
     no_answer_accuracy: float
+    low_score_refusal_accuracy: float
+    answerable_pass_rate: float
+    agent_mode: str
+    average_retrieval_rounds: float
     status: str
 
 
@@ -123,16 +128,31 @@ def evaluate_rag(
     hits5: list[float] = []
     latencies: list[float] = []
     no_answer_results: list[float] = []
+    low_score_no_answer_results: list[float] = []
+    answerable_gate_results: list[float] = []
+    retrieval_rounds: list[int] = []
 
     for question in dataset.questions:
         started = time.perf_counter()
         result = retrieve_dense(question.question, index, embedder, top_k=10)
+        agentic = retrieve_with_agent(
+            question.question,
+            snapshot,
+            index,
+            embedder,
+            top_k=10,
+            minimum_score=minimum_score,
+        )
+        retrieval_rounds.append(agentic.retrieval_rounds)
         latencies.append((time.perf_counter() - started) * 1_000)
         ranked_articles = list(dict.fromkeys(item.chunk.article_id for item in result.candidates))
         if not question.answerable:
             top_score = result.candidates[0].score if result.candidates else -1.0
-            no_answer_results.append(float(top_score < minimum_score))
+            low_score_no_answer_results.append(float(top_score < minimum_score))
+            no_answer_results.append(float(not agentic.assessment.sufficient))
             continue
+
+        answerable_gate_results.append(float(agentic.assessment.sufficient))
 
         relevant = set(question.expected_article_ids)
         hits_at5 = relevant & set(ranked_articles[:5])
@@ -163,12 +183,21 @@ def evaluate_rag(
     no_answer_accuracy = (
         round(statistics.fmean(no_answer_results), 4) if no_answer_results else 0.0
     )
+    low_score_refusal_accuracy = (
+        round(statistics.fmean(low_score_no_answer_results), 4)
+        if low_score_no_answer_results
+        else 0.0
+    )
+    answerable_pass_rate = (
+        round(statistics.fmean(answerable_gate_results), 4) if answerable_gate_results else 0.0
+    )
     production_gate_passed = (
         health.passed
         and metrics.recall_at5 >= 0.75
         and metrics.hit_at5 >= 0.85
         and metrics.p95_latency_ms <= 4_000
         and no_answer_accuracy >= 0.8
+        and answerable_pass_rate >= 0.9
         and dataset.review_status == "human_reviewed"
     )
     gate: Literal["pass", "fail", "observe"] = (
@@ -197,11 +226,15 @@ def evaluate_rag(
         answer_quality=AnswerQualityStatus(
             citation_coverage=None,
             no_answer_accuracy=no_answer_accuracy,
+            low_score_refusal_accuracy=low_score_refusal_accuracy,
+            answerable_pass_rate=answerable_pass_rate,
+            agent_mode="bounded_v1",
+            average_retrieval_rounds=round(statistics.fmean(retrieval_rounds), 2),
             status="pending_generated_answer_review",
         ),
         note=(
-            "当前结果来自小规模验证集，用于比较检索策略。黄金题仍待人工复核，"
-            "回答引用覆盖率尚未评测，因此暂不作为正式发布结论。"
+            "当前结果来自小规模验证集。无答案识别已由单一阈值升级为有限步骤的"
+            "证据充分性门禁；黄金题和生成回答仍待人工复核，因此暂不作为正式发布结论。"
         ),
     )
 

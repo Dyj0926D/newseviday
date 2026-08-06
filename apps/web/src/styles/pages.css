@@ -179,6 +179,17 @@
   color: var(--ne-color-text-muted);
 }
 
+.article-archive-notice {
+  width: fit-content;
+  margin: 1rem 0 0;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgb(124 92 255 / 22%);
+  border-radius: var(--ne-radius-md);
+  background: rgb(124 92 255 / 8%);
+  color: var(--ne-color-text-secondary);
+  font-size: var(--ne-font-size-sm);
+}
+
 .article-layout {
   display: grid;
   max-width: var(--ne-content-max);

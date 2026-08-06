@@ -146,10 +146,13 @@ jobs:
             "$PUBLISH_SNAPSHOT" \
             --output data/runtime/rag/index.json \
             --vectorize-output data/runtime/rag/vectorize.ndjson
+          python -m uv run --project pipeline newseviday-pipeline audit-snapshot \
+            "$PUBLISH_SNAPSHOT" \
+            --report data/runtime/quality/latest.json
       - name: Run compatible RAG evaluation
         if: env.RUN_REFRESH == 'true'
         run: |
-          dataset="pipeline/eval/rag-gold-trial-v1.json"
+          dataset="pipeline/eval/rag-gold-trial-v2.json"
           if [[ -f "$dataset" ]]; then
             expected_snapshot="$(jq -r '.corpusSnapshotId' "$dataset")"
             current_snapshot="$(jq -r '.snapshotId' "$PUBLISH_SNAPSHOT")"
@@ -169,6 +172,9 @@ jobs:
           if [[ -f data/runtime/rag/eval-latest.json ]]; then
             publish_args+=(--eval-report data/runtime/rag/eval-latest.json)
           fi
+          if [[ -f data/runtime/quality/latest.json ]]; then
+            publish_args+=(--quality-report data/runtime/quality/latest.json)
+          fi
           python -m uv run --project pipeline newseviday-pipeline publish-web "${publish_args[@]}"
       - name: Verify publish candidate
         if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true'
@@ -187,6 +193,7 @@ jobs:
             data/runtime/content-enriched/
             data/runtime/ai-cache/
             data/runtime/rag/
+            data/runtime/quality/
           if-no-files-found: warn
           retention-days: 14
       - name: Commit snapshot candidate

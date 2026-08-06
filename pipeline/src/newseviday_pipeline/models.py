@@ -127,6 +127,8 @@ class Article(ContractModel):
     ai: GeneratedText | None = None
     evidence_ids: list[str] = Field(default_factory=list)
     topic_scores: dict[str, float] = Field(default_factory=dict)
+    content_score: float | None = Field(default=None, ge=0, le=1)
+    selection_reasons: list[str] = Field(default_factory=list, max_length=5)
     content_hash: str
 
 
@@ -220,6 +222,13 @@ class RagTrace(ContractModel):
     injected_chunk_ids: list[str] = Field(default_factory=list)
     answer_id: str | None = None
     fallback_reason: str | None = None
+    agent_mode: Literal["bounded_v1"] | None = None
+    route: Literal["single_fact", "comparison", "timeline", "policy_scope"] | None = None
+    retrieval_rounds: int | None = Field(default=None, ge=0, le=2)
+    sufficiency_reason: str | None = None
+    stop_reason: Literal[
+        "evidence_sufficient", "evidence_insufficient", "policy_scope", "round_limit"
+    ] | None = None
     latency_ms: int = Field(ge=0)
 
 

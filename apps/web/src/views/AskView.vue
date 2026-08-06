@@ -254,7 +254,7 @@ onBeforeUnmount(cancelAsk);
           <p class="section-kicker">TRACEABLE ANSWER</p>
           <h2>{{ refusal ? '当前语料不足以回答' : '基于证据的回答' }}</h2>
           <p v-if="refusal" class="rag-answer__refusal">
-            检索结果没有达到证据阈值，因此本次不调用模型生成结论。
+            当前语料没有满足问题所需的范围、时间或直接证据，因此本次不调用模型生成结论。
           </p>
           <p v-else class="rag-answer__body">
             {{ answer || '正在检索证据并生成回答…' }}
@@ -289,7 +289,7 @@ onBeforeUnmount(cancelAsk);
           <div>
             <h2>{{ ragAvailable ? '等待问题' : '功能准备中' }}</h2>
             <p>
-              正式回答按“检索候选、证据阈值、引用式生成、匿名 Trace”执行。没有足够证据时会拒答。
+              正式回答按“问题路由、最多两轮检索、证据门禁、引用式生成、匿名 Trace”执行。没有足够证据时会拒答。
             </p>
           </div>
         </section>

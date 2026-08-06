@@ -11,7 +11,7 @@ import IntelligenceLead from '../components/home/IntelligenceLead.vue';
 import IntelligenceRow from '../components/home/IntelligenceRow.vue';
 import SignalOverview from '../components/home/SignalOverview.vue';
 import { formatDateTime, resolveSource } from '../lib/intelligence';
-import { useContentStore } from '../stores/content';
+import { useContentStore, type ArchiveArticleEntry } from '../stores/content';
 import { useProfileStore } from '../stores/profile';
 
 const route = useRoute();
@@ -29,6 +29,8 @@ const source = ref(readQuery('source'));
 const time = ref(readQuery('time'));
 const visibleCount = ref(4);
 const savedIds = ref(new Set<string>());
+const archiveResults = ref<ArchiveArticleEntry[]>([]);
+const archiveSearching = ref(false);
 
 const snapshot = computed(() => content.snapshot);
 const sources = computed(() => snapshot.value?.sources ?? []);
@@ -69,7 +71,7 @@ const filteredArticles = computed(() => {
 
   return items.sort((left, right) => {
     if (view.value === 'recommended') return recommendationScore(right) - recommendationScore(left);
-    return timestamp(right) - timestamp(left);
+    return contentScore(right) - contentScore(left) || timestamp(right) - timestamp(left);
   });
 });
 
@@ -115,14 +117,21 @@ function timestamp(article: Article): number {
 }
 
 function recommendationScore(article: Article): number {
+  const valueScore = contentScore(article);
   if (profile.profile) {
-    return Object.entries(article.topicScores).reduce(
+    const profileScore = Object.entries(article.topicScores).reduce(
       (score, [topicId, topicScore]) =>
         score + topicScore * (profile.profile?.interests[topicId] ?? 0),
       0,
     );
+    return valueScore * 0.4 + profileScore * 0.6;
   }
-  return Math.max(0, ...Object.values(article.topicScores));
+  return valueScore;
+}
+
+function contentScore(article: Article): number {
+  if (typeof article.contentScore === 'number') return article.contentScore;
+  return Math.max(0, ...Object.values(article.topicScores)) * 0.65 + 0.35;
 }
 
 function recommendationReason(article: Article): string | undefined {
@@ -144,8 +153,11 @@ function updateRoute(key: string, value: string): void {
   void router.replace({ path: '/', query: nextQuery });
 }
 
-function submitSearch(): void {
+async function submitSearch(): Promise<void> {
   updateRoute('q', query.value.trim());
+  archiveSearching.value = query.value.trim().length >= 2;
+  archiveResults.value = await content.searchArchive(query.value);
+  archiveSearching.value = false;
 }
 
 function setView(value: 'all' | 'recommended'): void {
@@ -207,6 +219,7 @@ onMounted(async () => {
 
   profile.hydrate();
   await content.refresh();
+  if (query.value.trim().length >= 2) await submitSearch();
   if (readQuery('focus') === 'search') {
     await nextTick();
     document.querySelector<HTMLInputElement>('[data-home-search]')?.focus();
@@ -245,7 +258,7 @@ onMounted(async () => {
               <div>
                 <p class="section-kicker">CURATED FEED</p>
                 <h2 id="feed-title">{{ view === 'recommended' ? '为你推荐' : '最新情报' }}</h2>
-                <p>{{ filteredArticles.length }} 条内容，按发布时间与主题相关度整理</p>
+                <p>{{ filteredArticles.length }} 条内容，按内容价值、时效与主题相关度整理</p>
               </div>
               <RouterLink class="text-link" to="/brief">
                 查看趋势简报
@@ -314,6 +327,25 @@ onMounted(async () => {
                 清除筛选
               </button>
             </div>
+
+            <section v-if="query.trim().length >= 2" class="archive-search" aria-live="polite">
+              <div>
+                <p class="section-kicker">PUBLIC ARCHIVE</p>
+                <h3>历史快照匹配</h3>
+                <span>{{ archiveSearching ? '正在检索公开历史索引' : `${archiveResults.length} 条历史标题匹配` }}</span>
+              </div>
+              <RouterLink
+                v-for="item in archiveResults"
+                :key="item.id"
+                :to="`/article/${item.id}`"
+              >
+                <strong>{{ item.title }}</strong>
+                <small>{{ item.sourceId }} · {{ item.publishedAt ? formatDateTime(item.publishedAt) : '时间未知' }}</small>
+              </RouterLink>
+              <p v-if="!archiveSearching && !archiveResults.length">
+                公开历史索引只检索标题和来源，不等同于全文或语义检索。
+              </p>
+            </section>
           </div>
         </div>
 
@@ -338,6 +370,42 @@ onMounted(async () => {
   border-radius: 2.25rem 2.25rem 0 0;
   background: var(--ne-color-bg-page);
   box-shadow: 0 -1rem 3.5rem rgb(10 9 27 / 8%);
+}
+
+.archive-search {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--ne-color-border-subtle);
+  border-radius: var(--ne-radius-lg);
+  background: var(--ne-color-bg-surface);
+}
+
+.archive-search > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.archive-search h3 {
+  margin: 0.15rem 0 0;
+}
+
+.archive-search > a {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.8rem 0;
+  border-top: 1px solid var(--ne-color-border-subtle);
+  color: inherit;
+  text-decoration: none;
+}
+
+.archive-search small,
+.archive-search span,
+.archive-search > p {
+  color: var(--ne-color-text-muted);
 }
 
 @media (max-width: 767px) {
