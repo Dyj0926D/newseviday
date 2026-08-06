@@ -17,6 +17,7 @@ from newseviday_pipeline.terminology import TerminologyConfig
 
 PROMPT_VERSION = "article-enrichment-v3"
 PROFILE_PROMPT_VERSION = "profile-enhancement-v1"
+MIN_ENRICHMENT_EVIDENCE_CHARS = 120
 SchemaModel = TypeVar("SchemaModel", bound=BaseModel)
 
 
@@ -199,6 +200,8 @@ def enrich_snapshot(
     topic_description = ", ".join(f"{topic.id}={topic.label}" for topic in topics)
     for article in _source_diverse_order(result.articles):
         evidence = article.facts.abstract or article.facts.title
+        if len(evidence.strip()) < MIN_ENRICHMENT_EVIDENCE_CHARS:
+            continue
         terminology_instruction = _terminology_instruction(evidence, terminology)
         terminology_signature = hashlib.sha256(
             terminology_instruction.encode("utf-8")
