@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260806T024414Z-19fc303e-ai-50816643",
-  "generatedAt": "2026-08-06T02:44:23.785101Z",
+  "snapshotId": "snapshot-20260806T043139Z-549351af-ai-77d7a0ad",
+  "generatedAt": "2026-08-06T04:31:50.470263Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 9,
   "contributingSourceCount": 8,
-  "aiArticleCount": 5,
+  "aiArticleCount": 3,
   "missingAbstractCount": 12,
   "missingAbstractRate": 0.3,
   "sourceCounts": {
@@ -24,10 +24,10 @@
     "data-agent": 0,
     "semantic-layer": 0,
     "intelligent-lakehouse": 1,
-    "rag-eval": 7,
+    "rag-eval": 10,
     "metadata-governance": 0,
     "foundation-models": 32,
-    "ai-products-agents": 12
+    "ai-products-agents": 11
   },
   "topicGaps": [
     "data-agent",
