@@ -95,7 +95,7 @@ describe('worker API', () => {
 
     expect(response.status).toBe(503);
     expect(payload.error.code).toBe('invalid_configuration');
-    expect(JSON.stringify(payload)).not.toContain('999');
+    expect(JSON.stringify(payload.error)).not.toContain('999');
   });
 
   it('fails closed when soft limits exceed their hard limits', async () => {

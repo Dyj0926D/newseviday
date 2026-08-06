@@ -13,11 +13,19 @@ from pydantic import BaseModel
 
 from newseviday_pipeline.ai_models import ArticleEnrichment, ProfileEnhancement
 from newseviday_pipeline.models import Article, ContentSnapshot, GeneratedText, TopicConfig
+from newseviday_pipeline.stages import (
+    chinese_display_ready,
+    key_signal_assessment,
+    key_signal_waiting_for_chinese,
+)
 from newseviday_pipeline.terminology import TerminologyConfig
 
 PROMPT_VERSION = "article-enrichment-v3"
 PROFILE_PROMPT_VERSION = "profile-enhancement-v1"
 MIN_ENRICHMENT_EVIDENCE_CHARS = 120
+TRANSLATION_PRIORITY_SCORE = 0.60
+HOME_PRIORITY_WINDOW = 8
+SOURCE_REPEAT_PENALTY = 0.18
 SchemaModel = TypeVar("SchemaModel", bound=BaseModel)
 
 
@@ -151,34 +159,83 @@ def _terminology_instruction(evidence: str, config: TerminologyConfig | None) ->
     )
 
 
-def _source_diverse_order(articles: list[Article]) -> list[Article]:
-    groups: dict[str, list[Article]] = {}
-    for article in articles:
-        groups.setdefault(article.source_id, []).append(article)
+def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
+    """Prioritize valuable untranslated items while preserving source diversity."""
+
     topic_counts: dict[str, int] = {}
     for article in articles:
         for topic_id in article.topic_scores:
             topic_counts[topic_id] = topic_counts.get(topic_id, 0) + 1
+    homepage_ids = {
+        article.id
+        for article in sorted(
+            articles,
+            key=lambda item: item.content_score or 0.0,
+            reverse=True,
+        )[:HOME_PRIORITY_WINDOW]
+    }
+    source_selections: dict[str, int] = {}
+    recent_sources: list[str] = []
+    remaining = list(articles)
+    result: list[Article] = []
 
     def priority(article: Article) -> float:
-        if article.content_score is None:
-            return 0.0
+        score = article.content_score or 0.0
         underrepresented_bonus = max(
             (1 / max(1, topic_counts.get(topic_id, 1)) for topic_id in article.topic_scores),
             default=0.0,
         )
-        cross_language_bonus = 0.08 if article.language.casefold().startswith("en") else 0.0
-        return article.content_score + 0.12 * underrepresented_bonus + cross_language_bonus
+        needs_chinese = not chinese_display_ready(article)
+        key_translation_bonus = (
+            100.0
+            if needs_chinese
+            and article.content_score_breakdown is not None
+            and key_signal_waiting_for_chinese(article)
+            else 0.0
+        )
+        high_value_translation_bonus = (
+            10.0 if needs_chinese and score >= TRANSLATION_PRIORITY_SCORE else 0.0
+        )
+        homepage_translation_bonus = (
+            4.0 if needs_chinese and article.id in homepage_ids else 0.0
+        )
+        cross_language_bonus = (
+            0.08
+            if needs_chinese and not article.language.casefold().startswith("zh")
+            else 0.0
+        )
+        source_penalty = SOURCE_REPEAT_PENALTY * source_selections.get(article.source_id, 0)
+        editorial_priority = 0.25 * (article.key_signal.score if article.key_signal else 0.0)
+        return (
+            key_translation_bonus
+            + high_value_translation_bonus
+            + homepage_translation_bonus
+            + score
+            + editorial_priority
+            + 0.12 * underrepresented_bonus
+            + cross_language_bonus
+            - source_penalty
+        )
 
-    for group in groups.values():
-        group.sort(key=priority, reverse=True)
-    maximum = max((len(group) for group in groups.values()), default=0)
-    return [
-        group[index]
-        for index in range(maximum)
-        for group in groups.values()
-        if index < len(group)
-    ]
+    while remaining:
+        candidates = [
+            article
+            for article in remaining
+            if not (
+                len(recent_sources) >= 2
+                and recent_sources[-1] == recent_sources[-2] == article.source_id
+            )
+        ]
+        if not candidates:
+            candidates = remaining
+        selected = max(candidates, key=priority)
+        remaining.remove(selected)
+        result.append(selected)
+        source_selections[selected.source_id] = source_selections.get(selected.source_id, 0) + 1
+        recent_sources.append(selected.source_id)
+        if len(recent_sources) > 2:
+            recent_sources.pop(0)
+    return result
 
 
 def enrich_snapshot(
@@ -198,7 +255,7 @@ def enrich_snapshot(
     model_calls = 0
     allowed_topics = {topic.id for topic in topics}
     topic_description = ", ".join(f"{topic.id}={topic.label}" for topic in topics)
-    for article in _source_diverse_order(result.articles):
+    for article in _enrichment_priority_order(result.articles):
         evidence = article.facts.abstract or article.facts.title
         if len(evidence.strip()) < MIN_ENRICHMENT_EVIDENCE_CHARS:
             continue
@@ -251,6 +308,9 @@ def enrich_snapshot(
     suffix = hashlib.sha256(
         f"{snapshot.snapshot_id}:{client.model}:{PROMPT_VERSION}".encode()
     ).hexdigest()[:8]
+    for article in result.articles:
+        if article.content_score_breakdown is not None:
+            article.key_signal = key_signal_assessment(article)
     result.snapshot_id = f"{snapshot.snapshot_id}-ai-{suffix}"
     result.generated_at = generated_at
     return result, model_calls

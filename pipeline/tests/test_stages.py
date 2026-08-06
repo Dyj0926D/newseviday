@@ -2,10 +2,14 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from newseviday_pipeline.models import RawFeedItem, TopicConfig
+from newseviday_pipeline.models import GeneratedText, RawFeedItem, TopicConfig
 from newseviday_pipeline.stages import (
+    CHINESE_READINESS_FAILURE,
+    apply_article_scoring,
     apply_content_quotas,
     canonicalize_url,
+    chinese_display_ready,
+    content_score_breakdown,
     content_value_score,
     exact_deduplicate,
     fuzzy_deduplicate,
@@ -112,3 +116,151 @@ def test_content_value_score_balances_relevance_freshness_and_completeness() -> 
 
     assert content_value_score(recent, anchor=NOW) > content_value_score(stale, anchor=NOW)
     assert apply_content_quotas([stale, recent])[0].id == recent.id
+
+
+def test_content_score_assigns_twenty_five_percent_to_engineering_signals() -> None:
+    engineering = normalize_item(
+        item(
+            "https://example.com/engineering",
+            "Open-source semantic platform benchmark improves production latency by 35%",
+            (
+                "We introduce a general-purpose framework with an API and deployment workflow. "
+                "Evaluation across datasets shows lower cost and higher throughput than baseline. "
+            )
+            * 3,
+        ),
+        collected_at=NOW,
+    )[0]
+    engineering.published_at = NOW
+    engineering.topic_scores = {"semantic-layer": 1.0, "data-agent": 0.8}
+    plain = normalize_item(
+        item("https://example.com/plain", "Semantic layer research", "x" * 300),
+        collected_at=NOW,
+    )[0]
+    plain.published_at = NOW
+    plain.topic_scores = {"semantic-layer": 1.0, "data-agent": 0.8}
+
+    breakdown = content_score_breakdown(engineering, anchor=NOW)
+
+    assert breakdown.technical_advancement >= 0.7
+    assert breakdown.engineering_applicability >= 0.7
+    assert breakdown.technical_generality >= 0.65
+    assert content_value_score(engineering, anchor=NOW) > content_value_score(plain, anchor=NOW)
+
+
+def test_arxiv_source_has_a_six_article_daily_cap() -> None:
+    candidates = []
+    for index in range(8):
+        article = normalize_item(
+            item(
+                f"https://arxiv.org/abs/2608.{index:05d}",
+                f"RAG evaluation benchmark {index}",
+                "We propose an evaluation dataset for retrieval systems. " * 5,
+            ),
+            collected_at=NOW,
+        )[0]
+        article.source_id = "arxiv-cs-ai"
+        article.published_at = NOW - timedelta(minutes=index)
+        article.topic_scores = {"rag-eval": 0.9}
+        candidates.append(article)
+    official = normalize_item(
+        item(
+            "https://example.com/release",
+            "Data agent platform release",
+            "A production platform API and workflow for enterprise data agents. " * 4,
+        ),
+        collected_at=NOW,
+    )[0]
+    official.topic_scores = {"data-agent": 1.0}
+    candidates.append(official)
+
+    selected = apply_content_quotas(candidates, max_total=20)
+
+    assert sum(article.source_id == "arxiv-cs-ai" for article in selected) == 6
+    assert official in selected
+
+
+def test_key_signal_uses_a_separate_editorial_gate() -> None:
+    candidate = normalize_item(
+        item(
+            "https://example.com/key-signal",
+            "Open-source data agent platform benchmark improves production latency by 35%",
+            (
+                "We introduce a general-purpose framework, API, deployment workflow and dataset. "
+                "Evaluation across models shows higher throughput and lower cost than baseline. "
+            )
+            * 3,
+        ),
+        collected_at=NOW,
+    )[0]
+    candidate.published_at = NOW
+    candidate.topic_scores = {"data-agent": 1.0, "semantic-layer": 0.8}
+    candidate.ai = GeneratedText(
+        title_zh="开源数据智能体平台将生产延迟降低 35%",
+        summary_zh="该平台提供通用框架、API 与可复现评测，并给出跨模型生产部署结果。",
+        why_it_matters="可用于判断数据智能体的落地成本。",
+        key_points=["生产延迟降低", "提供开源框架"],
+        model="deepseek-test",
+        prompt_version="test",
+        generated_at=NOW,
+    )
+
+    apply_article_scoring(candidate, anchor=NOW)
+
+    assert candidate.content_score is not None and candidate.content_score >= 0.75
+    assert candidate.key_signal is not None and candidate.key_signal.eligible
+
+
+def test_key_signal_rejects_a_narrow_low_relevance_paper() -> None:
+    candidate = normalize_item(
+        item(
+            "https://arxiv.org/abs/2608.99999",
+            "Modern Greek police language processing benchmark",
+            "We propose a new benchmark and dataset for Modern Greek police language. " * 4,
+        ),
+        collected_at=NOW,
+    )[0]
+    candidate.source_id = "arxiv-cs-ai"
+    candidate.published_at = NOW
+    candidate.topic_scores = {"foundation-models": 0.8}
+    candidate.ai = GeneratedText(
+        title_zh="现代希腊语警务语言处理评测",
+        summary_zh="论文整理了现代希腊语警务语言数据集和评测方法。",
+        why_it_matters="适用于特定语种研究。",
+        key_points=["建立数据集", "限定特定语种"],
+        model="deepseek-test",
+        prompt_version="test",
+        generated_at=NOW,
+    )
+
+    apply_article_scoring(candidate, anchor=NOW)
+
+    assert candidate.key_signal is not None
+    assert not candidate.key_signal.eligible
+    assert "目标用户相关性低于 65" in candidate.key_signal.gate_failures
+
+
+def test_chinese_source_satisfies_display_gate_without_model_output() -> None:
+    candidate = normalize_item(
+        RawFeedItem(
+            source_id="official-cn",
+            url="https://example.cn/release",
+            title="数据智能体平台发布统一语义能力",
+            summary=(
+                "该平台发布统一指标口径、权限治理和可追溯查询能力，"
+                "面向企业生产环境提供接口与评测结果。"
+            )
+            * 3,
+            language="zh-CN",
+        ),
+        collected_at=NOW,
+    )[0]
+    candidate.published_at = NOW
+    candidate.topic_scores = {"data-agent": 1.0, "semantic-layer": 0.8}
+
+    apply_article_scoring(candidate, anchor=NOW)
+
+    assert chinese_display_ready(candidate)
+    assert candidate.ai is None
+    assert candidate.key_signal is not None
+    assert CHINESE_READINESS_FAILURE not in candidate.key_signal.gate_failures

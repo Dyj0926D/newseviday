@@ -10,6 +10,7 @@ import InlineNotice from '../components/home/InlineNotice.vue';
 import IntelligenceLead from '../components/home/IntelligenceLead.vue';
 import IntelligenceRow from '../components/home/IntelligenceRow.vue';
 import SignalOverview from '../components/home/SignalOverview.vue';
+import { diversifyBySource, selectKeySignal } from '../lib/feedRanking';
 import { formatDateTime, resolveSource } from '../lib/intelligence';
 import { useContentStore, type ArchiveArticleEntry } from '../stores/content';
 import { useProfileStore } from '../stores/profile';
@@ -75,9 +76,33 @@ const filteredArticles = computed(() => {
   });
 });
 
-const visibleArticles = computed(() => filteredArticles.value.slice(0, visibleCount.value));
-const leadArticle = computed(() => visibleArticles.value[0] ?? null);
-const listArticles = computed(() => visibleArticles.value.slice(1));
+const isDefaultFeed = computed(
+  () =>
+    view.value === 'all' &&
+    !query.value.trim() &&
+    !topic.value &&
+    !region.value &&
+    !source.value &&
+    !time.value,
+);
+const keySignalArticle = computed(() =>
+  isDefaultFeed.value ? selectKeySignal(filteredArticles.value) : null,
+);
+const displayArticles = computed(() => {
+  const keySignal = keySignalArticle.value;
+  const remaining = keySignal
+    ? filteredArticles.value.filter((article) => article.id !== keySignal.id)
+    : filteredArticles.value;
+  const diversified = diversifyBySource(remaining, {
+    leadingSourceIds: keySignal ? [keySignal.sourceId] : [],
+  });
+  return keySignal ? [keySignal, ...diversified] : diversified;
+});
+const visibleArticles = computed(() => displayArticles.value.slice(0, visibleCount.value));
+const leadArticle = computed(() => keySignalArticle.value);
+const listArticles = computed(() =>
+  leadArticle.value ? visibleArticles.value.slice(1) : visibleArticles.value,
+);
 const topicSignals = computed(() =>
   topics.value
     .map((item) => ({
@@ -292,8 +317,9 @@ onMounted(async () => {
               <span></span><span></span><span></span>
             </div>
 
-            <div v-else-if="leadArticle" class="intelligence-feed">
+            <div v-else-if="visibleArticles.length" class="intelligence-feed">
               <IntelligenceLead
+                v-if="leadArticle"
                 :article="leadArticle"
                 :source="resolveSource(leadArticle, sources)"
                 :topics="topics"
@@ -312,11 +338,11 @@ onMounted(async () => {
                 @save="toggleSaved"
               />
 
-              <div v-if="visibleCount < filteredArticles.length" class="load-more">
+              <div v-if="visibleCount < displayArticles.length" class="load-more">
                 <button class="button button--secondary" type="button" @click="visibleCount += 4">
                   加载更多情报
                 </button>
-                <span>已展示 {{ visibleArticles.length }} / {{ filteredArticles.length }}</span>
+                <span>已展示 {{ visibleArticles.length }} / {{ displayArticles.length }}</span>
               </div>
             </div>
 
@@ -332,15 +358,18 @@ onMounted(async () => {
               <div>
                 <p class="section-kicker">PUBLIC ARCHIVE</p>
                 <h3>历史快照匹配</h3>
-                <span>{{ archiveSearching ? '正在检索公开历史索引' : `${archiveResults.length} 条历史标题匹配` }}</span>
+                <span>{{
+                  archiveSearching
+                    ? '正在检索公开历史索引'
+                    : `${archiveResults.length} 条历史标题匹配`
+                }}</span>
               </div>
-              <RouterLink
-                v-for="item in archiveResults"
-                :key="item.id"
-                :to="`/article/${item.id}`"
-              >
+              <RouterLink v-for="item in archiveResults" :key="item.id" :to="`/article/${item.id}`">
                 <strong>{{ item.title }}</strong>
-                <small>{{ item.sourceId }} · {{ item.publishedAt ? formatDateTime(item.publishedAt) : '时间未知' }}</small>
+                <small>
+                  {{ item.sourceId }} ·
+                  {{ item.publishedAt ? formatDateTime(item.publishedAt) : '时间未知' }}
+                </small>
               </RouterLink>
               <p v-if="!archiveSearching && !archiveResults.length">
                 公开历史索引只检索标题和来源，不等同于全文或语义检索。
