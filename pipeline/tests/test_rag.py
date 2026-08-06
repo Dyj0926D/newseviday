@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from newseviday_pipeline.embeddings import HashingEmbedder
@@ -13,6 +14,11 @@ from newseviday_pipeline.snapshot import load_snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
 CURRENT_SNAPSHOT = ROOT / "apps" / "web" / "public" / "data" / "current.json"
+RAG_DATASET = ROOT / "pipeline" / "eval" / "rag-gold-trial-v2.json"
+RAG_CORPUS_SNAPSHOT_ID = json.loads(RAG_DATASET.read_text(encoding="utf-8"))["corpusSnapshotId"]
+PINNED_RAG_SNAPSHOT = (
+    ROOT / "apps" / "web" / "public" / "data" / "versions" / f"{RAG_CORPUS_SNAPSHOT_ID}.json"
+)
 
 
 def test_chunks_are_traceable_and_deterministic() -> None:
@@ -27,7 +33,7 @@ def test_chunks_are_traceable_and_deterministic() -> None:
 
 
 def test_dense_retrieval_context_and_article_fallback() -> None:
-    snapshot = load_snapshot(CURRENT_SNAPSHOT)
+    snapshot = load_snapshot(PINNED_RAG_SNAPSHOT)
     embedder = HashingEmbedder()
     index = build_dense_index(snapshot, embedder)
     result = retrieve_dense("Video-DeepResearch 发现了哪两个智能体瓶颈？", index, embedder, top_k=5)
