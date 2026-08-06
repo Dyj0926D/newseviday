@@ -7,13 +7,22 @@ from newseviday_pipeline.rag import build_dense_index
 from newseviday_pipeline.snapshot import load_snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
-TRIAL_SNAPSHOT = ROOT / "apps" / "web" / "public" / "data" / "current.json"
 DATASET = ROOT / "pipeline" / "eval" / "rag-gold-trial-v2.json"
 
 
 def test_unreviewed_trial_eval_cannot_pass_production_gate() -> None:
-    snapshot = load_snapshot(TRIAL_SNAPSHOT)
     dataset = load_gold_dataset(DATASET)
+    trial_snapshot = (
+        ROOT
+        / "apps"
+        / "web"
+        / "public"
+        / "data"
+        / "versions"
+        / f"{dataset.corpus_snapshot_id}.json"
+    )
+    snapshot = load_snapshot(trial_snapshot)
+    assert snapshot.snapshot_id == dataset.corpus_snapshot_id
     embedder = HashingEmbedder()
     index = build_dense_index(snapshot, embedder)
     report = evaluate_rag(
