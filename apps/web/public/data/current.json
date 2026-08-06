@@ -193,7 +193,7 @@
       },
       "ai": {
         "titleZh": "Argus：面向长时程推理的通用智能体运行时",
-        "summaryZh": "Argus 是一个持久化、自进化的智能体运行时，通过 Manager、Planner、Engineer、Reviewer 角色在项目状态上执行任务，分离用户意图与操作目标，并引入验证门控的自进化机制。在 SWE-Bench Pro 上达到 78% 准确率，相比 Direct Copilot 的 59% 有显著提升，同时 token 消耗仅为其 1.41 倍。自进化后，成熟任务减少 21% 的输入 token 和 15% 的工作时间，并记录了 34 次验证器恢复和 22 次严格审查循环救援。",
+        "summaryZh": "Argus 是一个持久化、自进化的智能体运行时，通过 Manager、Planner、Engineer、Reviewer 角色在项目状态上执行任务，分离用户意图与操作目标，并引入验证门控的自进化机制。在 SWE-Bench Pro 上得分约 78%，高于 Direct Copilot 的 59%，但总 token 消耗为其 1.41 倍。自进化后，成熟任务减少 21% 的输入 token 和 15% 的工作时间，并记录了 34 次验证器恢复和 22 次严格审查循环救援。",
         "whyItMatters": "Argus 展示了固定权重模型通过运行时状态和策略实现自进化，提升长时程推理任务的性能与效率，为智能体系统设计提供新范式。",
         "keyPoints": [
           "持久化运行时支持任务持久与转向",
