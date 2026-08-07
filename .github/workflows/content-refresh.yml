@@ -121,15 +121,19 @@ jobs:
         shell: bash
         run: |
           previous_run_id=""
+          previous_artifact_name=""
           while IFS= read -r candidate_run_id; do
             [[ -n "$candidate_run_id" ]] || continue
-            expected_artifact="content-refresh-${candidate_run_id}"
+            paid_artifact="content-refresh-${candidate_run_id}-true"
+            legacy_artifact="content-refresh-${candidate_run_id}"
             artifact_name="$(gh api \
               "repos/${GITHUB_REPOSITORY}/actions/runs/${candidate_run_id}/artifacts" \
-              | jq -r --arg expected "$expected_artifact" \
-                '[.artifacts[] | select(.name == $expected and (.expired | not))][0].name // empty')"
+              | jq -r --arg paid "$paid_artifact" --arg legacy "$legacy_artifact" \
+                '[.artifacts[] | select((.name == $paid or .name == $legacy) and (.expired | not)) | .name]
+                 | if index($paid) then $paid else .[0] // empty end')"
             if [[ -n "$artifact_name" ]]; then
               previous_run_id="$candidate_run_id"
+              previous_artifact_name="$artifact_name"
               break
             fi
           done < <(gh run list \
@@ -141,7 +145,7 @@ jobs:
           if [ -n "$previous_run_id" ]; then
             mkdir -p data/runtime/previous-artifact data/runtime/ai-cache
             if gh run download "$previous_run_id" \
-              --name "content-refresh-${previous_run_id}" \
+              --name "$previous_artifact_name" \
               --dir data/runtime/previous-artifact; then
               if [ -d data/runtime/previous-artifact/ai-cache ]; then
                 cp -R data/runtime/previous-artifact/ai-cache/. data/runtime/ai-cache/
@@ -150,7 +154,7 @@ jobs:
               echo "::warning::Previous AI cache artifact could not be downloaded; continuing with the Actions cache only."
             fi
           else
-            echo "No non-expired content refresh artifact was found; continuing with the Actions cache only."
+            echo "No non-expired paid refresh artifact was found; continuing with the Actions cache only."
           fi
       - name: Collect configured public sources
         if: env.RUN_REFRESH == 'true'
@@ -221,7 +225,7 @@ jobs:
         if: always() && env.RUN_REFRESH == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: content-refresh-${{ github.run_id }}
+          name: content-refresh-${{ github.run_id }}-${{ env.ALLOW_MODEL }}
           path: |
             data/runtime/content-refresh/
             data/runtime/content-enriched/
