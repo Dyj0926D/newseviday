@@ -75,6 +75,22 @@ jobs:
             echo "MODEL_CALL_LIMIT=${{ inputs.max_model_calls }}" >> "$GITHUB_ENV"
             echo "OPEN_PULL_REQUEST=${{ inputs.open_pull_request }}" >> "$GITHUB_ENV"
           fi
+      - name: Avoid overlapping scheduled content pull requests
+        if: env.RUN_REFRESH == 'true' && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          open_refresh_pr="$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --limit 100 \
+            --json number,headRefName \
+            --jq '[.[] | select(.headRefName | startswith("content-refresh/"))][0].number // empty')"
+          if [[ -n "$open_refresh_pr" ]]; then
+            echo "RUN_REFRESH=false" >> "$GITHUB_ENV"
+            echo "Scheduled refresh skipped because content PR #${open_refresh_pr} is still open."
+          fi
       - uses: actions/checkout@v7
         if: env.RUN_REFRESH == 'true'
       - uses: actions/setup-python@v7
@@ -102,21 +118,39 @@ jobs:
         if: env.RUN_REFRESH == 'true' && env.ALLOW_MODEL == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
-          previous_run_id="$(gh run list \
+          previous_run_id=""
+          while IFS= read -r candidate_run_id; do
+            [[ -n "$candidate_run_id" ]] || continue
+            expected_artifact="content-refresh-${candidate_run_id}"
+            artifact_name="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${candidate_run_id}/artifacts" \
+              | jq -r --arg expected "$expected_artifact" \
+                '[.artifacts[] | select(.name == $expected and (.expired | not))][0].name // empty')"
+            if [[ -n "$artifact_name" ]]; then
+              previous_run_id="$candidate_run_id"
+              break
+            fi
+          done < <(gh run list \
             --workflow content-refresh.yml \
             --status success \
-            --limit 1 \
+            --limit 20 \
             --json databaseId \
-            --jq '.[0].databaseId // empty')"
+            --jq '.[].databaseId')
           if [ -n "$previous_run_id" ]; then
             mkdir -p data/runtime/previous-artifact data/runtime/ai-cache
-            gh run download "$previous_run_id" \
+            if gh run download "$previous_run_id" \
               --name "content-refresh-${previous_run_id}" \
-              --dir data/runtime/previous-artifact
-            if [ -d data/runtime/previous-artifact/ai-cache ]; then
-              cp -R data/runtime/previous-artifact/ai-cache/. data/runtime/ai-cache/
+              --dir data/runtime/previous-artifact; then
+              if [ -d data/runtime/previous-artifact/ai-cache ]; then
+                cp -R data/runtime/previous-artifact/ai-cache/. data/runtime/ai-cache/
+              fi
+            else
+              echo "::warning::Previous AI cache artifact could not be downloaded; continuing with the Actions cache only."
             fi
+          else
+            echo "No non-expired content refresh artifact was found; continuing with the Actions cache only."
           fi
       - name: Collect configured public sources
         if: env.RUN_REFRESH == 'true'
