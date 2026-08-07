@@ -180,6 +180,35 @@ def test_arxiv_source_has_a_six_article_daily_cap() -> None:
     assert official in selected
 
 
+def test_arxiv_requires_strong_target_relevance_before_entering_the_feed() -> None:
+    specialist = normalize_item(
+        item(
+            "https://arxiv.org/abs/2608.12345",
+            "Synthetic clinical benchmark for enterprise AI agents",
+            "We introduce a healthcare benchmark with quantitative evaluation. " * 6,
+        ),
+        collected_at=NOW,
+    )[0]
+    specialist.source_id = "arxiv-cs-ai"
+    specialist.published_at = NOW
+    specialist.topic_scores = {"ai-products-agents": 0.45}
+    official = normalize_item(
+        item(
+            "https://example.com/official-agent-update",
+            "Enterprise AI agent product update",
+            "The product adds a production workflow and evaluation API. " * 6,
+        ),
+        collected_at=NOW,
+    )[0]
+    official.published_at = NOW
+    official.topic_scores = {"ai-products-agents": 0.45}
+
+    selected = apply_content_quotas([specialist, official], max_total=10)
+
+    assert specialist not in selected
+    assert official in selected
+
+
 def test_key_signal_uses_a_separate_editorial_gate() -> None:
     candidate = normalize_item(
         item(

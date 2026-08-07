@@ -46,6 +46,8 @@ PRIMARY_PRODUCT_TOPICS = {
 }
 ARXIV_SOURCE_ID = "arxiv-cs-ai"
 DEFAULT_SOURCE_LIMITS = {ARXIV_SOURCE_ID: 6}
+ARXIV_MIN_TARGET_RELEVANCE = 0.3
+ARXIV_NARROW_DOMAIN_MIN_TARGET_RELEVANCE = 0.5
 
 ADVANCEMENT_PATTERNS = (
     "we introduce",
@@ -162,6 +164,11 @@ NARROW_DOMAIN_PATTERNS = (
     "vr simulations",
     "chiplet",
     "quantum circuit",
+    "clinical",
+    "heart failure",
+    "heart-failure",
+    "healthcare",
+    "medical",
 )
 QUANTITATIVE_PATTERN = re.compile(
     r"(?:\b\d+(?:\.\d+)?\s*(?:%|x|ms|million|billion)|\b\d+(?:\.\d+)?\s*s\b|\d+(?:\.\d+)?\s*倍)",
@@ -342,10 +349,20 @@ def apply_content_quotas(
         (article.published_at or article.collected_at for article in articles),
         default=datetime.now(UTC),
     )
+    eligible: list[Article] = []
     for article in articles:
         apply_article_scoring(article, anchor=anchor)
+        if article.source_id == ARXIV_SOURCE_ID and article.content_score_breakdown is not None:
+            minimum_relevance = (
+                ARXIV_NARROW_DOMAIN_MIN_TARGET_RELEVANCE
+                if _contains_any(_article_text(article), NARROW_DOMAIN_PATTERNS)
+                else ARXIV_MIN_TARGET_RELEVANCE
+            )
+            if article.content_score_breakdown.target_relevance < minimum_relevance:
+                continue
+        eligible.append(article)
     ranked = sorted(
-        articles,
+        eligible,
         key=lambda article: (
             article.content_score or 0.0,
             article.published_at or article.collected_at,
