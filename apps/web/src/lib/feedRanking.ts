@@ -10,6 +10,50 @@ function articleScore(article: Article): number {
   return article.contentScore ?? 0;
 }
 
+function tripleCount(sourceIds: string[]): number {
+  return sourceIds.reduce(
+    (count, sourceId, index) =>
+      index >= 2 && sourceId === sourceIds[index - 1] && sourceId === sourceIds[index - 2]
+        ? count + 1
+        : count,
+    0,
+  );
+}
+
+function repairTrailingTriples(
+  articles: Article[],
+  leadingSourceIds: string[],
+  firstScreenSize: number,
+): Article[] {
+  const repaired = [...articles];
+  const firstMovableIndex = Math.max(0, firstScreenSize - leadingSourceIds.length);
+  const sources = (): string[] => [
+    ...leadingSourceIds,
+    ...repaired.map((article) => article.sourceId),
+  ];
+
+  for (let attempt = 0; attempt < repaired.length; attempt += 1) {
+    const currentTripleCount = tripleCount(sources());
+    if (currentTripleCount === 0) break;
+    let improved = false;
+
+    for (let right = repaired.length - 1; right >= firstMovableIndex && !improved; right -= 1) {
+      for (let left = right - 1; left >= firstMovableIndex; left -= 1) {
+        if (repaired[left]?.sourceId === repaired[right]?.sourceId) continue;
+        [repaired[left], repaired[right]] = [repaired[right] as Article, repaired[left] as Article];
+        if (tripleCount(sources()) < currentTripleCount) {
+          improved = true;
+          break;
+        }
+        [repaired[left], repaired[right]] = [repaired[right] as Article, repaired[left] as Article];
+      }
+    }
+
+    if (!improved) break;
+  }
+  return repaired;
+}
+
 export function selectKeySignal(articles: Article[]): Article | null {
   return (
     articles
@@ -59,5 +103,5 @@ export function diversifyBySource(articles: Article[], options: DiversityOptions
     }
   }
 
-  return result;
+  return repairTrailingTriples(result, leadingSourceIds, firstScreenSize);
 }

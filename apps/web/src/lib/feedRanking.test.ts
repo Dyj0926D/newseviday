@@ -81,4 +81,30 @@ describe('feed ranking', () => {
     );
     expect(ordered.slice(0, 7).filter((item) => item.sourceId === 'arxiv')).toHaveLength(2);
   });
+
+  it('does not strand three articles from one source at the end of the full feed', () => {
+    const ordered = diversifyBySource([
+      article('a1', 'arxiv', 0.99),
+      article('b1', 'github', 0.98),
+      article('c1', 'qwen', 0.97),
+      article('a2', 'arxiv', 0.96),
+      article('a3', 'arxiv', 0.95),
+      article('b2', 'github', 0.94),
+      article('c2', 'qwen', 0.93),
+      article('d1', 'databricks', 0.92),
+      article('b3', 'github', 0.91),
+      article('a4', 'arxiv', 0.9),
+      article('a5', 'arxiv', 0.89),
+      article('a6', 'arxiv', 0.88),
+    ]);
+
+    expect(
+      ordered.some(
+        (item, index) =>
+          index >= 2 &&
+          item.sourceId === ordered[index - 1]?.sourceId &&
+          item.sourceId === ordered[index - 2]?.sourceId,
+      ),
+    ).toBe(false);
+  });
 });

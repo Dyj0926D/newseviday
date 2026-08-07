@@ -253,7 +253,6 @@ def enrich_snapshot(
     generated_at = now or datetime.now(UTC)
     result = snapshot.model_copy(deep=True)
     model_calls = 0
-    allowed_topics = {topic.id for topic in topics}
     topic_description = ", ".join(f"{topic.id}={topic.label}" for topic in topics)
     for article in _enrichment_priority_order(result.articles):
         evidence = article.facts.abstract or article.facts.title
@@ -302,9 +301,8 @@ def enrich_snapshot(
             prompt_version=PROMPT_VERSION,
             generated_at=generated_at,
         )
-        article.topic_scores.update(
-            {topic_id: 1.0 for topic_id in enrichment.topic_ids if topic_id in allowed_topics}
-        )
+        # Topic labels remain deterministic pipeline data. Model topicIds are
+        # validated for observability but never change filters or recommendations.
     suffix = hashlib.sha256(
         f"{snapshot.snapshot_id}:{client.model}:{PROMPT_VERSION}".encode()
     ).hexdigest()[:8]

@@ -80,6 +80,7 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:1]
+    snapshot.articles[0].topic_scores = {"semantic-layer": 0.6}
     client = FakeStructuredClient()
     cache = FileAiCache(tmp_path)
 
@@ -103,7 +104,7 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
     assert second_calls == 0
     assert first.articles[0].ai is not None
     assert second.articles[0].ai == first.articles[0].ai
-    assert first.articles[0].topic_scores["data-agent"] == 1.0
+    assert first.articles[0].topic_scores == {"semantic-layer": 0.6}
 
 
 def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
