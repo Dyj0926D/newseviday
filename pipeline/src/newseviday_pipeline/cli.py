@@ -8,7 +8,13 @@ from pathlib import Path
 from typing import Any
 
 from newseviday_pipeline import __version__
-from newseviday_pipeline.ai import DeepSeekStructuredClient, FileAiCache, enrich_snapshot
+from newseviday_pipeline.ai import (
+    DeepSeekStructuredClient,
+    EnrichmentTelemetry,
+    FileAiCache,
+    enrich_snapshot,
+)
+from newseviday_pipeline.ai_models import AiUsageReport
 from newseviday_pipeline.dedup_eval import evaluate_dedup_dataset, write_dedup_report
 from newseviday_pipeline.embeddings import HashingEmbedder, OpenAICompatibleEmbedder
 from newseviday_pipeline.evaluation import evaluate_rag, load_gold_dataset, write_eval_report
@@ -85,6 +91,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=5,
         help="Hard cap for paid calls in one run (0-10, default: 5).",
+    )
+    enrich_parser.add_argument(
+        "--usage-report",
+        type=Path,
+        help="Write a private per-run token, cache and estimated-cost report.",
     )
     index_parser = subparsers.add_parser(
         "build-index", help="Build a versioned dense retrieval artifact"
@@ -239,14 +250,56 @@ def enrich(args: argparse.Namespace) -> int:
     _runtime, _sources, topics = load_project_config()
     snapshot = load_snapshot(args.snapshot)
     terminology = load_terminology(args.terminology)
+    client = DeepSeekStructuredClient.from_environment()
+    telemetry = EnrichmentTelemetry()
     result, model_calls = enrich_snapshot(
         snapshot,
-        client=DeepSeekStructuredClient.from_environment(),
+        client=client,
         cache=FileAiCache(args.cache),
         topics=topics.topics,
         terminology=terminology,
         max_model_calls=args.max_model_calls,
+        telemetry=telemetry,
     )
+    input_price, output_price = _token_prices_from_environment()
+    usage = client.usage_totals
+    usage_complete = client.usage_reported_calls == model_calls
+    estimated_cost = (
+        round(
+            (
+                usage.prompt_tokens * input_price
+                + usage.completion_tokens * output_price
+            )
+            / 1_000_000,
+            6,
+        )
+        if usage_complete and input_price is not None and output_price is not None
+        else None
+    )
+    usage_report = AiUsageReport(
+        snapshot_id=result.snapshot_id,
+        generated_at=result.generated_at,
+        model=client.model,
+        model_calls=model_calls,
+        model_call_limit=args.max_model_calls,
+        usage_reported_calls=client.usage_reported_calls,
+        usage_complete=usage_complete,
+        cache_hits=telemetry.cache_hits,
+        enriched_article_count=telemetry.enriched_articles,
+        skipped_thin_evidence=telemetry.skipped_thin_evidence,
+        skipped_after_call_limit=telemetry.skipped_after_call_limit,
+        prompt_tokens=usage.prompt_tokens,
+        completion_tokens=usage.completion_tokens,
+        total_tokens=usage.total_tokens,
+        input_cny_per_million=input_price,
+        output_cny_per_million=output_price,
+        estimated_cost_cny=estimated_cost,
+    )
+    if args.usage_report:
+        _atomic_json(
+            usage_report.model_dump(mode="json", by_alias=True),
+            args.usage_report,
+        )
     terminology_score = terminology_consistency(
         result.articles,
         terminology,
@@ -260,6 +313,7 @@ def enrich(args: argparse.Namespace) -> int:
                     "score": round(terminology_score, 4),
                     "threshold": args.terminology_threshold,
                     "modelCalls": model_calls,
+                    "usage": usage_report.model_dump(mode="json", by_alias=True),
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -276,6 +330,7 @@ def enrich(args: argparse.Namespace) -> int:
                 "modelCalls": model_calls,
                 "modelCallLimit": args.max_model_calls,
                 "terminologyConsistency": round(terminology_score, 4),
+                "usage": usage_report.model_dump(mode="json", by_alias=True),
                 "output": str(args.output / "current.json"),
             },
             ensure_ascii=False,
@@ -283,6 +338,27 @@ def enrich(args: argparse.Namespace) -> int:
         )
     )
     return 0
+
+
+def _optional_nonnegative_float(name: str) -> float | None:
+    value = os.environ.get(name, "").strip()
+    if not value:
+        return None
+    try:
+        parsed = float(value)
+    except ValueError as error:
+        raise ValueError(f"{name}_must_be_nonnegative_number") from error
+    if parsed < 0:
+        raise ValueError(f"{name}_must_be_nonnegative_number")
+    return parsed
+
+
+def _token_prices_from_environment() -> tuple[float | None, float | None]:
+    input_price = _optional_nonnegative_float("DEEPSEEK_INPUT_CNY_PER_MILLION")
+    output_price = _optional_nonnegative_float("DEEPSEEK_OUTPUT_CNY_PER_MILLION")
+    if (input_price is None) != (output_price is None):
+        raise ValueError("deepseek_token_prices_must_be_configured_together")
+    return input_price, output_price
 
 
 def _embedding_provider(args: argparse.Namespace) -> HashingEmbedder | OpenAICompatibleEmbedder:

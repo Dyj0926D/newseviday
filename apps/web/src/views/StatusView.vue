@@ -21,7 +21,11 @@ interface QualityReport {
   gate: 'pass' | 'observe' | 'fail';
   missingAbstractCount: number;
   missingAbstractRate: number;
+  missingAbstractBySource?: Record<string, number>;
+  zeroContributionSourceIds?: string[];
   topicGaps: string[];
+  keySignalEligibleCount?: number;
+  highValueChineseGapCount?: number;
   potentialStoryClusters: Array<{ id: string; articleIds: string[]; sourceCount: number }>;
   issues: string[];
 }
@@ -172,6 +176,14 @@ onMounted(async () => {
           <div>
             <dt>潜在多来源事件</dt>
             <dd>{{ quality.potentialStoryClusters.length }}</dd>
+          </div>
+          <div v-if="quality.highValueChineseGapCount !== undefined">
+            <dt>高分内容中文缺口</dt>
+            <dd>{{ quality.highValueChineseGapCount }}</dd>
+          </div>
+          <div v-if="quality.zeroContributionSourceIds !== undefined">
+            <dt>本期未入选来源</dt>
+            <dd>{{ quality.zeroContributionSourceIds.length }}</dd>
           </div>
         </dl>
         <ul v-if="quality.issues.length" class="quality-issues">

@@ -301,6 +301,11 @@ onMounted(async () => {
               title="当前为受控更新"
               :description="productionNoticeDescription"
             />
+            <InlineNotice
+              v-if="isDefaultFeed && snapshot && !keySignalArticle"
+              title="今日暂无达标重点信号"
+              description="当前内容已通过基础质量筛选，但没有一条同时满足相关性、工程价值、证据成熟度和中文展示门槛。以下信息流仍按内容价值排序。"
+            />
 
             <InlineNotice
               v-if="view === 'recommended' && !profile.hasProfile"

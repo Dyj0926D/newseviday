@@ -4,6 +4,7 @@ import os
 import re
 import tempfile
 from collections.abc import Mapping
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol, TypeVar
@@ -27,6 +28,22 @@ TRANSLATION_PRIORITY_SCORE = 0.60
 HOME_PRIORITY_WINDOW = 8
 SOURCE_REPEAT_PENALTY = 0.18
 SchemaModel = TypeVar("SchemaModel", bound=BaseModel)
+
+
+@dataclass(frozen=True)
+class CompletionUsage:
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+
+@dataclass
+class EnrichmentTelemetry:
+    model_calls: int = 0
+    cache_hits: int = 0
+    enriched_articles: int = 0
+    skipped_thin_evidence: int = 0
+    skipped_after_call_limit: int = 0
 
 
 class StructuredCompletionClient(Protocol):
@@ -63,10 +80,23 @@ class DeepSeekStructuredClient:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.thinking_enabled = thinking_enabled
+        self._usage: list[CompletionUsage] = []
 
     @property
     def model(self) -> str:
         return self._model
+
+    @property
+    def usage_reported_calls(self) -> int:
+        return len(self._usage)
+
+    @property
+    def usage_totals(self) -> CompletionUsage:
+        return CompletionUsage(
+            prompt_tokens=sum(item.prompt_tokens for item in self._usage),
+            completion_tokens=sum(item.completion_tokens for item in self._usage),
+            total_tokens=sum(item.total_tokens for item in self._usage),
+        )
 
     def complete_json(self, *, system: str, user: str) -> Mapping[str, Any]:
         response = httpx.post(
@@ -94,6 +124,18 @@ class DeepSeekStructuredClient:
             content = payload["choices"][0]["message"]["content"]
         except (KeyError, IndexError, TypeError) as error:
             raise ValueError("invalid_deepseek_completion") from error
+        usage = payload.get("usage") if isinstance(payload, Mapping) else None
+        if isinstance(usage, Mapping):
+            prompt_tokens = _nonnegative_int(usage.get("prompt_tokens"))
+            completion_tokens = _nonnegative_int(usage.get("completion_tokens"))
+            total_tokens = _nonnegative_int(usage.get("total_tokens"))
+            self._usage.append(
+                CompletionUsage(
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                    total_tokens=total_tokens or prompt_tokens + completion_tokens,
+                )
+            )
         return _json_object(str(content))
 
     @classmethod
@@ -105,6 +147,12 @@ class DeepSeekStructuredClient:
             thinking_enabled=os.environ.get("DEEPSEEK_THINKING_ENABLED", "false").lower()
             == "true",
         )
+
+
+def _nonnegative_int(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        return 0
+    return value
 
 
 class FileAiCache:
@@ -247,16 +295,19 @@ def enrich_snapshot(
     terminology: TerminologyConfig | None = None,
     max_model_calls: int = 5,
     now: datetime | None = None,
+    telemetry: EnrichmentTelemetry | None = None,
 ) -> tuple[ContentSnapshot, int]:
     if not 0 <= max_model_calls <= 10:
         raise ValueError("max_model_calls_must_be_between_0_and_10")
     generated_at = now or datetime.now(UTC)
     result = snapshot.model_copy(deep=True)
+    stats = telemetry or EnrichmentTelemetry()
     model_calls = 0
     topic_description = ", ".join(f"{topic.id}={topic.label}" for topic in topics)
     for article in _enrichment_priority_order(result.articles):
         evidence = article.facts.abstract or article.facts.title
         if len(evidence.strip()) < MIN_ENRICHMENT_EVIDENCE_CHARS:
+            stats.skipped_thin_evidence += 1
             continue
         terminology_instruction = _terminology_instruction(evidence, terminology)
         terminology_signature = hashlib.sha256(
@@ -270,6 +321,7 @@ def enrich_snapshot(
         enrichment = cache.get(key, ArticleEnrichment)
         if enrichment is None:
             if model_calls >= max_model_calls:
+                stats.skipped_after_call_limit += 1
                 continue
             payload = client.complete_json(
                 system=(
@@ -292,6 +344,9 @@ def enrich_snapshot(
             enrichment = ArticleEnrichment.model_validate(payload)
             cache.put(key, enrichment)
             model_calls += 1
+            stats.model_calls = model_calls
+        else:
+            stats.cache_hits += 1
         article.ai = GeneratedText(
             title_zh=enrichment.title_zh,
             summary_zh=enrichment.summary_zh,
@@ -301,6 +356,7 @@ def enrich_snapshot(
             prompt_version=PROMPT_VERSION,
             generated_at=generated_at,
         )
+        stats.enriched_articles += 1
         # Topic labels remain deterministic pipeline data. Model topicIds are
         # validated for observability but never change filters or recommendations.
     suffix = hashlib.sha256(

@@ -4,6 +4,7 @@ from typing import Any
 
 from newseviday_pipeline.ai import (
     DeepSeekStructuredClient,
+    EnrichmentTelemetry,
     FileAiCache,
     enhance_profile,
     enrich_snapshot,
@@ -62,7 +63,14 @@ def test_deepseek_v4_request_explicitly_disables_thinking(monkeypatch: Any) -> N
             return None
 
         def json(self) -> dict[str, Any]:
-            return {"choices": [{"message": {"content": '{"ok": true}'}}]}
+            return {
+                "choices": [{"message": {"content": '{"ok": true}'}}],
+                "usage": {
+                    "prompt_tokens": 120,
+                    "completion_tokens": 30,
+                    "total_tokens": 150,
+                },
+            }
 
     def fake_post(*_args: Any, **kwargs: Any) -> FakeResponse:
         captured.update(kwargs["json"])
@@ -74,6 +82,10 @@ def test_deepseek_v4_request_explicitly_disables_thinking(monkeypatch: Any) -> N
     assert client.complete_json(system="system", user="user") == {"ok": True}
     assert captured["thinking"] == {"type": "disabled"}
     assert captured["temperature"] == 0.1
+    assert client.usage_reported_calls == 1
+    assert client.usage_totals.prompt_tokens == 120
+    assert client.usage_totals.completion_tokens == 30
+    assert client.usage_totals.total_tokens == 150
 
 
 def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path) -> None:
@@ -83,6 +95,7 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
     snapshot.articles[0].topic_scores = {"semantic-layer": 0.6}
     client = FakeStructuredClient()
     cache = FileAiCache(tmp_path)
+    first_telemetry = EnrichmentTelemetry()
 
     first, first_calls = enrich_snapshot(
         snapshot,
@@ -90,14 +103,17 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
         cache=cache,
         topics=[topic()],
         now=datetime(2026, 8, 2, tzinfo=UTC),
+        telemetry=first_telemetry,
     )
     second_client = FakeStructuredClient()
+    second_telemetry = EnrichmentTelemetry()
     second, second_calls = enrich_snapshot(
         snapshot,
         client=second_client,
         cache=cache,
         topics=[topic()],
         now=datetime(2026, 8, 2, tzinfo=UTC),
+        telemetry=second_telemetry,
     )
 
     assert first_calls == 1
@@ -105,6 +121,10 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
     assert first.articles[0].ai is not None
     assert second.articles[0].ai == first.articles[0].ai
     assert first.articles[0].topic_scores == {"semantic-layer": 0.6}
+    assert first_telemetry.model_calls == 1
+    assert first_telemetry.cache_hits == 0
+    assert second_telemetry.model_calls == 0
+    assert second_telemetry.cache_hits == 1
 
 
 def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
