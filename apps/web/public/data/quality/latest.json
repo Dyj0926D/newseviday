@@ -1,40 +1,66 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260806T084432Z-9adae754-ai-bb56da47",
-  "generatedAt": "2026-08-06T08:44:51.880563Z",
+  "snapshotId": "snapshot-20260808T030115Z-6e5386a9-ai-bf4736d1",
+  "generatedAt": "2026-08-08T03:01:35.107150Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 9,
   "contributingSourceCount": 8,
-  "aiArticleCount": 8,
-  "missingAbstractCount": 10,
-  "missingAbstractRate": 0.25,
+  "aiArticleCount": 12,
+  "missingAbstractCount": 9,
+  "missingAbstractRate": 0.225,
   "sourceCounts": {
     "anthropic-news": 4,
     "arxiv-cs-ai": 6,
-    "databricks-blog": 2,
+    "databricks-blog": 3,
     "dbt-labs-blog": 2,
-    "deepseek-updates": 6,
+    "deepseek-updates": 5,
     "github-ai-ml": 8,
     "openai-news": 4,
     "qwen-blog": 8
   },
   "topicCounts": {
-    "data-platform": 3,
-    "data-agent": 1,
-    "semantic-layer": 0,
-    "intelligent-lakehouse": 2,
-    "rag-eval": 10,
+    "data-platform": 2,
+    "data-agent": 0,
+    "semantic-layer": 1,
+    "intelligent-lakehouse": 0,
+    "rag-eval": 9,
     "metadata-governance": 0,
-    "foundation-models": 28,
-    "ai-products-agents": 16
+    "foundation-models": 25,
+    "ai-products-agents": 18
   },
   "topicGaps": [
-    "metadata-governance",
-    "semantic-layer"
+    "data-agent",
+    "intelligent-lakehouse",
+    "metadata-governance"
   ],
-  "potentialStoryClusters": [],
+  "potentialStoryClusters": [
+    {
+      "id": "story-001",
+      "articleIds": [
+        "article-13844026d0b31ab87e4a",
+        "article-98b061f178880396da02"
+      ],
+      "sourceCount": 2,
+      "sharedTerms": [
+        "are",
+        "what"
+      ]
+    },
+    {
+      "id": "story-002",
+      "articleIds": [
+        "article-13844026d0b31ab87e4a",
+        "article-2a7072ece5f3372bd87b"
+      ],
+      "sourceCount": 2,
+      "sharedTerms": [
+        "agentic",
+        "workflows"
+      ]
+    }
+  ],
   "issues": [
-    "2 个配置主题暂时没有入选内容"
+    "3 个配置主题暂时没有入选内容"
   ]
 }
