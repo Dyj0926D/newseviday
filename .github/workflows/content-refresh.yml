@@ -45,6 +45,8 @@ jobs:
       DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
       DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' }}
       DEEPSEEK_THINKING_ENABLED: ${{ vars.DEEPSEEK_THINKING_ENABLED || 'false' }}
+      DEEPSEEK_INPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_INPUT_CNY_PER_MILLION || '2' }}
+      DEEPSEEK_OUTPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_OUTPUT_CNY_PER_MILLION || '4' }}
       DAILY_REFRESH_ENABLED: ${{ vars.DAILY_REFRESH_ENABLED || 'false' }}
       DAILY_REFRESH_ALLOW_MODEL: ${{ vars.DAILY_REFRESH_ALLOW_MODEL || 'false' }}
       DAILY_REFRESH_MAX_MODEL_CALLS: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS || '5' }}
@@ -173,6 +175,7 @@ jobs:
             data/runtime/content-refresh/current.json \
             --output data/runtime/content-enriched \
             --cache data/runtime/ai-cache \
+            --usage-report data/runtime/quality/ai-usage-latest.json \
             --allow-model \
             --max-model-calls "$MODEL_CALL_LIMIT"
           echo "PUBLISH_SNAPSHOT=data/runtime/content-enriched/current.json" >> "$GITHUB_ENV"
@@ -187,6 +190,46 @@ jobs:
           python -m uv run --project pipeline newseviday-pipeline audit-snapshot \
             "$PUBLISH_SNAPSHOT" \
             --report data/runtime/quality/latest.json
+      - name: Write controlled refresh summary
+        if: env.RUN_REFRESH == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          quality_path = Path("data/runtime/quality/latest.json")
+          usage_path = Path("data/runtime/quality/ai-usage-latest.json")
+          lines = ["## Controlled content refresh", "", "| Item | Value |", "| --- | ---: |"]
+          if quality_path.exists():
+              quality = json.loads(quality_path.read_text(encoding="utf-8"))
+              lines.extend(
+                  [
+                      f"| Snapshot | `{quality['snapshotId']}` |",
+                      f"| Articles | {quality['articleCount']} |",
+                      f"| Contributing sources | {quality['contributingSourceCount']} |",
+                      f"| Missing abstracts | {quality['missingAbstractCount']} |",
+                      f"| Topic gaps | {len(quality['topicGaps'])} |",
+                      f"| Eligible Key Signals | {quality.get('keySignalEligibleCount', 0)} |",
+                      f"| Quality gate | {quality['gate']} |",
+                  ]
+              )
+          if usage_path.exists():
+              usage = json.loads(usage_path.read_text(encoding="utf-8"))
+              cost = usage.get("estimatedCostCny")
+              lines.extend(
+                  [
+                      f"| Model calls | {usage['modelCalls']} / {usage['modelCallLimit']} |",
+                      f"| Cache hits | {usage['cacheHits']} |",
+                      f"| Total tokens | {usage['totalTokens']} |",
+                      f"| Estimated cost (CNY) | {cost if cost is not None else 'unavailable'} |",
+                      f"| Usage complete | {usage['usageComplete']} |",
+                  ]
+              )
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as stream:
+              stream.write("\n".join(lines) + "\n")
+          PY
       - name: Run compatible RAG evaluation
         if: env.RUN_REFRESH == 'true'
         run: |

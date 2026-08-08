@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import Field
 
 from newseviday_pipeline.models import ContractModel
@@ -9,6 +11,28 @@ class ArticleEnrichment(ContractModel):
     why_it_matters: str = Field(min_length=10, max_length=180)
     key_points: list[str] = Field(min_length=2, max_length=5)
     topic_ids: list[str] = Field(default_factory=list, max_length=6)
+
+
+class AiUsageReport(ContractModel):
+    schema_version: str = "1.0.0"
+    snapshot_id: str
+    generated_at: datetime
+    provider: str = "deepseek"
+    model: str
+    model_calls: int = Field(ge=0)
+    model_call_limit: int = Field(ge=0)
+    usage_reported_calls: int = Field(ge=0)
+    usage_complete: bool
+    cache_hits: int = Field(ge=0)
+    enriched_article_count: int = Field(ge=0)
+    skipped_thin_evidence: int = Field(ge=0)
+    skipped_after_call_limit: int = Field(ge=0)
+    prompt_tokens: int = Field(ge=0)
+    completion_tokens: int = Field(ge=0)
+    total_tokens: int = Field(ge=0)
+    input_cny_per_million: float | None = Field(default=None, ge=0)
+    output_cny_per_million: float | None = Field(default=None, ge=0)
+    estimated_cost_cny: float | None = Field(default=None, ge=0)
 
 
 class ProfileInterest(ContractModel):

@@ -9,6 +9,7 @@ from pathlib import Path
 from pydantic import Field
 
 from newseviday_pipeline.models import ContentSnapshot, ContractModel
+from newseviday_pipeline.stages import chinese_display_ready
 
 
 class StoryCluster(ContractModel):
@@ -29,9 +30,13 @@ class SnapshotQualityReport(ContractModel):
     ai_article_count: int
     missing_abstract_count: int
     missing_abstract_rate: float = Field(ge=0, le=1)
+    missing_abstract_by_source: dict[str, int]
     source_counts: dict[str, int]
+    zero_contribution_source_ids: list[str]
     topic_counts: dict[str, int]
     topic_gaps: list[str]
+    key_signal_eligible_count: int
+    high_value_chinese_gap_count: int
     potential_story_clusters: list[StoryCluster]
     issues: list[str]
 
@@ -39,12 +44,32 @@ class SnapshotQualityReport(ContractModel):
 STOP_TERMS = {
     "about",
     "after",
+    "and",
+    "are",
+    "can",
+    "for",
     "from",
+    "has",
+    "have",
+    "how",
     "into",
     "news",
+    "new",
+    "our",
     "that",
+    "the",
     "their",
     "this",
+    "use",
+    "using",
+    "was",
+    "were",
+    "what",
+    "when",
+    "where",
+    "which",
+    "who",
+    "why",
     "with",
     "your",
     "发布",
@@ -105,7 +130,19 @@ def audit_snapshot(
     }
     topic_gaps = sorted(topic_id for topic_id, count in topic_counts.items() if count == 0)
     missing_abstract_count = sum(not article.facts.abstract for article in snapshot.articles)
+    missing_abstract_by_source = Counter(
+        article.source_id for article in snapshot.articles if not article.facts.abstract
+    )
     missing_rate = missing_abstract_count / len(snapshot.articles) if snapshot.articles else 1.0
+    configured_source_ids = {source.id for source in snapshot.sources}
+    zero_contribution_source_ids = sorted(configured_source_ids - set(source_counts))
+    key_signal_eligible_count = sum(
+        bool(article.key_signal and article.key_signal.eligible) for article in snapshot.articles
+    )
+    high_value_chinese_gap_count = sum(
+        (article.content_score or 0) >= 0.6 and not chinese_display_ready(article)
+        for article in snapshot.articles
+    )
     issues: list[str] = []
     hard_failure = False
     if len(snapshot.articles) < 20:
@@ -130,9 +167,13 @@ def audit_snapshot(
         ai_article_count=sum(article.ai is not None for article in snapshot.articles),
         missing_abstract_count=missing_abstract_count,
         missing_abstract_rate=round(missing_rate, 4),
+        missing_abstract_by_source=dict(sorted(missing_abstract_by_source.items())),
         source_counts=dict(sorted(source_counts.items())),
+        zero_contribution_source_ids=zero_contribution_source_ids,
         topic_counts=topic_counts,
         topic_gaps=topic_gaps,
+        key_signal_eligible_count=key_signal_eligible_count,
+        high_value_chinese_gap_count=high_value_chinese_gap_count,
         potential_story_clusters=detect_story_clusters(snapshot),
         issues=issues,
     )

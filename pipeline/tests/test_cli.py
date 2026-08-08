@@ -1,9 +1,10 @@
 import json
 from pathlib import Path
 
-from pytest import CaptureFixture
+import pytest
+from pytest import CaptureFixture, MonkeyPatch
 
-from newseviday_pipeline.cli import main
+from newseviday_pipeline.cli import _token_prices_from_environment, main
 
 FIXTURE = Path(__file__).parent / "fixtures" / "arxiv-feed.xml"
 
@@ -58,6 +59,22 @@ def test_enrich_rejects_call_cap_above_ten(capsys: CaptureFixture[str]) -> None:
         == 2
     )
     assert "between 0 and 10" in capsys.readouterr().out
+
+
+def test_token_prices_are_optional_but_must_be_configured_together(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("DEEPSEEK_INPUT_CNY_PER_MILLION", raising=False)
+    monkeypatch.delenv("DEEPSEEK_OUTPUT_CNY_PER_MILLION", raising=False)
+    assert _token_prices_from_environment() == (None, None)
+
+    monkeypatch.setenv("DEEPSEEK_INPUT_CNY_PER_MILLION", "2")
+    monkeypatch.setenv("DEEPSEEK_OUTPUT_CNY_PER_MILLION", "4")
+    assert _token_prices_from_environment() == (2.0, 4.0)
+
+    monkeypatch.delenv("DEEPSEEK_OUTPUT_CNY_PER_MILLION")
+    with pytest.raises(ValueError, match="configured_together"):
+        _token_prices_from_environment()
 
 
 def test_publish_web_keeps_an_immutable_snapshot_version(
