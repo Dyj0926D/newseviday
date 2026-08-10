@@ -104,6 +104,27 @@ def test_html_listing_can_select_a_source_specific_title_class() -> None:
     assert items[0].title == "Investigating cybersecurity evaluations"
 
 
+def test_html_listing_extracts_card_summary_and_published_date() -> None:
+    content = b"""
+      <a href="/news/claude-agents">
+        <time>Aug 7, 2026</time>
+        <h3>Claude agents enter production workflows</h3>
+        <p>Anthropic reports a governed workflow with evaluation and audit evidence.</p>
+      </a>
+    """
+    items = parse_html_listing(
+        content,
+        source_id="anthropic-news",
+        language="en",
+        base_url="https://www.anthropic.com/news",
+    )
+
+    assert items[0].summary == (
+        "Anthropic reports a governed workflow with evaluation and audit evidence."
+    )
+    assert items[0].published_at == datetime(2026, 8, 7, tzinfo=UTC)
+
+
 def test_html_heading_listing_creates_stable_fragment_links() -> None:
     content = b"""
       <h2 id="2026-08-02">2026-08-02</h2>
@@ -122,6 +143,31 @@ def test_html_heading_listing_creates_stable_fragment_links() -> None:
         ("https://api-docs.deepseek.com/updates/#deepseek-v4", "DeepSeek-V4")
     ]
     assert items[0].preserve_fragment is True
+
+
+def test_html_heading_listing_extracts_section_evidence_and_date() -> None:
+    content = b"""
+      <h2 id="date-2026-07-31">Date: 2026-07-31</h2>
+      <h3 id="deepseek-v4-flash">DeepSeek-V4-Flash Update</h3>
+      <p>The API release improves agent capabilities and keeps the same endpoint.</p>
+      <ul><li>Terminal Bench 2.1: 82.7</li></ul>
+      <hr>
+      <h2 id="date-2026-04-24">Date: 2026-04-24</h2>
+      <h3 id="deepseek-v4">DeepSeek-V4</h3>
+      <p>V4-Pro and V4-Flash are available through two compatible interfaces.</p>
+      <hr>
+    """
+    items = parse_html_headings(
+        content,
+        source_id="deepseek-updates",
+        language="mixed",
+        base_url="https://api-docs.deepseek.com/updates/",
+        heading_tags=["h3"],
+    )
+
+    assert items[0].published_at == datetime(2026, 7, 31, tzinfo=UTC)
+    assert "Terminal Bench 2.1: 82.7" in (items[0].summary or "")
+    assert items[1].published_at == datetime(2026, 4, 24, tzinfo=UTC)
 
 
 def test_public_url_validation_blocks_local_targets() -> None:
@@ -165,6 +211,14 @@ def test_network_pipeline_keeps_partial_source_failures_and_writes_trace(
     )
 
     assert run.status == "succeeded"
+    outcomes = {item.source_id: item for item in run.source_outcomes}
+    assert outcomes["one"].fetch_status == "succeeded"
+    assert outcomes["one"].parse_status == "succeeded"
+    assert outcomes["one"].item_count == 1
+    assert outcomes["one"].selected_count == 1
+    assert outcomes["four"].fetch_status == "failed"
+    assert outcomes["four"].parse_status == "skipped"
+    assert outcomes["four"].error_code == "timeout"
     assert snapshot.source_count == 3
     assert len(snapshot.articles) == 3
     assert (tmp_path / "runs" / f"{run.id}.json").exists()

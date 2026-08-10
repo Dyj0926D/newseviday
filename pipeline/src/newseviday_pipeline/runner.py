@@ -1,3 +1,4 @@
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
@@ -15,6 +16,7 @@ from newseviday_pipeline.models import (
     SnapshotTopic,
     Source,
     SourceConfig,
+    SourceRunOutcome,
     TopicConfig,
 )
 from newseviday_pipeline.network import fetch_source
@@ -164,6 +166,17 @@ def run_network_pipeline(
         with ThreadPoolExecutor(max_workers=min(4, len(enabled_sources))) as executor:
             fetched = list(executor.map(fetch_source, enabled_sources))
         successful = [result for result in fetched if result.ok]
+        outcomes = {
+            result.source.id: SourceRunOutcome(
+                source_id=result.source.id,
+                fetch_status="succeeded" if result.ok else "failed",
+                parse_status="skipped",
+                final_url=result.final_url,
+                error_code=result.error_code,
+            )
+            for result in fetched
+        }
+        run.source_outcomes = [outcomes[source.id] for source in enabled_sources]
         run.stages.append(_stage("fetch", stage_started, len(enabled_sources), len(successful)))
         if len(successful) < minimum_successful_sources:
             raise RuntimeError("insufficient_successful_sources")
@@ -175,9 +188,14 @@ def run_network_pipeline(
             if result.content is None:
                 continue
             try:
-                raw_items.extend(parse_source(result.content, result.source))
+                parsed_items = parse_source(result.content, result.source)
+                raw_items.extend(parsed_items)
                 successful_sources.append(result.source)
-            except (ValueError, KeyError):
+                outcomes[result.source.id].parse_status = "succeeded"
+                outcomes[result.source.id].item_count = len(parsed_items)
+            except (ValueError, KeyError) as error:
+                outcomes[result.source.id].parse_status = "failed"
+                outcomes[result.source.id].error_code = type(error).__name__
                 continue
         run.stages.append(_stage("extract", stage_started, len(successful), len(raw_items)))
         if len(successful_sources) < minimum_successful_sources:
@@ -199,6 +217,9 @@ def run_network_pipeline(
 
         stage_started = perf_counter()
         selected = apply_content_quotas(select_by_topics(fuzzy, topics))
+        selected_counts = Counter(article.source_id for article in selected)
+        for source_id, outcome in outcomes.items():
+            outcome.selected_count = selected_counts.get(source_id, 0)
         run.stages.append(_stage("select", stage_started, len(fuzzy), len(selected)))
         selected_evidence = [
             evidence_by_article[article.id]

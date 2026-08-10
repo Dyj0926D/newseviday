@@ -24,8 +24,11 @@ class AiUsageReport(ContractModel):
     usage_reported_calls: int = Field(ge=0)
     usage_complete: bool
     cache_hits: int = Field(ge=0)
+    accepted_enrichment_reuses: int = Field(ge=0)
     enriched_article_count: int = Field(ge=0)
     skipped_thin_evidence: int = Field(ge=0)
+    skipped_below_quality_floor: int = Field(ge=0)
+    skipped_stale: int = Field(ge=0)
     skipped_after_call_limit: int = Field(ge=0)
     prompt_tokens: int = Field(ge=0)
     completion_tokens: int = Field(ge=0)

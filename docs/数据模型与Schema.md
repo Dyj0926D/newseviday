@@ -6,33 +6,33 @@
 
 当前基线：
 
-| 载体 | 路径 | 用途 |
-|---|---|---|
-| TypeScript | `packages/contracts/src/index.ts` | Vue、Worker 编译期类型和轻量运行时断言 |
-| JSON Schema | `packages/contracts/schema/newseviday.schema.json` | 跨语言交换、快照和外部工具校验 |
-| Python/Pydantic | `pipeline/src/newseviday_pipeline/models.py` | 配置、流水线、发布前强校验 |
-| 当前快照 | `apps/web/public/data/current.json` | Cloudflare/EdgeOne 均可读取的生产降级快照 |
-| 历史快照 | `apps/web/public/data/versions/{snapshotId}.json` | 不可变回滚与固定评测语料 |
+| 载体            | 路径                                               | 用途                                      |
+| --------------- | -------------------------------------------------- | ----------------------------------------- |
+| TypeScript      | `packages/contracts/src/index.ts`                  | Vue、Worker 编译期类型和轻量运行时断言    |
+| JSON Schema     | `packages/contracts/schema/newseviday.schema.json` | 跨语言交换、快照和外部工具校验            |
+| Python/Pydantic | `pipeline/src/newseviday_pipeline/models.py`       | 配置、流水线、发布前强校验                |
+| 当前快照        | `apps/web/public/data/current.json`                | Cloudflare/EdgeOne 均可读取的生产降级快照 |
+| 历史快照        | `apps/web/public/data/versions/{snapshotId}.json`  | 不可变回滚与固定评测语料                  |
 
 Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使用 snake_case，由 Pydantic 别名转换。
 
 ## 2. 核心模型
 
-| 模型 | 解决的问题 | 关键字段 | 当前实现 |
-|---|---|---|---|
-| `Source` | 来源身份、类型和使用边界 | `kind`、`language`、`region`、`usageScope` | 契约已定义 |
-| `Article` | 规范化文章主记录 | `facts`、`ai`、`contentHash`、`topicScores`、`contentScore`、`contentScoreBreakdown`、`keySignal` | Python 已生成 |
-| `Evidence` | 结论可回链的证据片段 | `articleId`、`sourceId`、`url`、`excerpt` | Python 已生成 |
-| `Chunk` | RAG 的最小检索单元 | `articleId`、`position`、`contentHash` | Python/Worker 基线已生成 |
-| `PipelineRun` | 每次采集处理的过程记录 | `stages`、计数、耗时、`errorCode` | JSON 持久化已实现 |
-| `ContentSnapshot` | 可发布、可回滚的只读内容包 | `snapshotKind`、来源/主题目录、文章/证据/简报 | 已实现 |
-| `Brief` | 趋势简报及引用关系 | `sections[].evidenceIds`、`generatedBy` | 契约预留 |
-| `RagTrace` | 检索与上下文注入过程 | 路由、轮次、候选排名、注入 Chunk、停止原因 | Worker 匿名日志已实现 |
-| `EvalRun` | 检索版本能否上线的证据 | 数据集版本、指标、时延、gate | Demo 与生产试运行报告已实现 |
-| `RuntimeConfig` | 开关、限额和模型选择 | `features`、`limits`、`ai` | Worker 公开子集已实现 |
-| `generation_requests` | 生成预算预留、结算和幂等 | request、匿名日键、预留/实际微元、状态 | D1 migration 已实现 |
-| `quota_counters` | 单 IP 与全站日额度 | scope、匿名键、UTC 日、count/limit | D1 migration 已实现 |
-| `generation_leases` | 跨 Worker 实例并发保护 | lease、request、过期秒数 | D1 migration 已实现 |
+| 模型                  | 解决的问题                 | 关键字段                                                                                          | 当前实现                    |
+| --------------------- | -------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------- |
+| `Source`              | 来源身份、类型和使用边界   | `kind`、`language`、`region`、`usageScope`                                                        | 契约已定义                  |
+| `Article`             | 规范化文章主记录           | `facts`、`ai`、`contentHash`、`topicScores`、`contentScore`、`contentScoreBreakdown`、`keySignal` | Python 已生成               |
+| `Evidence`            | 结论可回链的证据片段       | `articleId`、`sourceId`、`url`、`excerpt`                                                         | Python 已生成               |
+| `Chunk`               | RAG 的最小检索单元         | `articleId`、`position`、`contentHash`                                                            | Python/Worker 基线已生成    |
+| `PipelineRun`         | 每次采集处理的过程记录     | `stages`、计数、耗时、`sourceOutcomes`、`errorCode`                                               | JSON 持久化已实现           |
+| `ContentSnapshot`     | 可发布、可回滚的只读内容包 | `snapshotKind`、来源/主题目录、文章/证据/简报                                                     | 已实现                      |
+| `Brief`               | 趋势简报及引用关系         | `sections[].evidenceIds`、`generatedBy`                                                           | 契约预留                    |
+| `RagTrace`            | 检索与上下文注入过程       | 路由、轮次、候选排名、注入 Chunk、停止原因                                                        | Worker 匿名日志已实现       |
+| `EvalRun`             | 检索版本能否上线的证据     | 数据集版本、指标、时延、gate                                                                      | Demo 与生产试运行报告已实现 |
+| `RuntimeConfig`       | 开关、限额和模型选择       | `features`、`limits`、`ai`                                                                        | Worker 公开子集已实现       |
+| `generation_requests` | 生成预算预留、结算和幂等   | request、匿名日键、预留/实际微元、状态                                                            | D1 migration 已实现         |
+| `quota_counters`      | 单 IP 与全站日额度         | scope、匿名键、UTC 日、count/limit                                                                | D1 migration 已实现         |
+| `generation_leases`   | 跨 Worker 实例并发保护     | lease、request、过期秒数                                                                          | D1 migration 已实现         |
 
 ## 3. 事实与 AI 内容分离
 
@@ -53,14 +53,14 @@ Schema 版本为 `1.0.0`。JSON 字段统一使用 camelCase；Python 内部使�
 
 ## 4. ID、时间与哈希
 
-| 对象 | 规则 |
-|---|---|
-| Article ID | 规范化 URL 的 SHA-256 截断值，前缀 `article-` |
-| Evidence ID | 内容哈希截断值，前缀 `evidence-` |
-| Snapshot ID | UTC 生成时间 + 随机短 ID，前缀 `snapshot-` |
-| Pipeline Run ID | UUID，前缀 `pipeline-` |
-| 时间 | ISO 8601 UTC；未知发布时间使用 `null` |
-| Content Hash | 规范化标题 + 摘要的 SHA-256 |
+| 对象            | 规则                                          |
+| --------------- | --------------------------------------------- |
+| Article ID      | 规范化 URL 的 SHA-256 截断值，前缀 `article-` |
+| Evidence ID     | 内容哈希截断值，前缀 `evidence-`              |
+| Snapshot ID     | UTC 生成时间 + 随机短 ID，前缀 `snapshot-`    |
+| Pipeline Run ID | UUID，前缀 `pipeline-`                        |
+| 时间            | ISO 8601 UTC；未知发布时间使用 `null`         |
+| Content Hash    | 规范化标题 + 摘要的 SHA-256                   |
 
 哈希用于去重和变更判断，不用于证明内容真实性。
 

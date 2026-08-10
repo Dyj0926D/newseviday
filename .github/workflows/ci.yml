@@ -5,6 +5,10 @@ on:
     branches:
       - main
   pull_request:
+    # Content-only PRs are already validated inside content-refresh.yml before commit.
+    # Skipping them here also avoids GitHub's manual approval gate for bot-authored PRs.
+    paths-ignore:
+      - 'apps/web/public/data/**'
   workflow_dispatch:
 
 concurrency:

@@ -29,10 +29,22 @@ def _datetime(value: str) -> datetime | None:
     try:
         parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
     except ValueError:
-        try:
-            parsed = parsedate_to_datetime(value.strip())
-        except (TypeError, ValueError):
+        parsed = None
+        for date_format in ("%b %d, %Y", "%B %d, %Y"):
+            try:
+                parsed = datetime.strptime(value.strip(), date_format).replace(tzinfo=UTC)
+                break
+            except ValueError:
+                continue
+        if parsed is None:
+            try:
+                parsed = parsedate_to_datetime(value.strip())
+            except (TypeError, ValueError):
+                return None
+        if parsed is None:
             return None
+    if parsed is None:
+        return None
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=UTC)
     return parsed.astimezone(UTC)
@@ -172,13 +184,18 @@ class _ListingParser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.base_url = base_url
         self.title_class_patterns = [re.compile(pattern) for pattern in title_class_patterns]
-        self.links: list[tuple[str, str]] = []
+        self.links: list[tuple[str, str, str | None, datetime | None]] = []
         self._href: str | None = None
         self._text: list[str] = []
         self._heading_tag: str | None = None
         self._heading_text: list[str] = []
         self._title_tag: str | None = None
         self._title_text: list[str] = []
+        self._summary_tag: str | None = None
+        self._summary_text: list[str] = []
+        self._time_tag: str | None = None
+        self._time_text: list[str] = []
+        self._time_value: str | None = None
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if self._href is not None and tag in {"h1", "h2", "h3", "h4"}:
@@ -191,6 +208,15 @@ class _ListingParser(HTMLParser):
                 self._title_tag = tag
                 self._title_text = []
                 return
+        if self._href is not None and tag == "p" and self._summary_tag is None:
+            self._summary_tag = tag
+            self._summary_text = []
+            return
+        if self._href is not None and tag == "time" and self._time_tag is None:
+            self._time_tag = tag
+            self._time_text = []
+            self._time_value = dict(attrs).get("datetime")
+            return
         if tag != "a" or self._href is not None:
             return
         attributes = dict(attrs)
@@ -202,6 +228,11 @@ class _ListingParser(HTMLParser):
             self._heading_text = []
             self._title_tag = None
             self._title_text = []
+            self._summary_tag = None
+            self._summary_text = []
+            self._time_tag = None
+            self._time_text = []
+            self._time_value = None
 
     def handle_data(self, data: str) -> None:
         if self._href is not None:
@@ -210,6 +241,10 @@ class _ListingParser(HTMLParser):
                 self._heading_text.append(data)
             if self._title_tag is not None:
                 self._title_text.append(data)
+            if self._summary_tag is not None:
+                self._summary_text.append(data)
+            if self._time_tag is not None:
+                self._time_text.append(data)
 
     def handle_endtag(self, tag: str) -> None:
         if tag == self._heading_tag:
@@ -218,19 +253,32 @@ class _ListingParser(HTMLParser):
         if tag == self._title_tag:
             self._title_tag = None
             return
+        if tag == self._summary_tag:
+            self._summary_tag = None
+            return
+        if tag == self._time_tag:
+            self._time_tag = None
+            return
         if tag != "a" or self._href is None:
             return
         heading_title = " ".join("".join(self._heading_text).split())
         class_title = " ".join("".join(self._title_text).split())
         title = heading_title or class_title or " ".join("".join(self._text).split())
+        summary = " ".join("".join(self._summary_text).split()) or None
+        published_at = _datetime(self._time_value or " ".join(self._time_text))
         if len(title) >= 12 and self._href.startswith(("http://", "https://")):
-            self.links.append((self._href, title))
+            self.links.append((self._href, title, summary, published_at))
         self._href = None
         self._text = []
         self._heading_tag = None
         self._heading_text = []
         self._title_tag = None
         self._title_text = []
+        self._summary_tag = None
+        self._summary_text = []
+        self._time_tag = None
+        self._time_text = []
+        self._time_value = None
 
 
 class _HeadingParser(HTMLParser):
@@ -238,16 +286,34 @@ class _HeadingParser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.base_url = base_url
         self.heading_tags = heading_tags
-        self.headings: list[tuple[str, str]] = []
+        self.headings: list[tuple[str, str, str | None, datetime | None]] = []
         self._tag: str | None = None
         self._id: str | None = None
         self._text: list[str] = []
+        self._current_date: datetime | None = None
+        self._active_item: tuple[str, str, datetime | None] | None = None
+        self._summary_text: list[str] = []
+
+    def _flush_item(self) -> None:
+        if self._active_item is None:
+            return
+        heading_id, title, published_at = self._active_item
+        summary = " ".join("".join(self._summary_text).split())[:4_000] or None
+        self.headings.append(
+            (urljoin(self.base_url, f"#{heading_id}"), title, summary, published_at)
+        )
+        self._active_item = None
+        self._summary_text = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if self._tag is not None or tag not in self.heading_tags:
+        if tag == "hr":
+            self._flush_item()
             return
+        if self._tag is not None or tag not in self.heading_tags | {"h2"}:
+            return
+        self._flush_item()
         heading_id = dict(attrs).get("id")
-        if heading_id:
+        if heading_id or tag == "h2":
             self._tag = tag
             self._id = heading_id
             self._text = []
@@ -255,16 +321,25 @@ class _HeadingParser(HTMLParser):
     def handle_data(self, data: str) -> None:
         if self._tag is not None:
             self._text.append(data)
+        elif self._active_item is not None:
+            self._summary_text.append(data)
 
     def handle_endtag(self, tag: str) -> None:
-        if tag != self._tag or self._id is None:
+        if tag != self._tag:
             return
         title = " ".join("".join(self._text).replace("\u200b", "").split())
-        if len(title) >= 4:
-            self.headings.append((urljoin(self.base_url, f"#{self._id}"), title))
+        date_match = re.fullmatch(r"Date:\s*(\d{4}-\d{2}-\d{2})", title, re.IGNORECASE)
+        if tag == "h2" and date_match:
+            self._current_date = _datetime(date_match.group(1))
+        elif tag in self.heading_tags and self._id is not None and len(title) >= 4:
+            self._active_item = (self._id, title, self._current_date)
+            self._summary_text = []
         self._tag = None
         self._id = None
         self._text = []
+
+    def finish(self) -> None:
+        self._flush_item()
 
 
 def parse_html_listing(
@@ -283,7 +358,7 @@ def parse_html_listing(
     result: list[RawFeedItem] = []
     includes = [re.compile(pattern) for pattern in (include_url_patterns or [])]
     excludes = [re.compile(pattern) for pattern in (exclude_url_patterns or [])]
-    for link, title in parser.links:
+    for link, title, summary, published_at in parser.links:
         if link in seen:
             continue
         if includes and not any(pattern.search(link) for pattern in includes):
@@ -292,7 +367,14 @@ def parse_html_listing(
             continue
         seen.add(link)
         result.append(
-            RawFeedItem(source_id=source_id, url=link, title=title, language=language)
+            RawFeedItem(
+                source_id=source_id,
+                url=link,
+                title=title,
+                summary=summary,
+                published_at=published_at,
+                language=language,
+            )
         )
     return result
 
@@ -307,9 +389,10 @@ def parse_html_headings(
 ) -> list[RawFeedItem]:
     parser = _HeadingParser(base_url, set(heading_tags))
     parser.feed(content.decode("utf-8", errors="replace"))
+    parser.finish()
     seen: set[str] = set()
     result: list[RawFeedItem] = []
-    for link, title in parser.headings:
+    for link, title, summary, published_at in parser.headings:
         if link in seen:
             continue
         seen.add(link)
@@ -318,6 +401,8 @@ def parse_html_headings(
                 source_id=source_id,
                 url=link,
                 title=title,
+                summary=summary,
+                published_at=published_at,
                 language=language,
                 preserve_fragment=True,
             )

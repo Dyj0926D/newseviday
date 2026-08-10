@@ -2,8 +2,10 @@ name: Controlled content refresh
 
 on:
   schedule:
-    # 09:17 Asia/Shanghai. The repository variables below remain the kill switch.
+    # Primary: 09:17 Asia/Shanghai. Backup: 11:47. An open content PR makes the
+    # backup run exit before checkout or model calls.
     - cron: '17 1 * * *'
+    - cron: '47 3 * * *'
   workflow_dispatch:
     inputs:
       allow_model:
@@ -173,6 +175,7 @@ jobs:
           test -n "$DEEPSEEK_MODEL"
           python -m uv run --project pipeline newseviday-pipeline enrich \
             data/runtime/content-refresh/current.json \
+            --accepted-snapshot apps/web/public/data/current.json \
             --output data/runtime/content-enriched \
             --cache data/runtime/ai-cache \
             --usage-report data/runtime/quality/ai-usage-latest.json \
@@ -201,7 +204,25 @@ jobs:
 
           quality_path = Path("data/runtime/quality/latest.json")
           usage_path = Path("data/runtime/quality/ai-usage-latest.json")
+          run_paths = sorted(Path("data/runtime/content-refresh/runs").glob("*.json"))
           lines = ["## Controlled content refresh", "", "| Item | Value |", "| --- | ---: |"]
+          if run_paths:
+              pipeline_run = json.loads(run_paths[-1].read_text(encoding="utf-8"))
+              outcomes = pipeline_run.get("sourceOutcomes", [])
+              failed_sources = [
+                  item["sourceId"] for item in outcomes if item.get("fetchStatus") == "failed"
+              ]
+              zero_selected = [
+                  item["sourceId"]
+                  for item in outcomes
+                  if item.get("parseStatus") == "succeeded" and item.get("selectedCount") == 0
+              ]
+              lines.extend(
+                  [
+                      f"| Failed sources | {', '.join(failed_sources) or 'none'} |",
+                      f"| Parsed but not selected | {', '.join(zero_selected) or 'none'} |",
+                  ]
+              )
           if quality_path.exists():
               quality = json.loads(quality_path.read_text(encoding="utf-8"))
               lines.extend(
@@ -221,7 +242,10 @@ jobs:
               lines.extend(
                   [
                       f"| Model calls | {usage['modelCalls']} / {usage['modelCallLimit']} |",
+                      f"| Published AI reused | {usage.get('acceptedEnrichmentReuses', 0)} |",
                       f"| Cache hits | {usage['cacheHits']} |",
+                      f"| Skipped below quality floor | {usage.get('skippedBelowQualityFloor', 0)} |",
+                      f"| Skipped stale | {usage.get('skippedStale', 0)} |",
                       f"| Total tokens | {usage['totalTokens']} |",
                       f"| Estimated cost (CNY) | {cost if cost is not None else 'unavailable'} |",
                       f"| Usage complete | {usage['usageComplete']} |",

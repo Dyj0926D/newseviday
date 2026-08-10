@@ -42,8 +42,7 @@ class FakeStructuredClient:
         return {
             "titleZh": "语义层成为可信 Data Agent 的指标入口",
             "summaryZh": (
-                "统一语义层集中治理指标口径和访问权限，"
-                "为 Data Agent 提供可以追溯的数据查询基础。"
+                "统一语义层集中治理指标口径和访问权限，为 Data Agent 提供可以追溯的数据查询基础。"
             ),
             "whyItMatters": "这会影响企业数据产品的准确率、权限边界和可解释性。",
             "keyPoints": ["指标口径集中治理", "查询结果可以追溯"],
@@ -93,6 +92,7 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:1]
     snapshot.articles[0].topic_scores = {"semantic-layer": 0.6}
+    snapshot.articles[0].ai = None
     client = FakeStructuredClient()
     cache = FileAiCache(tmp_path)
     first_telemetry = EnrichmentTelemetry()
@@ -147,10 +147,13 @@ def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
     assert model_calls == 2
     assert client.calls == 2
     assert sum(article.ai is not None for article in result.articles) == 2
-    assert sum(
-        article.ai is not None and article.ai.model == "deepseek-test"
-        for article in result.articles
-    ) == 2
+    assert (
+        sum(
+            article.ai is not None and article.ai.model == "deepseek-test"
+            for article in result.articles
+        )
+        == 2
+    )
 
 
 def test_article_enrichment_skips_thin_source_evidence(tmp_path: Path) -> None:
@@ -189,7 +192,10 @@ def test_article_enrichment_rotates_across_sources(tmp_path: Path) -> None:
     snapshot.articles[1].source_id = "source-a"
     snapshot.articles[2].source_id = "source-b"
     snapshot.articles[3].source_id = "source-c"
-    original_second_model = snapshot.articles[1].ai.model if snapshot.articles[1].ai else None
+    for article in snapshot.articles:
+        article.ai = None
+        article.content_score = 0.8
+        article.published_at = datetime(2026, 8, 5, tzinfo=UTC)
 
     result, model_calls = enrich_snapshot(
         snapshot,
@@ -202,8 +208,7 @@ def test_article_enrichment_rotates_across_sources(tmp_path: Path) -> None:
     assert model_calls == 3
     assert result.articles[0].ai is not None
     assert result.articles[0].ai.model == "deepseek-test"
-    assert result.articles[1].ai is not None
-    assert result.articles[1].ai.model == original_second_model
+    assert result.articles[1].ai is None
     assert result.articles[2].ai is not None
     assert result.articles[2].ai.model == "deepseek-test"
     assert result.articles[3].ai is not None
@@ -262,6 +267,7 @@ def test_article_enrichment_injects_relevant_terminology(tmp_path: Path) -> None
         "RAG systems need reproducible evaluation across retrieval, ranking, citation, "
         "latency, and refusal cases. The source describes a complete repeatable protocol."
     )
+    snapshot.articles[0].ai = None
     client = FakeStructuredClient()
     terminology = TerminologyConfig(
         version=1,
@@ -278,6 +284,82 @@ def test_article_enrichment_injects_relevant_terminology(tmp_path: Path) -> None
 
     assert "RAG -> RAG" in client.users[0]
     assert "titleZh 或 summaryZh 必须保留该概念" in client.users[0]
+
+
+def test_article_enrichment_reuses_published_ai_below_new_call_floor(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    accepted = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    accepted.articles = accepted.articles[:1]
+    assert accepted.articles[0].ai is not None
+    incoming = accepted.model_copy(deep=True)
+    incoming.articles[0].ai = None
+    incoming.articles[0].content_score = 0.2
+    telemetry = EnrichmentTelemetry()
+
+    result, model_calls = enrich_snapshot(
+        incoming,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        accepted_snapshot=accepted,
+        telemetry=telemetry,
+        now=datetime(2026, 8, 10, tzinfo=UTC),
+    )
+
+    assert model_calls == 0
+    assert result.articles[0].ai == accepted.articles[0].ai
+    assert telemetry.accepted_enrichment_reuses == 1
+    assert telemetry.skipped_below_quality_floor == 0
+
+
+def test_article_enrichment_does_not_pay_for_low_value_backlog(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    article = snapshot.articles[0]
+    article.ai = None
+    article.content_score = 0.59
+    article.facts.abstract = "Detailed but low-priority source evidence. " * 8
+    telemetry = EnrichmentTelemetry()
+    client = FakeStructuredClient()
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=client,
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        telemetry=telemetry,
+        now=datetime(2026, 8, 10, tzinfo=UTC),
+    )
+
+    assert model_calls == 0
+    assert client.calls == 0
+    assert result.articles[0].ai is None
+    assert telemetry.skipped_below_quality_floor == 1
+
+
+def test_article_enrichment_does_not_pay_for_stale_backlog(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    article = snapshot.articles[0]
+    article.ai = None
+    article.content_score = 0.9
+    article.published_at = datetime(2026, 5, 1, tzinfo=UTC)
+    article.facts.abstract = "High-quality but stale source evidence. " * 8
+    telemetry = EnrichmentTelemetry()
+
+    _result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        telemetry=telemetry,
+        now=datetime(2026, 8, 10, tzinfo=UTC),
+    )
+
+    assert model_calls == 0
+    assert telemetry.skipped_stale == 1
 
 
 def test_article_enrichment_rejects_call_cap_above_ten(tmp_path: Path) -> None:

@@ -5,7 +5,7 @@ import re
 import tempfile
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Protocol, TypeVar
 
@@ -25,8 +25,9 @@ PROMPT_VERSION = "article-enrichment-v3"
 PROFILE_PROMPT_VERSION = "profile-enhancement-v1"
 MIN_ENRICHMENT_EVIDENCE_CHARS = 120
 TRANSLATION_PRIORITY_SCORE = 0.60
+MAX_PAID_ENRICHMENT_AGE_DAYS = 45
 HOME_PRIORITY_WINDOW = 8
-SOURCE_REPEAT_PENALTY = 0.18
+SOURCE_REPEAT_PENALTY = 1.0
 SchemaModel = TypeVar("SchemaModel", bound=BaseModel)
 
 
@@ -41,8 +42,11 @@ class CompletionUsage:
 class EnrichmentTelemetry:
     model_calls: int = 0
     cache_hits: int = 0
+    accepted_enrichment_reuses: int = 0
     enriched_articles: int = 0
     skipped_thin_evidence: int = 0
+    skipped_below_quality_floor: int = 0
+    skipped_stale: int = 0
     skipped_after_call_limit: int = 0
 
 
@@ -144,8 +148,7 @@ class DeepSeekStructuredClient:
             api_key=os.environ.get("DEEPSEEK_API_KEY", ""),
             model=os.environ.get("DEEPSEEK_MODEL", ""),
             base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
-            thinking_enabled=os.environ.get("DEEPSEEK_THINKING_ENABLED", "false").lower()
-            == "true",
+            thinking_enabled=os.environ.get("DEEPSEEK_THINKING_ENABLED", "false").lower() == "true",
         )
 
 
@@ -197,9 +200,7 @@ def _terminology_instruction(evidence: str, config: TerminologyConfig | None) ->
     relevant = [rule for rule in config.terms if rule.source.casefold() in source_text]
     if not relevant:
         return ""
-    mappings = "\n".join(
-        f"- {rule.source} -> {rule.preferred_zh}" for rule in relevant
-    )
+    mappings = "\n".join(f"- {rule.source} -> {rule.preferred_zh}" for rule in relevant)
     return (
         "\n术语规范：原文已经出现下列术语。titleZh 或 summaryZh 必须保留该概念，"
         "并使用指定中文写法：\n"
@@ -244,13 +245,9 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
         high_value_translation_bonus = (
             10.0 if needs_chinese and score >= TRANSLATION_PRIORITY_SCORE else 0.0
         )
-        homepage_translation_bonus = (
-            4.0 if needs_chinese and article.id in homepage_ids else 0.0
-        )
+        homepage_translation_bonus = 4.0 if needs_chinese and article.id in homepage_ids else 0.0
         cross_language_bonus = (
-            0.08
-            if needs_chinese and not article.language.casefold().startswith("zh")
-            else 0.0
+            0.08 if needs_chinese and not article.language.casefold().startswith("zh") else 0.0
         )
         source_penalty = SOURCE_REPEAT_PENALTY * source_selections.get(article.source_id, 0)
         editorial_priority = 0.25 * (article.key_signal.score if article.key_signal else 0.0)
@@ -286,6 +283,15 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
     return result
 
 
+def _paid_enrichment_skip_reason(article: Article, generated_at: datetime) -> str | None:
+    if (article.content_score or 0.0) < TRANSLATION_PRIORITY_SCORE:
+        return "below_quality_floor"
+    published_at = article.published_at or article.collected_at
+    if generated_at - published_at > timedelta(days=MAX_PAID_ENRICHMENT_AGE_DAYS):
+        return "stale"
+    return None
+
+
 def enrich_snapshot(
     snapshot: ContentSnapshot,
     *,
@@ -293,6 +299,7 @@ def enrich_snapshot(
     cache: FileAiCache,
     topics: list[TopicConfig],
     terminology: TerminologyConfig | None = None,
+    accepted_snapshot: ContentSnapshot | None = None,
     max_model_calls: int = 5,
     now: datetime | None = None,
     telemetry: EnrichmentTelemetry | None = None,
@@ -304,15 +311,33 @@ def enrich_snapshot(
     stats = telemetry or EnrichmentTelemetry()
     model_calls = 0
     topic_description = ", ".join(f"{topic.id}={topic.label}" for topic in topics)
+    accepted_ai = {
+        article.content_hash: article.ai
+        for article in (accepted_snapshot.articles if accepted_snapshot else [])
+        if article.ai is not None
+    }
     for article in _enrichment_priority_order(result.articles):
+        published_enrichment = article.ai or accepted_ai.get(article.content_hash)
+        if published_enrichment is not None:
+            article.ai = published_enrichment.model_copy(deep=True)
+            stats.accepted_enrichment_reuses += 1
+            stats.enriched_articles += 1
+            continue
         evidence = article.facts.abstract or article.facts.title
         if len(evidence.strip()) < MIN_ENRICHMENT_EVIDENCE_CHARS:
             stats.skipped_thin_evidence += 1
             continue
+        skip_reason = _paid_enrichment_skip_reason(article, generated_at)
+        if skip_reason == "below_quality_floor":
+            stats.skipped_below_quality_floor += 1
+            continue
+        if skip_reason == "stale":
+            stats.skipped_stale += 1
+            continue
         terminology_instruction = _terminology_instruction(evidence, terminology)
-        terminology_signature = hashlib.sha256(
-            terminology_instruction.encode("utf-8")
-        ).hexdigest()[:12]
+        terminology_signature = hashlib.sha256(terminology_instruction.encode("utf-8")).hexdigest()[
+            :12
+        ]
         key = _cache_key(
             article.content_hash,
             client.model,
