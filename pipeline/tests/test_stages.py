@@ -121,6 +121,26 @@ def test_content_value_score_balances_relevance_freshness_and_completeness() -> 
     assert apply_content_quotas([stale, recent])[0].id == recent.id
 
 
+def test_content_quotas_measure_freshness_from_collection_time() -> None:
+    collected_at = NOW + timedelta(days=3)
+    article = normalize_item(
+        item(
+            "https://example.com/stale-feed-latest",
+            "Latest item in a stale RAG feed",
+            "A complete retrieval evaluation report. " * 8,
+        ),
+        collected_at=collected_at,
+    )[0]
+    article.published_at = NOW
+    article.topic_scores = {"rag-eval": 1.0}
+
+    selected = apply_content_quotas([article])
+
+    assert selected[0].content_score_breakdown is not None
+    assert selected[0].content_score_breakdown.freshness < 0.6
+    assert "24 小时内发布" not in selected[0].selection_reasons
+
+
 def test_content_score_assigns_twenty_five_percent_to_engineering_signals() -> None:
     engineering = normalize_item(
         item(
