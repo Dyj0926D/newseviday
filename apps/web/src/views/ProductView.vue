@@ -29,7 +29,7 @@ const exampleSource = computed(() =>
 );
 
 const loopSteps = [
-  ['发现', '汇总海内外官方博客、论文和开源信号'],
+  ['发现', '汇总海内外官方、论文、研究机构、专业媒体和作者信号'],
   ['理解', '翻译并整理标题、摘要和为什么值得看'],
   ['推荐', '按站点主题或关注偏好调整内容顺序'],
   ['追问', '在已收录语料内发起证据约束问答'],
@@ -41,8 +41,8 @@ const architectureLayers = [
   {
     name: '公开来源',
     icon: PhGlobeHemisphereWest,
-    summary: 'RSS、Atom、公开 API、网页元数据和手动来源。',
-    detail: '每个来源独立配置类型、语言、区域、启停状态和使用范围。',
+    summary: 'RSS、Atom、公开 API 和网页元数据。',
+    detail: '来源按官方、论文、研究机构、专业媒体和独立作者分层，并标记一手、二手或观点证据。',
   },
   {
     name: 'Python 内容管道',
@@ -60,7 +60,8 @@ const architectureLayers = [
     name: '检索与质量评测',
     icon: PhFlowArrow,
     summary: '有限步骤检索、证据门禁、引用生成和版本化评测。',
-    detail: '问题先路由，最多执行两轮检索，再检查范围、时间与必需证据；公开问答仍受人工质量门槛控制。',
+    detail:
+      '问题先路由，最多执行两轮检索，再检查范围、时间与必需证据；公开问答仍受人工质量门槛控制。',
   },
   {
     name: 'Worker API',
@@ -248,7 +249,13 @@ const architectureLayers = [
                       : '内容状态'
                 }}
               </dt>
-              <dd>{{ exampleArticle.ai ? '中文标题、摘要、关键点和为什么值得看' : '保留来源标题与摘要，未经 AI 改写' }}</dd>
+              <dd>
+                {{
+                  exampleArticle.ai
+                    ? '中文标题、摘要、关键点和为什么值得看'
+                    : '保留来源标题与摘要，未经 AI 改写'
+                }}
+              </dd>
             </div>
             <div>
               <dt>可追溯性</dt>

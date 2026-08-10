@@ -34,8 +34,9 @@ from newseviday_pipeline.terminology import TerminologyConfig
 
 PROMPT_VERSION = "article-enrichment-v3"
 PROFILE_PROMPT_VERSION = "profile-enhancement-v1"
-BRIEF_PROMPT_VERSION = "weekly-trend-brief-v1"
+BRIEF_PROMPT_VERSION = "weekly-trend-brief-v2"
 SHANGHAI_TIMEZONE = timezone(timedelta(hours=8), name="Asia/Shanghai")
+WEEKLY_BRIEF_CUTOFF = time(hour=9)
 MIN_ENRICHMENT_EVIDENCE_CHARS = 120
 TRANSLATION_PRIORITY_SCORE = 0.60
 MIN_PAID_TARGET_RELEVANCE = 0.60
@@ -440,9 +441,11 @@ def _last_complete_seven_day_window(now: datetime) -> tuple[datetime, datetime]:
     current_or_previous_saturday = local_now.date() - timedelta(days=days_since_saturday)
     period_end_exclusive = datetime.combine(
         current_or_previous_saturday,
-        time.min,
+        WEEKLY_BRIEF_CUTOFF,
         tzinfo=SHANGHAI_TIMEZONE,
     )
+    if local_now < period_end_exclusive:
+        period_end_exclusive -= timedelta(days=7)
     period_start = period_end_exclusive - timedelta(days=7)
     return period_start.astimezone(UTC), period_end_exclusive.astimezone(UTC)
 
@@ -492,7 +495,8 @@ def update_weekly_brief(
         result = _carry_brief(snapshot, accepted_brief)
         return BriefUpdateResult(result, "current", 0, period_start, period_end_exclusive)
 
-    is_due = generated_at.astimezone(SHANGHAI_TIMEZONE).weekday() == 5
+    local_generated_at = generated_at.astimezone(SHANGHAI_TIMEZONE)
+    is_due = local_generated_at.weekday() == 5 and local_generated_at.time() >= WEEKLY_BRIEF_CUTOFF
     if not generate_if_due or not is_due or client is None:
         if accepted_brief is None:
             return BriefUpdateResult(snapshot, "not_due", 0, period_start, period_end_exclusive)
@@ -535,6 +539,8 @@ def update_weekly_brief(
             {
                 "evidenceId": article.evidence_ids[0],
                 "sourceId": article.source_id,
+                "sourceType": article.source_type,
+                "evidenceTier": article.evidence_tier,
                 "publishedAt": (
                     article.published_at.isoformat() if article.published_at is not None else None
                 ),
@@ -557,6 +563,9 @@ def update_weekly_brief(
                 f"{(period_end_exclusive - timedelta(days=1)).date().isoformat()}。\n"
                 "输出 title 和 1 至 3 个 sections。每个 section 包含 heading、body、evidenceIds；"
                 "每节必须引用 2 至 5 条证据，并覆盖至少 2 个不同 sourceId。"
+                "事实结论优先使用 evidenceTier=primary 的一手来源；"
+                "professional_media 与 independent_author 只作为观察、解释或交叉验证，"
+                "不能单独支撑趋势结论。"
                 "body 用中文说明共同变化和判断边界，避免把单篇文章写成行业趋势。\n"
                 f"<untrusted-evidence>\n{json.dumps(evidence_rows, ensure_ascii=False)}\n"
                 "</untrusted-evidence>"
@@ -571,6 +580,11 @@ def update_weekly_brief(
         for article in candidates
         for evidence_id in article.evidence_ids
     }
+    evidence_to_tier = {
+        evidence_id: article.evidence_tier
+        for article in candidates
+        for evidence_id in article.evidence_ids
+    }
     sections: list[BriefSection] = []
     for section in draft.sections:
         evidence_ids = list(dict.fromkeys(section.evidence_ids))
@@ -578,6 +592,14 @@ def update_weekly_brief(
             raise ValueError("weekly_brief_contains_unknown_evidence")
         if len({evidence_to_source[item] for item in evidence_ids}) < 2:
             raise ValueError("weekly_brief_section_requires_two_sources")
+        section_tiers = [evidence_to_tier[item] for item in evidence_ids]
+        secondary_sources = {
+            evidence_to_source[item]
+            for item in evidence_ids
+            if evidence_to_tier[item] == "secondary"
+        }
+        if "primary" not in section_tiers and len(secondary_sources) < 2:
+            raise ValueError("weekly_brief_requires_primary_or_two_secondary_sources")
         sections.append(
             BriefSection(
                 heading=section.heading,

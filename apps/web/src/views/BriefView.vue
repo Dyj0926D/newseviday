@@ -10,7 +10,9 @@ import { useContentStore } from '../stores/content';
 const content = useContentStore();
 const brief = computed(() => content.snapshot?.briefs[0] ?? null);
 const briefSourceCount = computed(() => {
-  const evidenceIds = new Set(brief.value?.sections.flatMap((section) => section.evidenceIds) ?? []);
+  const evidenceIds = new Set(
+    brief.value?.sections.flatMap((section) => section.evidenceIds) ?? [],
+  );
   return new Set(
     (content.snapshot?.evidence ?? [])
       .filter((item) => evidenceIds.has(item.id))
@@ -112,7 +114,7 @@ function formatPeriod(value: string): string {
         <div class="brief-main">
           <InlineNotice
             title="证据约束的 7 日趋势简报"
-            description="每周一整理上一完整自然周。每个趋势至少关联两个来源；证据不足或生成失败时保留上一版成功简报。"
+            description="北京时间每周六 10:00，整理截至当日 09:00 的完整七天。每个趋势至少关联两个来源，并满足一手来源或双二手来源门禁；证据不足或生成失败时保留上一版成功简报。"
           />
 
           <article
@@ -155,7 +157,7 @@ function formatPeriod(value: string): string {
             </div>
             <ul>
               <li>每个判断关联原始来源</li>
-              <li>单一来源会明确标记</li>
+              <li>观点来源不单独支撑趋势</li>
               <li>证据不足时不生成强结论</li>
               <li>更新失败时保留上一版内容</li>
             </ul>

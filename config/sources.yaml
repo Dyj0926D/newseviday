@@ -8,7 +8,10 @@ sources:
     region: 全球
     enabled: true
     usage_scope: metadata_and_abstract
+    source_type: academic
+    evidence_tier: primary
     max_items: 20
+    max_selected_items: 6
     note: 使用公开 API 的标题、作者和摘要，不转载论文全文
 
   - id: github-ai-ml
@@ -19,6 +22,8 @@ sources:
     region: 北美
     enabled: true
     usage_scope: metadata_and_excerpt
+    source_type: official
+    evidence_tier: primary
     max_items: 12
     note: 仅保留 Feed 元数据、短摘录和原文链接
 
@@ -30,6 +35,8 @@ sources:
     region: 北美
     enabled: true
     usage_scope: metadata_and_excerpt
+    source_type: official
+    evidence_tier: primary
     max_items: 12
     note: 重点筛选 Data Intelligence、Lakehouse 与 Agent 主题
 
@@ -41,6 +48,8 @@ sources:
     region: 北美
     enabled: true
     usage_scope: metadata_and_excerpt
+    source_type: official
+    evidence_tier: primary
     max_items: 12
     note: 重点筛选 Semantic Layer、Analytics Engineering 与 Agent 主题
 
@@ -52,6 +61,8 @@ sources:
     region: 北美
     enabled: true
     usage_scope: metadata_and_excerpt
+    source_type: official
+    evidence_tier: primary
     max_items: 12
     note: 通用 AI 产品、模型、Agent、安全与开发者平台的一手信息
 
@@ -63,6 +74,8 @@ sources:
     region: 北美
     enabled: true
     usage_scope: metadata_and_link
+    source_type: official
+    evidence_tier: primary
     max_items: 12
     include_url_patterns:
       - ^https://www\.anthropic\.com/news/[a-z0-9-]+$
@@ -78,6 +91,8 @@ sources:
     region: 中国大陆
     enabled: true
     usage_scope: metadata_and_excerpt
+    source_type: official
+    evidence_tier: primary
     max_items: 12
     note: 国内通用模型、Agent、开源模型和产品更新的一手信息
 
@@ -89,6 +104,8 @@ sources:
     region: 中国大陆
     enabled: true
     usage_scope: metadata_and_link
+    source_type: official
+    evidence_tier: primary
     max_items: 12
     heading_tags:
       - h3
@@ -102,5 +119,99 @@ sources:
     region: 全球
     enabled: true
     usage_scope: metadata_and_excerpt
+    source_type: official
+    evidence_tier: primary
     max_items: 12
     note: 兼容部分条目只提供 permalink GUID 的 Feed 结构
+
+  - id: mit-technology-review-ai
+    name: MIT Technology Review AI
+    adapter: rss
+    url: https://www.technologyreview.com/topic/artificial-intelligence/feed/
+    language: en
+    region: 北美
+    enabled: true
+    usage_scope: metadata_and_excerpt
+    source_type: professional_media
+    evidence_tier: secondary
+    max_items: 12
+    max_selected_items: 3
+    note: 专业科技媒体的 AI 报道，用于补充行业背景与外部观察，不能单独支撑 Key Signal
+
+  - id: the-batch
+    name: The Batch
+    adapter: html
+    url: https://www.deeplearning.ai/the-batch
+    language: en
+    region: 北美
+    enabled: true
+    usage_scope: metadata_and_excerpt
+    source_type: professional_media
+    evidence_tier: secondary
+    max_items: 8
+    max_selected_items: 2
+    html_card_mode: true
+    require_published_at: true
+    require_summary: true
+    include_url_patterns:
+      - ^https://www\.deeplearning\.ai/the-batch/issue-\d+$
+    note: DeepLearning.AI 编辑型周刊，按 Issue 卡片采集标题、日期、导语和原文链接
+
+  - id: mlcommons-news
+    name: MLCommons News
+    adapter: rss
+    url: https://mlcommons.org/category/news/feed/
+    language: en
+    region: 全球
+    enabled: true
+    usage_scope: metadata_and_excerpt
+    source_type: research_institute
+    evidence_tier: primary
+    max_items: 12
+    max_selected_items: 3
+    note: AI 基准、性能评测和产业协作的一手机构动态
+
+  - id: metr-blog
+    name: METR Blog
+    adapter: html
+    url: https://metr.org/blog/
+    language: en
+    region: 北美
+    enabled: true
+    usage_scope: metadata_and_excerpt
+    source_type: research_institute
+    evidence_tier: primary
+    max_items: 12
+    max_selected_items: 3
+    html_card_mode: true
+    include_url_patterns:
+      - ^https://metr\.org/blog/\d{4}-\d{2}-\d{2}-[a-z0-9-]+/?$
+    note: 模型能力、软件工程与 AI 风险评测的一手研究机构内容
+
+  - id: simon-willison-llms
+    name: Simon Willison · LLMs
+    adapter: atom
+    url: https://simonwillison.net/tags/llms.atom
+    language: en
+    region: 北美
+    enabled: true
+    usage_scope: metadata_and_excerpt
+    source_type: independent_author
+    evidence_tier: opinion
+    max_items: 12
+    max_selected_items: 2
+    note: 独立开发者对 LLM 工具和工程实践的观察，仅作观点与案例线索
+
+  - id: interconnects
+    name: Interconnects
+    adapter: rss
+    url: https://www.interconnects.ai/feed
+    language: en
+    region: 北美
+    enabled: true
+    usage_scope: metadata_and_excerpt
+    source_type: independent_author
+    evidence_tier: opinion
+    max_items: 12
+    max_selected_items: 2
+    note: 独立研究者对模型、开源与产业进展的分析，仅作观点与趋势线索

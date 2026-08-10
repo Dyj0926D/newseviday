@@ -119,7 +119,17 @@
         "language": { "type": "string", "minLength": 2 },
         "region": { "type": "string", "minLength": 2 },
         "active": { "type": "boolean" },
-        "usageScope": { "type": "string", "minLength": 1 }
+        "usageScope": { "type": "string", "minLength": 1 },
+        "sourceType": {
+          "enum": [
+            "official",
+            "academic",
+            "research_institute",
+            "professional_media",
+            "independent_author"
+          ]
+        },
+        "evidenceTier": { "enum": ["primary", "secondary", "opinion"] }
       }
     },
     "snapshotTopic": {
@@ -152,6 +162,16 @@
         "schemaVersion": { "const": "1.0.0" },
         "id": { "$ref": "#/$defs/id" },
         "sourceId": { "$ref": "#/$defs/id" },
+        "sourceType": {
+          "enum": [
+            "official",
+            "academic",
+            "research_institute",
+            "professional_media",
+            "independent_author"
+          ]
+        },
+        "evidenceTier": { "enum": ["primary", "secondary", "opinion"] },
         "canonicalUrl": { "type": "string", "format": "uri" },
         "language": { "type": "string", "minLength": 2 },
         "publishedAt": { "oneOf": [{ "$ref": "#/$defs/isoDateTime" }, { "type": "null" }] },

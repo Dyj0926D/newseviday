@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from newseviday_pipeline.adapters import (
+    parse_html_cards,
     parse_html_headings,
     parse_html_listing,
     parse_json_feed,
@@ -123,6 +124,71 @@ def test_html_listing_extracts_card_summary_and_published_date() -> None:
         "Anthropic reports a governed workflow with evaluation and audit evidence."
     )
     assert items[0].published_at == datetime(2026, 8, 7, tzinfo=UTC)
+
+
+def test_html_card_listing_uses_semantic_article_boundaries() -> None:
+    content = b"""
+      <article>
+        <a href="/the-batch/tag/aug-08-2026">Aug 08, 2026</a>
+        <h2>How agents are changing software development</h2>
+        <p>A weekly review of agent engineering, evaluation and deployment.</p>
+        <a aria-label="Read issue 365" href="/the-batch/issue-365"></a>
+      </article>
+    """
+    items = parse_html_cards(
+        content,
+        source_id="the-batch",
+        language="en",
+        base_url="https://www.deeplearning.ai/the-batch",
+        include_url_patterns=[r"^https://www\.deeplearning\.ai/the-batch/issue-\d+$"],
+    )
+
+    assert len(items) == 1
+    assert items[0].url == "https://www.deeplearning.ai/the-batch/issue-365"
+    assert items[0].title == "How agents are changing software development"
+    assert items[0].summary == ("A weekly review of agent engineering, evaluation and deployment.")
+    assert items[0].published_at == datetime(2026, 8, 8, tzinfo=UTC)
+
+
+def test_parse_source_propagates_source_type_and_evidence_tier() -> None:
+    configured = source("media-source").model_copy(
+        update={"source_type": "professional_media", "evidence_tier": "secondary"}
+    )
+
+    parsed = parse_source(
+        rss("AI market update", "https://media-source.example/posts/1", "Evidence"),
+        configured,
+    )
+
+    assert parsed[0].source_type == "professional_media"
+    assert parsed[0].evidence_tier == "secondary"
+
+
+def test_parse_source_can_require_date_and_summary_before_source_cap() -> None:
+    configured = SourceConfig(
+        id="weekly-media",
+        name="Weekly media",
+        adapter="html",
+        url="https://example.com/issues",
+        language="en",
+        region="global",
+        enabled=True,
+        usage_scope="metadata_and_excerpt",
+        html_card_mode=True,
+        require_published_at=True,
+        require_summary=True,
+        max_items=1,
+        include_url_patterns=[r"^https://example\.com/issues/\d+$"],
+    )
+    content = b"""
+      <article><h2>Popular but undated issue</h2><a href="/issues/1"></a></article>
+      <article><h2>Current dated issue</h2><p>Useful current issue summary.</p>
+        <time datetime="2026-08-08"></time><a href="/issues/2"></a></article>
+    """
+
+    parsed = parse_source(content, configured)
+
+    assert [item.url for item in parsed] == ["https://example.com/issues/2"]
 
 
 def test_html_heading_listing_creates_stable_fragment_links() -> None:

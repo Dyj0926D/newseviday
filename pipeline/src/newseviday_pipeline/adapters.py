@@ -281,6 +281,120 @@ class _ListingParser(HTMLParser):
         self._time_value = None
 
 
+class _CardParser(HTMLParser):
+    """Extract one item from semantic ``article`` or ``.card-post`` containers."""
+
+    DATE_PATTERN = re.compile(
+        r"\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|"
+        r"Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|"
+        r"Dec(?:ember)?)\s+\d{1,2},\s+\d{4}\b",
+        re.IGNORECASE,
+    )
+
+    def __init__(self, base_url: str) -> None:
+        super().__init__(convert_charrefs=True)
+        self.base_url = base_url
+        self.cards: list[tuple[list[tuple[str, str | None]], str, str | None, datetime | None]] = []
+        self._root_tag: str | None = None
+        self._root_depth = 0
+        self._links: list[tuple[str, str | None]] = []
+        self._headings: list[str] = []
+        self._paragraphs: list[str] = []
+        self._all_text: list[str] = []
+        self._capture_tag: str | None = None
+        self._capture_text: list[str] = []
+        self._capture_kind: str | None = None
+        self._time_value: str | None = None
+
+    def _reset_card(self) -> None:
+        self._links = []
+        self._headings = []
+        self._paragraphs = []
+        self._all_text = []
+        self._capture_tag = None
+        self._capture_text = []
+        self._capture_kind = None
+        self._time_value = None
+
+    def _flush_card(self) -> None:
+        if not self._links:
+            return
+        title = next((item for item in self._headings if len(item) >= 8), "")
+        if not title:
+            title = next(
+                (label for _link, label in self._links if label and len(label.strip()) >= 8),
+                "",
+            )
+        if not title:
+            return
+        summary = next(
+            (item for item in self._paragraphs if len(item) >= 20 and item != title),
+            None,
+        )
+        full_text = " ".join(" ".join(self._all_text).split())
+        date_match = self.DATE_PATTERN.search(full_text)
+        published_at = _datetime(self._time_value or (date_match.group(0) if date_match else ""))
+        self.cards.append((self._links.copy(), title, summary, published_at))
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        classes = set((attributes.get("class") or "").split())
+        is_card_root = tag == "article" or (tag == "div" and "card-post" in classes)
+        if self._root_tag is None:
+            if is_card_root:
+                self._reset_card()
+                self._root_tag = tag
+                self._root_depth = 1
+            return
+        if tag == self._root_tag:
+            self._root_depth += 1
+        if tag == "a" and (href := attributes.get("href")):
+            self._links.append((urljoin(self.base_url, href), attributes.get("aria-label")))
+        if self._capture_tag is not None:
+            return
+        if tag in {"h1", "h2", "h3", "h4"} or "card-title" in classes:
+            self._capture_tag = tag
+            self._capture_kind = "heading"
+            self._capture_text = []
+        elif tag == "p":
+            self._capture_tag = tag
+            self._capture_kind = "paragraph"
+            self._capture_text = []
+        elif tag == "time":
+            self._capture_tag = tag
+            self._capture_kind = "time"
+            self._capture_text = []
+            self._time_value = attributes.get("datetime")
+
+    def handle_data(self, data: str) -> None:
+        if self._root_tag is None:
+            return
+        self._all_text.append(data)
+        if self._capture_tag is not None:
+            self._capture_text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if self._root_tag is None:
+            return
+        if tag == self._capture_tag:
+            value = " ".join("".join(self._capture_text).split())
+            if value and self._capture_kind == "heading":
+                self._headings.append(value)
+            elif value and self._capture_kind == "paragraph":
+                self._paragraphs.append(value)
+            elif value and self._capture_kind == "time" and self._time_value is None:
+                self._time_value = value
+            self._capture_tag = None
+            self._capture_text = []
+            self._capture_kind = None
+        if tag != self._root_tag:
+            return
+        self._root_depth -= 1
+        if self._root_depth == 0:
+            self._flush_card()
+            self._root_tag = None
+
+
 class _HeadingParser(HTMLParser):
     def __init__(self, base_url: str, heading_tags: set[str]) -> None:
         super().__init__(convert_charrefs=True)
@@ -379,6 +493,47 @@ def parse_html_listing(
     return result
 
 
+def parse_html_cards(
+    content: bytes,
+    *,
+    source_id: str,
+    language: str,
+    base_url: str,
+    include_url_patterns: list[str] | None = None,
+    exclude_url_patterns: list[str] | None = None,
+) -> list[RawFeedItem]:
+    parser = _CardParser(base_url)
+    parser.feed(content.decode("utf-8", errors="replace"))
+    includes = [re.compile(pattern) for pattern in (include_url_patterns or [])]
+    excludes = [re.compile(pattern) for pattern in (exclude_url_patterns or [])]
+    seen: set[str] = set()
+    result: list[RawFeedItem] = []
+    for links, title, summary, published_at in parser.cards:
+        link = next(
+            (
+                item
+                for item, _label in links
+                if (not includes or any(pattern.search(item) for pattern in includes))
+                and not any(pattern.search(item) for pattern in excludes)
+            ),
+            None,
+        )
+        if link is None or link in seen:
+            continue
+        seen.add(link)
+        result.append(
+            RawFeedItem(
+                source_id=source_id,
+                url=link,
+                title=title,
+                summary=summary,
+                published_at=published_at,
+                language=language,
+            )
+        )
+    return result
+
+
 def parse_html_headings(
     content: bytes,
     *,
@@ -426,6 +581,15 @@ class JsonFeedAdapter:
 
 class HtmlListingAdapter:
     def parse(self, content: bytes, source: SourceConfig) -> list[RawFeedItem]:
+        if source.html_card_mode:
+            return parse_html_cards(
+                content,
+                source_id=source.id,
+                language=source.language,
+                base_url=str(source.url),
+                include_url_patterns=source.include_url_patterns,
+                exclude_url_patterns=source.exclude_url_patterns,
+            )
         if source.heading_tags:
             return parse_html_headings(
                 content,
@@ -454,4 +618,14 @@ ADAPTERS: dict[str, SourceAdapter] = {
 
 
 def parse_source(content: bytes, source: SourceConfig) -> list[RawFeedItem]:
-    return ADAPTERS[source.adapter].parse(content, source)[: source.max_items]
+    parsed = ADAPTERS[source.adapter].parse(content, source)
+    items = [
+        item
+        for item in parsed
+        if (not source.require_published_at or item.published_at is not None)
+        and (not source.require_summary or bool((item.summary or "").strip()))
+    ][: source.max_items]
+    for item in items:
+        item.source_type = source.source_type
+        item.evidence_tier = source.evidence_tier
+    return items

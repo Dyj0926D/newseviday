@@ -10,7 +10,7 @@ import {
 import { computed, onMounted, ref } from 'vue';
 
 import InnerPageHero from '../components/InnerPageHero.vue';
-import { formatDateTime } from '../lib/intelligence';
+import { formatDateTime, sourceTypeLabel } from '../lib/intelligence';
 import { useContentStore } from '../stores/content';
 import { useRuntimeStore } from '../stores/runtime';
 
@@ -39,7 +39,8 @@ const contributingSources = computed(() => {
 });
 const aiArticleCount = computed(
   () =>
-    (content.snapshot?.articles ?? []).filter((article) => article.ai?.provider === 'deepseek').length,
+    (content.snapshot?.articles ?? []).filter((article) => article.ai?.provider === 'deepseek')
+      .length,
 );
 const editorialArticleCount = computed(
   () =>
@@ -169,11 +170,19 @@ onMounted(async () => {
         <dl class="status-facts">
           <div>
             <dt>质量门禁</dt>
-            <dd>{{ quality.gate === 'pass' ? '通过' : quality.gate === 'observe' ? '观察' : '未通过' }}</dd>
+            <dd>
+              {{
+                quality.gate === 'pass' ? '通过' : quality.gate === 'observe' ? '观察' : '未通过'
+              }}
+            </dd>
           </div>
           <div>
             <dt>缺少来源摘要</dt>
-            <dd>{{ quality.missingAbstractCount }} 条（{{ Math.round(quality.missingAbstractRate * 100) }}%）</dd>
+            <dd>
+              {{ quality.missingAbstractCount }} 条（{{
+                Math.round(quality.missingAbstractRate * 100)
+              }}%）
+            </dd>
           </div>
           <div>
             <dt>空白主题</dt>
@@ -209,7 +218,8 @@ onMounted(async () => {
           <article v-for="source in contributingSources" :key="source.id">
             <span class="source-mark">{{ source.name.slice(0, 1) }}</span>
             <div>
-              <strong>{{ source.name }}</strong><small>{{ source.region }} · {{ source.language }}</small>
+              <strong>{{ source.name }}</strong><small>{{ sourceTypeLabel(source.sourceType) }} · {{ source.region }} ·
+                {{ source.language }}</small>
             </div>
             <span class="status-text">快照可用</span>
             <a :href="source.homepageUrl" target="_blank" rel="noreferrer">访问来源</a>
@@ -233,10 +243,9 @@ onMounted(async () => {
                 条内容用于体验产品流程，不用于实时判断。</span>
             </template>
             <template v-else>
-              <strong>受控生产快照</strong><span>当前
-                {{ content.snapshot?.articles.length ?? 0 }} 条内容来自
-                {{ contributingSources.length }} 个实际贡献来源，其中
-                {{ aiArticleCount }} 篇由 AI 结构化整理，{{ editorialArticleCount }} 篇经编辑整理。</span>
+              <strong>受控生产快照</strong><span>当前 {{ content.snapshot?.articles.length ?? 0 }} 条内容来自
+                {{ contributingSources.length }} 个实际贡献来源，其中 {{ aiArticleCount }} 篇由 AI
+                结构化整理，{{ editorialArticleCount }} 篇经编辑整理。</span>
             </template>
           </li>
           <li>

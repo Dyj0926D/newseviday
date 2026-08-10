@@ -2,7 +2,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from newseviday_pipeline.ai import FileAiCache, update_weekly_brief
+import pytest
+
+from newseviday_pipeline.ai import (
+    FileAiCache,
+    _last_complete_seven_day_window,
+    update_weekly_brief,
+)
 from newseviday_pipeline.editorial import apply_editorial_package, load_editorial_package
 from newseviday_pipeline.snapshot import load_snapshot
 
@@ -56,8 +62,8 @@ def test_weekly_brief_generates_once_and_reuses_the_published_period(tmp_path: P
     assert len(generated.snapshot.briefs) == 1
     assert generated.snapshot.briefs[0].generated_by is not None
     assert generated.snapshot.briefs[0].generated_by.provider == "deepseek"
-    assert generated.period_start == datetime(2026, 7, 31, 16, tzinfo=UTC)
-    assert generated.period_end == datetime(2026, 8, 7, 16, tzinfo=UTC)
+    assert generated.period_start == datetime(2026, 8, 1, 1, tzinfo=UTC)
+    assert generated.period_end == datetime(2026, 8, 8, 1, tzinfo=UTC)
 
     reused = update_weekly_brief(
         generated.snapshot,
@@ -89,3 +95,33 @@ def test_weekly_brief_is_carried_on_non_saturday_refresh(tmp_path: Path) -> None
     assert carried.status == "carried"
     assert carried.model_calls == 0
     assert carried.snapshot.briefs[0].id == accepted.briefs[0].id
+
+
+def test_weekly_window_uses_previous_cutoff_before_saturday_nine() -> None:
+    period_start, period_end = _last_complete_seven_day_window(
+        datetime(2026, 8, 8, 0, 30, tzinfo=UTC)
+    )
+
+    assert period_start == datetime(2026, 7, 25, 1, tzinfo=UTC)
+    assert period_end == datetime(2026, 8, 1, 1, tzinfo=UTC)
+
+
+def test_weekly_brief_rejects_opinion_only_support(tmp_path: Path) -> None:
+    source = load_snapshot(SNAPSHOT)
+    prepared = apply_editorial_package(source, load_editorial_package(PACKAGE))
+    prepared.briefs = []
+    for article in prepared.articles:
+        article.source_type = "independent_author"
+        article.evidence_tier = "opinion"
+
+    with pytest.raises(
+        ValueError,
+        match="weekly_brief_requires_primary_or_two_secondary_sources",
+    ):
+        update_weekly_brief(
+            prepared,
+            accepted_snapshot=None,
+            client=FakeBriefClient(),
+            cache=FileAiCache(tmp_path),
+            now=datetime(2026, 8, 8, 2, tzinfo=UTC),
+        )

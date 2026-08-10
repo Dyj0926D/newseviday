@@ -1,7 +1,7 @@
 import type { Article } from '@newseviday/contracts';
 import { describe, expect, it } from 'vitest';
 
-import { isChineseDisplayReady, translationStatus } from './intelligence';
+import { isChineseDisplayReady, sourceTypeLabel, translationStatus } from './intelligence';
 
 const article = {
   language: 'en',
@@ -48,5 +48,12 @@ describe('intelligence presentation', () => {
         },
       }),
     ).toBe(true);
+  });
+
+  it('labels source roles without exposing internal evidence codes', () => {
+    expect(sourceTypeLabel('official')).toBe('官方一手');
+    expect(sourceTypeLabel('research_institute')).toBe('研究机构');
+    expect(sourceTypeLabel('professional_media')).toBe('专业媒体');
+    expect(sourceTypeLabel('independent_author')).toBe('作者观察');
   });
 });

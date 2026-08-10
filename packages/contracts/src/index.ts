@@ -121,6 +121,9 @@ export type StatusResponse = ApiSuccess<StatusData>;
 export type RuntimeConfigResponse = ApiSuccess<RuntimeConfigData>;
 
 export type SourceKind = 'atom' | 'rss' | 'json' | 'html' | 'manual';
+export type SourceType =
+  'official' | 'academic' | 'research_institute' | 'professional_media' | 'independent_author';
+export type EvidenceTier = 'primary' | 'secondary' | 'opinion';
 
 export interface Source {
   schemaVersion: typeof SCHEMA_VERSION;
@@ -133,6 +136,8 @@ export interface Source {
   region: string;
   active: boolean;
   usageScope: string;
+  sourceType?: SourceType;
+  evidenceTier?: EvidenceTier;
 }
 
 export interface Evidence {
@@ -188,6 +193,8 @@ export interface Article {
   schemaVersion: typeof SCHEMA_VERSION;
   id: string;
   sourceId: string;
+  sourceType?: SourceType;
+  evidenceTier?: EvidenceTier;
   canonicalUrl: string;
   language: LanguageCode;
   publishedAt: IsoDateTime | null;

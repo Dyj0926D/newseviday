@@ -18,6 +18,7 @@ import {
   formatDateTime,
   languageLabel,
   resolveSource,
+  sourceTypeLabel,
   topicLabels,
 } from '../lib/intelligence';
 import { useContentStore } from '../stores/content';
@@ -41,7 +42,9 @@ const source = computed(() =>
   article.value ? resolveSource(article.value, activeSnapshot.value?.sources ?? []) : undefined,
 );
 const evidence = computed(() =>
-  (activeSnapshot.value?.evidence ?? []).filter((item) => article.value?.evidenceIds.includes(item.id)),
+  (activeSnapshot.value?.evidence ?? []).filter((item) =>
+    article.value?.evidenceIds.includes(item.id),
+  ),
 );
 const related = computed(() => {
   if (!article.value) return [];
@@ -70,7 +73,11 @@ watch(
 
 <template>
   <main id="main-content">
-    <div v-if="content.state === 'loading' || archiveLoading" class="page-container inner-loading" role="status">
+    <div
+      v-if="content.state === 'loading' || archiveLoading"
+      class="page-container inner-loading"
+      role="status"
+    >
       <span></span><span></span><span></span>
     </div>
 
@@ -91,6 +98,9 @@ watch(
           <div class="intel-meta article-hero__meta">
             <span class="source-mark">{{ source?.name.slice(0, 1) ?? 'N' }}</span>
             <strong>{{ source?.name ?? article.sourceId }}</strong>
+            <span class="source-type-badge">{{
+              sourceTypeLabel(source?.sourceType ?? article.sourceType)
+            }}</span>
             <span>{{ source?.region ?? '区域未知' }}</span>
             <span>{{ languageLabel(article.language) }}</span>
             <span>{{ formatDateTime(article.publishedAt) }}</span>
