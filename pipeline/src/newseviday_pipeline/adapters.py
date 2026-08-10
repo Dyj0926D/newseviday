@@ -626,6 +626,8 @@ def parse_source(content: bytes, source: SourceConfig) -> list[RawFeedItem]:
         and (not source.require_summary or bool((item.summary or "").strip()))
     ][: source.max_items]
     for item in items:
+        if item.summary:
+            item.summary = item.summary[: source.max_summary_chars]
         item.source_type = source.source_type
         item.evidence_tier = source.evidence_tier
     return items

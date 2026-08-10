@@ -58,6 +58,7 @@ class SourceConfig(ContractModel):
     note: str | None = None
     max_items: int = Field(default=12, ge=1, le=50)
     max_selected_items: int = Field(default=8, ge=1, le=12)
+    max_summary_chars: int = Field(default=2_500, ge=120, le=2_500)
     request_timeout_seconds: int = Field(default=15, ge=3, le=30)
     include_url_patterns: list[str] = Field(default_factory=list, max_length=8)
     exclude_url_patterns: list[str] = Field(default_factory=list, max_length=8)
