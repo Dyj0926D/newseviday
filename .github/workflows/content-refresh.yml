@@ -83,6 +83,7 @@ jobs:
         if: env.RUN_REFRESH == 'true' && github.event_name == 'schedule'
         env:
           GH_TOKEN: ${{ github.token }}
+          SCHEDULE_EXPRESSION: ${{ github.event.schedule }}
         shell: bash
         run: |
           open_refresh_pr="$(gh pr list \
@@ -94,6 +95,30 @@ jobs:
           if [[ -n "$open_refresh_pr" ]]; then
             echo "RUN_REFRESH=false" >> "$GITHUB_ENV"
             echo "Scheduled refresh skipped because content PR #${open_refresh_pr} is still open."
+            exit 0
+          fi
+          if [[ "$SCHEDULE_EXPRESSION" == "47 3 * * *" ]]; then
+            successful_run_today=""
+            while IFS=$'\t' read -r candidate_run_id candidate_created_at; do
+              [[ "${candidate_created_at%%T*}" == "$(date -u +%F)" ]] || continue
+              artifact_count="$(gh api \
+                "repos/${GITHUB_REPOSITORY}/actions/runs/${candidate_run_id}/artifacts" \
+                --jq '[.artifacts[] | select((.expired | not) and (.name | startswith("content-refresh-")))] | length')"
+              if [[ "$artifact_count" -gt 0 ]]; then
+                successful_run_today="$candidate_run_id"
+                break
+              fi
+            done < <(gh run list \
+              --repo "$GITHUB_REPOSITORY" \
+              --workflow content-refresh.yml \
+              --status success \
+              --limit 20 \
+              --json databaseId,createdAt \
+              --jq '.[] | [.databaseId, .createdAt] | @tsv')
+            if [[ -n "$successful_run_today" ]]; then
+              echo "RUN_REFRESH=false" >> "$GITHUB_ENV"
+              echo "Backup refresh skipped because successful content run ${successful_run_today} already completed today."
+            fi
           fi
       - uses: actions/checkout@v7
         if: env.RUN_REFRESH == 'true'
