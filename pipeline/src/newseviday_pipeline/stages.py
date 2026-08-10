@@ -345,8 +345,11 @@ def apply_content_quotas(
     effective_source_limits = {**DEFAULT_SOURCE_LIMITS, **(source_limits or {})}
     if any(limit < 1 for limit in effective_source_limits.values()):
         raise ValueError("source_limits_must_be_positive")
+    # Freshness is relative to this collection run, not to the newest article
+    # returned by the sources. Otherwise a stale feed can make its newest item
+    # look as if it was published in the last 24 hours.
     anchor = max(
-        (article.published_at or article.collected_at for article in articles),
+        (article.collected_at for article in articles),
         default=datetime.now(UTC),
     )
     eligible: list[Article] = []
