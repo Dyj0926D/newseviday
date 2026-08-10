@@ -3,7 +3,7 @@ import os
 import re
 import tempfile
 from collections import Counter
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from pydantic import Field
@@ -27,7 +27,9 @@ class SnapshotQualityReport(ContractModel):
     article_count: int
     configured_source_count: int
     contributing_source_count: int
+    structured_article_count: int
     ai_article_count: int
+    editorial_article_count: int
     missing_abstract_count: int
     missing_abstract_rate: float = Field(ge=0, le=1)
     missing_abstract_by_source: dict[str, int]
@@ -37,6 +39,11 @@ class SnapshotQualityReport(ContractModel):
     topic_gaps: list[str]
     key_signal_eligible_count: int
     high_value_chinese_gap_count: int
+    recent_window_days: int
+    recent_article_count: int
+    recent_chinese_ready_count: int
+    recent_chinese_gap_count: int
+    trend_brief_count: int
     potential_story_clusters: list[StoryCluster]
     issues: list[str]
 
@@ -143,6 +150,15 @@ def audit_snapshot(
         (article.content_score or 0) >= 0.6 and not chinese_display_ready(article)
         for article in snapshot.articles
     )
+    anchor = now or snapshot.generated_at
+    recent_cutoff = anchor - timedelta(days=30)
+    recent_articles = [
+        article
+        for article in snapshot.articles
+        if (article.published_at or article.collected_at) >= recent_cutoff
+    ]
+    recent_chinese_ready_count = sum(chinese_display_ready(article) for article in recent_articles)
+    recent_chinese_gap_count = len(recent_articles) - recent_chinese_ready_count
     issues: list[str] = []
     hard_failure = False
     if len(snapshot.articles) < 20:
@@ -156,6 +172,8 @@ def audit_snapshot(
         hard_failure = True
     if topic_gaps:
         issues.append(f"{len(topic_gaps)} 个配置主题暂时没有入选内容")
+    if recent_chinese_gap_count:
+        issues.append(f"近 30 天有 {recent_chinese_gap_count} 条外文内容待中文整理")
 
     return SnapshotQualityReport(
         snapshot_id=snapshot.snapshot_id,
@@ -164,7 +182,15 @@ def audit_snapshot(
         article_count=len(snapshot.articles),
         configured_source_count=len(snapshot.sources),
         contributing_source_count=len(source_counts),
-        ai_article_count=sum(article.ai is not None for article in snapshot.articles),
+        structured_article_count=sum(article.ai is not None for article in snapshot.articles),
+        ai_article_count=sum(
+            article.ai is not None and article.ai.provider == "deepseek"
+            for article in snapshot.articles
+        ),
+        editorial_article_count=sum(
+            article.ai is not None and article.ai.provider == "editorial"
+            for article in snapshot.articles
+        ),
         missing_abstract_count=missing_abstract_count,
         missing_abstract_rate=round(missing_rate, 4),
         missing_abstract_by_source=dict(sorted(missing_abstract_by_source.items())),
@@ -174,6 +200,11 @@ def audit_snapshot(
         topic_gaps=topic_gaps,
         key_signal_eligible_count=key_signal_eligible_count,
         high_value_chinese_gap_count=high_value_chinese_gap_count,
+        recent_window_days=30,
+        recent_article_count=len(recent_articles),
+        recent_chinese_ready_count=recent_chinese_ready_count,
+        recent_chinese_gap_count=recent_chinese_gap_count,
+        trend_brief_count=len(snapshot.briefs),
         potential_story_clusters=detect_story_clusters(snapshot),
         issues=issues,
     )

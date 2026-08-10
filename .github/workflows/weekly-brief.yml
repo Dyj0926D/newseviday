@@ -1,0 +1,128 @@
+name: Weekly trend brief
+
+on:
+  schedule:
+    # Monday 12:30 Asia/Shanghai. The brief covers the previous Monday-Sunday.
+    - cron: '30 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      allow_model:
+        description: 'Permit one DeepSeek call when the current weekly brief is missing'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  actions: read
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: weekly-trend-brief
+  cancel-in-progress: false
+
+jobs:
+  brief:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
+      DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' }}
+      DEEPSEEK_THINKING_ENABLED: ${{ vars.DEEPSEEK_THINKING_ENABLED || 'false' }}
+      WEEKLY_BRIEF_ENABLED: ${{ vars.WEEKLY_BRIEF_ENABLED || 'true' }}
+    steps:
+      - name: Resolve weekly policy
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "schedule" ]]; then
+            echo "RUN_BRIEF=$WEEKLY_BRIEF_ENABLED" >> "$GITHUB_ENV"
+            echo "ALLOW_MODEL=$WEEKLY_BRIEF_ENABLED" >> "$GITHUB_ENV"
+          else
+            echo "RUN_BRIEF=true" >> "$GITHUB_ENV"
+            echo "ALLOW_MODEL=${{ inputs.allow_model }}" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/checkout@v7
+        if: env.RUN_BRIEF == 'true'
+      - uses: actions/setup-python@v7
+        if: env.RUN_BRIEF == 'true'
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        if: env.RUN_BRIEF == 'true'
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - if: env.RUN_BRIEF == 'true'
+        run: python -m pip install uv
+      - if: env.RUN_BRIEF == 'true'
+        run: python -m uv sync --project pipeline --frozen
+      - name: Restore cumulative AI cache
+        if: env.RUN_BRIEF == 'true'
+        uses: actions/cache@v4
+        with:
+          path: data/runtime/ai-cache
+          key: weekly-brief-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py') }}-${{ github.run_id }}
+          restore-keys: |
+            weekly-brief-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py') }}-
+      - name: Build weekly brief candidate
+        if: env.RUN_BRIEF == 'true'
+        shell: bash
+        run: |
+          brief_args=(
+            apps/web/public/data/current.json
+            --accepted-snapshot apps/web/public/data/current.json
+            --output data/runtime/weekly-brief
+            --cache data/runtime/ai-cache
+          )
+          if [[ "$ALLOW_MODEL" == "true" ]]; then
+            test -n "$DEEPSEEK_API_KEY"
+            test -n "$DEEPSEEK_MODEL"
+            brief_args+=(--allow-model)
+          fi
+          python -m uv run --project pipeline newseviday-pipeline update-brief "${brief_args[@]}"
+          python -m uv run --project pipeline newseviday-pipeline audit-snapshot \
+            data/runtime/weekly-brief/current.json \
+            --report data/runtime/quality/latest.json
+          python -m uv run --project pipeline newseviday-pipeline publish-web \
+            data/runtime/weekly-brief/current.json \
+            --web-data apps/web/public/data \
+            --quality-report data/runtime/quality/latest.json
+      - name: Verify publish candidate
+        if: env.RUN_BRIEF == 'true'
+        run: |
+          npm ci
+          npm run test --workspace @newseviday/web
+          npm run build --workspace @newseviday/web
+      - name: Upload review artifacts
+        if: always() && env.RUN_BRIEF == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-brief-${{ github.run_id }}
+          path: |
+            data/runtime/weekly-brief/
+            data/runtime/quality/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Commit and open review pull request
+        if: env.RUN_BRIEF == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          git add apps/web/public/data
+          if git diff --cached --quiet; then
+            echo "No weekly brief changes to publish."
+            exit 0
+          fi
+          branch="content-refresh/weekly-brief-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -m "content: refresh weekly trend brief"
+          git push origin "$branch"
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "content: refresh weekly trend brief" \
+            --body "Weekly evidence-bound trend brief for editorial review."

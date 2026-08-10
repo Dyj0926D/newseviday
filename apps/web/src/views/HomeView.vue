@@ -10,8 +10,13 @@ import InlineNotice from '../components/home/InlineNotice.vue';
 import IntelligenceLead from '../components/home/IntelligenceLead.vue';
 import IntelligenceRow from '../components/home/IntelligenceRow.vue';
 import SignalOverview from '../components/home/SignalOverview.vue';
-import { diversifyBySource, selectKeySignal } from '../lib/feedRanking';
-import { formatDateTime, resolveSource } from '../lib/intelligence';
+import {
+  diversifyBySource,
+  isWithinPublishedWindow,
+  selectKeySignal,
+  sortLatestArticles,
+} from '../lib/feedRanking';
+import { formatDateTime, isChineseDisplayReady, resolveSource } from '../lib/intelligence';
 import { useContentStore, type ArchiveArticleEntry } from '../stores/content';
 import { useProfileStore } from '../stores/profile';
 
@@ -32,6 +37,7 @@ const visibleCount = ref(4);
 const savedIds = ref(new Set<string>());
 const archiveResults = ref<ArchiveArticleEntry[]>([]);
 const archiveSearching = ref(false);
+const defaultFeedWindowDays = 30;
 
 const snapshot = computed(() => content.snapshot);
 const sources = computed(() => snapshot.value?.sources ?? []);
@@ -42,7 +48,16 @@ const filteredArticles = computed(() => {
   const normalizedQuery = query.value.trim().toLocaleLowerCase();
   const anchor = snapshot.value ? new Date(snapshot.value.generatedAt).getTime() : Date.now();
   const windowHours =
-    time.value === '24h' ? 24 : time.value === '3d' ? 72 : time.value === '7d' ? 168 : null;
+    time.value === '24h'
+      ? 24
+      : time.value === '3d'
+        ? 72
+        : time.value === '7d'
+          ? 168
+          : time.value === 'all'
+            ? null
+            : defaultFeedWindowDays * 24;
+  const requireChinese = time.value !== 'all';
 
   const items = (snapshot.value?.articles ?? []).filter((article) => {
     const articleSource = resolveSource(article, sources.value);
@@ -63,6 +78,7 @@ const filteredArticles = computed(() => {
     if (topic.value && !Object.hasOwn(article.topicScores, topic.value)) return false;
     if (source.value && article.sourceId !== source.value) return false;
     if (region.value && articleSource?.region !== region.value) return false;
+    if (requireChinese && !isChineseDisplayReady(article)) return false;
     if (windowHours && article.publishedAt) {
       const age = anchor - new Date(article.publishedAt).getTime();
       if (age > windowHours * 60 * 60 * 1000) return false;
@@ -70,10 +86,13 @@ const filteredArticles = computed(() => {
     return true;
   });
 
-  return items.sort((left, right) => {
-    if (view.value === 'recommended') return recommendationScore(right) - recommendationScore(left);
-    return contentScore(right) - contentScore(left) || timestamp(right) - timestamp(left);
-  });
+  if (view.value === 'recommended') {
+    return items.sort(
+      (left, right) =>
+        recommendationScore(right) - recommendationScore(left) || timestamp(right) - timestamp(left),
+    );
+  }
+  return sortLatestArticles(items);
 });
 
 const isDefaultFeed = computed(
@@ -124,12 +143,31 @@ const overseasCount = computed(
 const contributingSourceCount = computed(
   () => new Set((snapshot.value?.articles ?? []).map((article) => article.sourceId)).size,
 );
-const aiArticleCount = computed(
+const organizedArticleCount = computed(
   () => (snapshot.value?.articles ?? []).filter((article) => Boolean(article.ai)).length,
 );
+const modelOrganizedArticleCount = computed(
+  () =>
+    (snapshot.value?.articles ?? []).filter((article) => article.ai?.provider === 'deepseek').length,
+);
+const recent24HourCount = computed(() => {
+  if (!snapshot.value) return 0;
+  const current = snapshot.value;
+  return current.articles.filter(
+    (article) =>
+      article.publishedAt && isWithinPublishedWindow(article, current.generatedAt, 1),
+  ).length;
+});
+const latestPublishedAt = computed(() => {
+  const timestamps = (snapshot.value?.articles ?? [])
+    .map((article) => article.publishedAt)
+    .filter((value): value is string => Boolean(value))
+    .sort((left, right) => new Date(right).getTime() - new Date(left).getTime());
+  return timestamps[0] ?? null;
+});
 const productionNoticeDescription = computed(() => {
   if (!snapshot.value) return '';
-  return `数据整理于 ${formatDateTime(snapshot.value.generatedAt)}，来自 ${contributingSourceCount.value} 个实际贡献来源；${aiArticleCount.value} 篇经 AI 结构化整理，其余保留来源标题与摘要。重要判断请回到原文核验。`;
+  return `数据整理于 ${formatDateTime(snapshot.value.generatedAt)}，来自 ${contributingSourceCount.value} 个实际贡献来源；${organizedArticleCount.value} 篇已完成中文结构化整理，其中 ${modelOrganizedArticleCount.value} 篇由 AI 生成，其余为编辑整理。重要判断请回到原文核验。`;
 });
 
 function readQuery(key: string): string {
@@ -283,7 +321,10 @@ onMounted(async () => {
               <div>
                 <p class="section-kicker">CURATED FEED</p>
                 <h2 id="feed-title">{{ view === 'recommended' ? '为你推荐' : '最新情报' }}</h2>
-                <p>{{ filteredArticles.length }} 条内容，按内容价值、时效与主题相关度整理</p>
+                <p v-if="time === ''">
+                  {{ filteredArticles.length }} 条近 30 天中文情报，按发布时间整理
+                </p>
+                <p v-else>共 {{ filteredArticles.length }} 条内容，按当前筛选条件整理</p>
               </div>
               <RouterLink class="text-link" to="/brief">
                 查看趋势简报
@@ -300,6 +341,11 @@ onMounted(async () => {
               v-else-if="snapshot"
               title="当前为受控更新"
               :description="productionNoticeDescription"
+            />
+            <InlineNotice
+              v-if="isDefaultFeed && snapshot && recent24HourCount === 0"
+              title="今日暂无新入选情报"
+              :description="`最近 24 小时没有内容同时通过来源、主题和中文展示门槛。以下展示近 30 天情报，最近一篇发布于 ${formatDateTime(latestPublishedAt)}。`"
             />
             <InlineNotice
               v-if="isDefaultFeed && snapshot && !keySignalArticle"
@@ -386,7 +432,7 @@ onMounted(async () => {
         <SignalOverview
           :source-count="contributingSourceCount"
           :overseas-count="overseasCount"
-          :new-count="snapshot?.articles.length ?? 0"
+          :new-count="filteredArticles.length"
           :updated-at="snapshot?.generatedAt ?? null"
           :topics="topicSignals"
           :demo="content.isDemo"

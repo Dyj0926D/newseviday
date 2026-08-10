@@ -150,7 +150,7 @@ export interface GeneratedText {
   summaryZh: string | null;
   whyItMatters?: string | null;
   keyPoints: string[];
-  provider: 'deepseek';
+  provider: 'deepseek' | 'editorial';
   model: string;
   promptVersion: string;
   generatedAt: IsoDateTime;

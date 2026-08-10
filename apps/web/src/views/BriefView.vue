@@ -9,6 +9,14 @@ import { useContentStore } from '../stores/content';
 
 const content = useContentStore();
 const brief = computed(() => content.snapshot?.briefs[0] ?? null);
+const briefSourceCount = computed(() => {
+  const evidenceIds = new Set(brief.value?.sections.flatMap((section) => section.evidenceIds) ?? []);
+  return new Set(
+    (content.snapshot?.evidence ?? [])
+      .filter((item) => evidenceIds.has(item.id))
+      .map((item) => item.sourceId),
+  ).size;
+});
 const sectionEvidence = computed(() => {
   const index = new Map<
     string,
@@ -85,15 +93,15 @@ function formatPeriod(value: string): string {
           </div>
           <div>
             <dt>快照来源</dt>
-            <dd>{{ content.snapshot?.sourceCount ?? 0 }} 个</dd>
+            <dd>{{ briefSourceCount }} 个</dd>
           </div>
           <div>
             <dt>整理方式</dt>
             <dd>
               {{
-                brief.generatedBy?.model === 'demo-fixture'
-                  ? '内容示例'
-                  : (brief.generatedBy?.model ?? '规则生成')
+                brief.generatedBy?.provider === 'deepseek'
+                  ? 'AI 结构化整理'
+                  : (brief.generatedBy?.model ?? '编辑整理')
               }}
             </dd>
           </div>
@@ -103,8 +111,8 @@ function formatPeriod(value: string): string {
       <section class="page-container brief-layout">
         <div class="brief-main">
           <InlineNotice
-            title="当前为趋势内容预览"
-            description="结论用于体验简报结构和证据回链，不用于实时市场判断。"
+            title="证据约束的 7 日趋势简报"
+            description="每周一整理上一完整自然周。每个趋势至少关联两个来源；证据不足或生成失败时保留上一版成功简报。"
           />
 
           <article
@@ -133,7 +141,7 @@ function formatPeriod(value: string): string {
                 </RouterLink>
               </div>
               <p class="trend-uncertainty">
-                不确定性：当前内容为预览样例，需要结合更多来源重新验证趋势强度。
+                判断边界：本节只归纳所引证来源共同支持的变化，不代表完整行业结论；请打开原文核验具体口径。
               </p>
             </div>
           </article>

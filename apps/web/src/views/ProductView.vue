@@ -239,7 +239,15 @@ const architectureLayers = [
               <dd>{{ exampleArticle.facts.title }}</dd>
             </div>
             <div>
-              <dt>{{ exampleArticle.ai ? 'AI 整理' : '内容状态' }}</dt>
+              <dt>
+                {{
+                  exampleArticle.ai?.provider === 'deepseek'
+                    ? 'AI 整理'
+                    : exampleArticle.ai?.provider === 'editorial'
+                      ? '编辑整理'
+                      : '内容状态'
+                }}
+              </dt>
               <dd>{{ exampleArticle.ai ? '中文标题、摘要、关键点和为什么值得看' : '保留来源标题与摘要，未经 AI 改写' }}</dd>
             </div>
             <div>

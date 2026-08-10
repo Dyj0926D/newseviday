@@ -1,7 +1,7 @@
 import type { Article } from '@newseviday/contracts';
 import { describe, expect, it } from 'vitest';
 
-import { translationStatus } from './intelligence';
+import { isChineseDisplayReady, translationStatus } from './intelligence';
 
 const article = {
   language: 'en',
@@ -29,5 +29,24 @@ describe('intelligence presentation', () => {
         },
       }),
     ).toBe('英文原文已整理');
+  });
+
+  it('keeps untranslated foreign articles out of the default Chinese feed', () => {
+    expect(isChineseDisplayReady(article)).toBe(false);
+    expect(
+      isChineseDisplayReady({
+        ...article,
+        ai: {
+          provider: 'editorial',
+          titleZh: '中文标题',
+          summaryZh: '这是用于默认信息流展示的中文导读。',
+          whyItMatters: '用于测试',
+          keyPoints: ['要点一', '要点二'],
+          model: '编辑整理',
+          promptVersion: 'test',
+          generatedAt: '2026-08-10T00:00:00Z',
+        },
+      }),
+    ).toBe(true);
   });
 });

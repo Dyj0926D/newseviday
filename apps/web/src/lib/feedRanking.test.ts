@@ -1,7 +1,12 @@
 import type { Article } from '@newseviday/contracts';
 import { describe, expect, it } from 'vitest';
 
-import { diversifyBySource, selectKeySignal } from './feedRanking';
+import {
+  diversifyBySource,
+  isWithinPublishedWindow,
+  selectKeySignal,
+  sortLatestArticles,
+} from './feedRanking';
 
 function article(id: string, sourceId: string, score: number, eligible = false): Article {
   return {
@@ -33,6 +38,25 @@ function article(id: string, sourceId: string, score: number, eligible = false):
 }
 
 describe('feed ranking', () => {
+  it('orders the latest feed by publication time before content score', () => {
+    const older = article('older', 'openai', 0.99);
+    older.publishedAt = '2026-07-10T00:00:00Z';
+    const newer = article('newer', 'github', 0.4);
+    newer.publishedAt = '2026-08-08T00:00:00Z';
+
+    expect(sortLatestArticles([older, newer]).map((item) => item.id)).toEqual(['newer', 'older']);
+  });
+
+  it('uses the snapshot time as the recency window anchor', () => {
+    const recent = article('recent', 'openai', 0.8);
+    recent.publishedAt = '2026-08-08T00:00:00Z';
+    const stale = article('stale', 'github', 0.8);
+    stale.publishedAt = '2026-07-01T00:00:00Z';
+
+    expect(isWithinPublishedWindow(recent, '2026-08-10T00:00:00Z', 30)).toBe(true);
+    expect(isWithinPublishedWindow(stale, '2026-08-10T00:00:00Z', 30)).toBe(false);
+  });
+
   it('selects the highest eligible Key Signal without forcing an ineligible item', () => {
     const items = [article('a', 'arxiv', 0.95), article('b', 'openai', 0.82, true)];
     expect(selectKeySignal(items)?.id).toBe('b');

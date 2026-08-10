@@ -7,15 +7,19 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+import httpx
+
 from newseviday_pipeline import __version__
 from newseviday_pipeline.ai import (
     DeepSeekStructuredClient,
     EnrichmentTelemetry,
     FileAiCache,
     enrich_snapshot,
+    update_weekly_brief,
 )
 from newseviday_pipeline.ai_models import AiUsageReport
 from newseviday_pipeline.dedup_eval import evaluate_dedup_dataset, write_dedup_report
+from newseviday_pipeline.editorial import apply_editorial_package, load_editorial_package
 from newseviday_pipeline.embeddings import HashingEmbedder, OpenAICompatibleEmbedder
 from newseviday_pipeline.evaluation import evaluate_rag, load_gold_dataset, write_eval_report
 from newseviday_pipeline.models import ContentSnapshot
@@ -100,6 +104,26 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Write a private per-run token, cache and estimated-cost report.",
     )
+    brief_parser = subparsers.add_parser(
+        "update-brief",
+        help="Generate the last complete weekly brief when due, or carry the last successful brief",
+    )
+    brief_parser.add_argument("snapshot", type=Path)
+    brief_parser.add_argument("--accepted-snapshot", type=Path)
+    brief_parser.add_argument("--output", type=Path, default=Path("data/briefed"))
+    brief_parser.add_argument("--cache", type=Path, default=Path("data/runtime/ai-cache"))
+    brief_parser.add_argument(
+        "--allow-model",
+        action="store_true",
+        help="Permit one paid DeepSeek call when the weekly brief is due.",
+    )
+    editorial_parser = subparsers.add_parser(
+        "apply-editorial",
+        help="Apply a reviewable editorial package to a validated snapshot",
+    )
+    editorial_parser.add_argument("snapshot", type=Path)
+    editorial_parser.add_argument("package", type=Path)
+    editorial_parser.add_argument("--output", type=Path, default=Path("data/editorial-output"))
     index_parser = subparsers.add_parser(
         "build-index", help="Build a versioned dense retrieval artifact"
     )
@@ -344,6 +368,68 @@ def enrich(args: argparse.Namespace) -> int:
     return 0
 
 
+def update_brief(args: argparse.Namespace) -> int:
+    snapshot = load_snapshot(args.snapshot)
+    accepted_snapshot = load_snapshot(args.accepted_snapshot) if args.accepted_snapshot else None
+    client = DeepSeekStructuredClient.from_environment() if args.allow_model else None
+    try:
+        update = update_weekly_brief(
+            snapshot,
+            accepted_snapshot=accepted_snapshot,
+            client=client,
+            cache=FileAiCache(args.cache),
+        )
+    except (httpx.HTTPError, ValueError) as error:
+        update = update_weekly_brief(
+            snapshot,
+            accepted_snapshot=accepted_snapshot,
+            client=None,
+            cache=FileAiCache(args.cache),
+            generate_if_due=False,
+        )
+        print(f"Weekly brief generation fell back to the last successful brief: {error}")
+    SnapshotPublisher(args.output).publish(update.snapshot)
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "snapshotId": update.snapshot.snapshot_id,
+                "status": update.status,
+                "briefCount": len(update.snapshot.briefs),
+                "modelCalls": update.model_calls,
+                "periodStart": update.period_start.isoformat(),
+                "periodEndExclusive": update.period_end.isoformat(),
+                "output": str(args.output / "current.json"),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 0
+
+
+def apply_editorial(args: argparse.Namespace) -> int:
+    snapshot = load_snapshot(args.snapshot)
+    package = load_editorial_package(args.package)
+    result = apply_editorial_package(snapshot, package)
+    SnapshotPublisher(args.output).publish(result)
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "snapshotId": result.snapshot_id,
+                "articleCount": len(result.articles),
+                "editorialArticleCount": len(package.articles),
+                "briefCount": len(result.briefs),
+                "output": str(args.output / "current.json"),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 0
+
+
 def _optional_nonnegative_float(name: str) -> float | None:
     value = os.environ.get(name, "").strip()
     if not value:
@@ -556,6 +642,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         return eval_dedup(args)
     if args.command == "enrich":
         return enrich(args)
+    if args.command == "update-brief":
+        return update_brief(args)
+    if args.command == "apply-editorial":
+        return apply_editorial(args)
     if args.command == "build-index":
         return build_index(args)
     if args.command == "eval-rag":

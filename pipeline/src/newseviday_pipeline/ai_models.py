@@ -13,6 +13,17 @@ class ArticleEnrichment(ContractModel):
     topic_ids: list[str] = Field(default_factory=list, max_length=6)
 
 
+class TrendBriefSectionDraft(ContractModel):
+    heading: str = Field(min_length=6, max_length=80)
+    body: str = Field(min_length=40, max_length=420)
+    evidence_ids: list[str] = Field(min_length=2, max_length=5)
+
+
+class TrendBriefDraft(ContractModel):
+    title: str = Field(min_length=6, max_length=80)
+    sections: list[TrendBriefSectionDraft] = Field(min_length=1, max_length=3)
+
+
 class AiUsageReport(ContractModel):
     schema_version: str = "1.0.0"
     snapshot_id: str

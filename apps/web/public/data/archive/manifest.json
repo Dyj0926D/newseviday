@@ -1,7 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "updatedAt": "2026-08-10T03:10:26.019230Z",
+  "updatedAt": "2026-08-10T04:25:00Z",
   "snapshots": [
+    {
+      "snapshotId": "snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab",
+      "generatedAt": "2026-08-10T04:25:00Z",
+      "path": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json",
+      "articleCount": 40
+    },
     {
       "snapshotId": "snapshot-20260810T031024Z-e3340841-ai-12c83ca0",
       "generatedAt": "2026-08-10T03:10:26.019230Z",
@@ -36,11 +42,11 @@
   "articles": [
     {
       "id": "article-ac90d732aad851eb833a",
-      "title": "CoinRAG: Contextualized Information Nugget KV Cache Reuse for Long-Context RAG",
+      "title": "CoinRAG：用细粒度信息单元复用 KV Cache，降低长上下文 RAG 成本",
       "originalTitle": "CoinRAG: Contextualized Information Nugget KV Cache Reuse for Long-Context RAG",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-07T17:51:49Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-cb908ccea1c039281a93",
@@ -48,39 +54,39 @@
       "originalTitle": "Taxonomy-Driven Analysis of Open-Source AI Risk Mitigation Tools",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-07T17:33:09Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-9661d4713bc53b5f576c",
-      "title": "PsychoAgent: An Affect-Sensitive Cognitive Architecture for Conflict-Aware Memory in LLM Agents",
+      "title": "PsychoAgent：面向情感显著性与冲突记忆的 LLM Agent 架构",
       "originalTitle": "PsychoAgent: An Affect-Sensitive Cognitive Architecture for Conflict-Aware Memory in LLM Agents",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-07T17:22:29Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-32b07cef96ff1a4a3a5f",
-      "title": "FinRank: An Evidence-Grounded Benchmark for Financial Question Answering and Retrieval over SEC Filings",
+      "title": "FinRank：面向 SEC 文件证据溯源的金融问答与检索基准",
       "originalTitle": "FinRank: An Evidence-Grounded Benchmark for Financial Question Answering and Retrieval over SEC Filings",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-07T16:45:39Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-d30bef288e2bc7b06868",
-      "title": "Managing AI Coding Costs at Scale",
+      "title": "如何规模化管理 AI 编程成本",
       "originalTitle": "Managing AI Coding Costs at Scale",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-08-07T11:50:39Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-6f0c59a4d2aabd7bb5bc",
-      "title": "What is an AI Assistant?",
+      "title": "什么是 AI 助手？",
       "originalTitle": "What is an AI Assistant?",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-08-07T11:44:24Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-7347f06e7c916544f6e9",
@@ -88,15 +94,15 @@
       "originalTitle": "How HSP GRUPPE builds AI capabilities for tax advisory",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-07T09:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-13844026d0b31ab87e4a",
-      "title": "What are Agentic Workflows?",
+      "title": "什么是 Agentic Workflow？",
       "originalTitle": "What are Agentic Workflows?",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-08-06T21:36:15Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-1441b6270a33709513b4",
@@ -104,7 +110,7 @@
       "originalTitle": "A guide to slash commands in the GitHub Copilot app",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-06T19:49:34Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-7b16ffe70ac1c0968e4b",
@@ -160,15 +166,15 @@
       "originalTitle": "Improving GPT‑5.6 Sol in ChatGPT—and expanding access to GPT-5.6 Luna for free users",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-06T10:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-3763c3e63f841c3b3b74",
-      "title": "From asking to doing: How the world is putting ChatGPT to work",
+      "title": "从提问到行动：全球用户如何把 ChatGPT 用到实际工作中",
       "originalTitle": "From asking to doing: How the world is putting ChatGPT to work",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-06T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-410456543f831dcbef23",
@@ -224,7 +230,7 @@
       "originalTitle": "How the GitHub legal team used Copilot CLI to streamline their workflows",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-04T19:02:34Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-c99ec862b4e71599bc42",
@@ -308,11 +314,11 @@
     },
     {
       "id": "article-129511f54188e7df4ed8",
-      "title": "New ways to learn and teach with ChatGPT Work and Codex",
+      "title": "ChatGPT Work 与 Codex 面向教学和学习的新插件",
       "originalTitle": "New ways to learn and teach with ChatGPT Work and Codex",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-04T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-a50fcff3a21f9aca662b",
@@ -324,11 +330,11 @@
     },
     {
       "id": "article-deec56a13e2b9b57f5b5",
-      "title": "How we built a realtime system for responsive voice AI in six months",
+      "title": "六个月构建低延迟实时语音 AI 系统的工程实践",
       "originalTitle": "How we built a realtime system for responsive voice AI in six months",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-03T07:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-cd88270c00622dafecb0",
@@ -348,11 +354,11 @@
     },
     {
       "id": "article-fd600cc958ac3fcb8eeb",
-      "title": "DeepSeek-V4-Flash Update",
+      "title": "DeepSeek-V4-Flash 正式版 API 开放公测",
       "originalTitle": "DeepSeek-V4-Flash Update",
       "sourceId": "deepseek-updates",
       "publishedAt": "2026-07-31T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-994add5868193c37f04d",
@@ -388,27 +394,27 @@
     },
     {
       "id": "article-4e90420c69645ce576fc",
-      "title": "The harness is all you need (mostly)",
+      "title": "大多数时候，先把 Agent Harness 用好就够了",
       "originalTitle": "The harness is all you need (mostly)",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-27T18:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-3bbd8b07cb5a7e5a4148",
-      "title": "GitHub Copilot app for Beginners: Getting started",
+      "title": "GitHub Copilot App 入门：从项目和多 Agent 会话开始",
       "originalTitle": "GitHub Copilot app for Beginners: Getting started",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-27T16:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-c34a327604b5be4a7c98",
-      "title": "Introducing Claude Opus 5",
+      "title": "Anthropic 发布 Claude Opus 5",
       "originalTitle": "Introducing Claude Opus 5",
       "sourceId": "anthropic-news",
       "publishedAt": "2026-07-24T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-98b061f178880396da02",
@@ -416,15 +422,15 @@
       "originalTitle": "Copilot vs. raw API access: What are you actually paying for?",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-22T19:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-24abb84d61b2e52549cc",
-      "title": "How to build interactive experiences with canvases",
+      "title": "如何用 Canvas 构建可交互的 Agent 体验",
       "originalTitle": "How to build interactive experiences with canvases",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-21T16:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-c8dc1df614610019c8cf",
@@ -432,7 +438,7 @@
       "originalTitle": "Better tools made Copilot code review worse. Here’s how we actually improved it.",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-10T15:57:47Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-2a7072ece5f3372bd87b",
@@ -440,7 +446,7 @@
       "originalTitle": "Automating cross-repo documentation with GitHub Agentic Workflows",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-08T21:11:56Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-5b150c21cc84194b8733",
@@ -448,7 +454,7 @@
       "originalTitle": "The productivity gains hiding in your data infrastructure",
       "sourceId": "dbt-labs-blog",
       "publishedAt": "2026-07-08T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-a1589d27ac1cdc88f4a7",
@@ -456,7 +462,7 @@
       "originalTitle": "Solving dashboard errors in minutes: How Integral Ad Science used MCP to connect agents to dbt and Databricks",
       "sourceId": "dbt-labs-blog",
       "publishedAt": "2026-07-07T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-db7f684905efdc853b1f",
@@ -464,7 +470,7 @@
       "originalTitle": "Data platforms were built to store. Intelligence platforms are built to reason.",
       "sourceId": "dbt-labs-blog",
       "publishedAt": "2026-07-02T15:24:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-2e0b2f76a5b7e197d60e",
@@ -480,7 +486,7 @@
       "originalTitle": "DeepSeek-V4",
       "sourceId": "deepseek-updates",
       "publishedAt": "2026-04-24T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-d12926ddba7ab466df98",
@@ -488,7 +494,7 @@
       "originalTitle": "DeepSeek-V3.2-Speciale",
       "sourceId": "deepseek-updates",
       "publishedAt": "2025-12-01T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-9173cc726336dababfa0",
@@ -496,7 +502,7 @@
       "originalTitle": "Qwen3Guard: Real-time Safety for Your Token Stream",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-09-22T20:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-2c308d1299a47f0fd6c1",
@@ -504,7 +510,7 @@
       "originalTitle": "Qwen-Image: Crafting with Native Text Rendering",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-08-04T14:08:30Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-2a193a141e55541a5d0e",
@@ -512,7 +518,7 @@
       "originalTitle": "Qwen-MT: Where Speed Meets Smart Translation",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-07-24T14:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-45b66faad922efd28827",
@@ -520,7 +526,7 @@
       "originalTitle": "Qwen3-Coder: Agentic Coding in the World",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-07-22T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-c775f203f583e33b82a3",
@@ -528,7 +534,7 @@
       "originalTitle": "Time to Speak Some Dialects, Qwen-TTS!",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-06-27T07:01:30Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-740aa8b36f962c482d6b",
@@ -544,7 +550,7 @@
       "originalTitle": "Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-06-05T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-3d7b702ae4535a131393",
@@ -552,7 +558,7 @@
       "originalTitle": "deepseek-reasoner",
       "sourceId": "deepseek-updates",
       "publishedAt": "2025-05-28T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-380631352b9e2cac6f0b",
@@ -560,7 +566,7 @@
       "originalTitle": "Qwen3: Think Deeper, Act Faster",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-04-28T20:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-7d620e492d990b3c0dc3",
@@ -568,7 +574,7 @@
       "originalTitle": "Qwen2.5 Omni: See, Hear, Talk, Write, Do It All!",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-03-26T16:00:45Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-ff0d9d2489cad8fae97c",
@@ -576,7 +582,7 @@
       "originalTitle": "deepseek-chat",
       "sourceId": "deepseek-updates",
       "publishedAt": "2025-03-24T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-17d84e2a2662e4e0c600",
@@ -584,7 +590,7 @@
       "originalTitle": "deepseek-reasoner",
       "sourceId": "deepseek-updates",
       "publishedAt": "2025-01-20T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-5f2fc0800dcdafaa61d4",
@@ -592,7 +598,7 @@
       "originalTitle": "deepseek-chat",
       "sourceId": "deepseek-updates",
       "publishedAt": "2024-12-26T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-9a0fbe9ee8afb4dfc6dd",
@@ -600,7 +606,7 @@
       "originalTitle": "deepseek-chat",
       "sourceId": "deepseek-updates",
       "publishedAt": "2024-12-10T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
     },
     {
       "id": "article-4307222bc7e5f2e47115",

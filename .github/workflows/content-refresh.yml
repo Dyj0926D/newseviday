@@ -207,6 +207,15 @@ jobs:
             --allow-model \
             --max-model-calls "$MODEL_CALL_LIMIT"
           echo "PUBLISH_SNAPSHOT=data/runtime/content-enriched/current.json" >> "$GITHUB_ENV"
+      - name: Preserve the latest successful weekly brief
+        if: env.RUN_REFRESH == 'true'
+        run: |
+          python -m uv run --project pipeline newseviday-pipeline update-brief \
+            "$PUBLISH_SNAPSHOT" \
+            --accepted-snapshot apps/web/public/data/current.json \
+            --output data/runtime/content-briefed \
+            --cache data/runtime/ai-cache
+          echo "PUBLISH_SNAPSHOT=data/runtime/content-briefed/current.json" >> "$GITHUB_ENV"
       - name: Validate and build retrieval artifacts
         if: env.RUN_REFRESH == 'true'
         run: |
@@ -322,6 +331,7 @@ jobs:
           path: |
             data/runtime/content-refresh/
             data/runtime/content-enriched/
+            data/runtime/content-briefed/
             data/runtime/ai-cache/
             data/runtime/rag/
             data/runtime/quality/
