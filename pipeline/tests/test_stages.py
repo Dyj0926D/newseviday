@@ -314,6 +314,42 @@ def test_key_signal_rejects_a_narrow_low_relevance_paper() -> None:
     assert "目标用户相关性低于 65" in candidate.key_signal.gate_failures
 
 
+def test_key_signal_rejects_an_uncorroborated_media_report() -> None:
+    candidate = normalize_item(
+        RawFeedItem(
+            source_id="professional-media",
+            source_type="professional_media",
+            evidence_tier="secondary",
+            url="https://example.com/media-signal",
+            title="Open-source data agent benchmark improves production latency by 35%",
+            summary=(
+                "We report a general-purpose framework, API, deployment workflow and dataset. "
+                "Evaluation across models shows higher throughput and lower cost than baseline. "
+            )
+            * 3,
+            language="en",
+        ),
+        collected_at=NOW,
+    )[0]
+    candidate.published_at = NOW
+    candidate.topic_scores = {"data-agent": 1.0, "semantic-layer": 0.8}
+    candidate.ai = GeneratedText(
+        title_zh="数据智能体基准称生产延迟降低 35%",
+        summary_zh="媒体报道了一项数据智能体框架、接口和跨模型评测结果。",
+        why_it_matters="可作为后续核验的一条行业线索。",
+        key_points=["报道基准结果", "需要一手来源核验"],
+        model="deepseek-test",
+        prompt_version="test",
+        generated_at=NOW,
+    )
+
+    apply_article_scoring(candidate, anchor=NOW)
+
+    assert candidate.key_signal is not None
+    assert not candidate.key_signal.eligible
+    assert "媒体报道或作者观点不能单独作为 Key Signal" in (candidate.key_signal.gate_failures)
+
+
 def test_chinese_source_satisfies_display_gate_without_model_output() -> None:
     candidate = normalize_item(
         RawFeedItem(

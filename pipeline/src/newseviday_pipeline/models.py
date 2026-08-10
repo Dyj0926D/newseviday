@@ -4,6 +4,14 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 SCHEMA_VERSION: Literal["1.0.0"] = "1.0.0"
+SourceType = Literal[
+    "official",
+    "academic",
+    "research_institute",
+    "professional_media",
+    "independent_author",
+]
+EvidenceTier = Literal["primary", "secondary", "opinion"]
 
 
 def to_camel(value: str) -> str:
@@ -44,13 +52,19 @@ class SourceConfig(ContractModel):
     region: str = Field(min_length=2)
     enabled: bool = False
     usage_scope: str = Field(min_length=2)
+    source_type: SourceType = "official"
+    evidence_tier: EvidenceTier = "primary"
     note: str | None = None
     max_items: int = Field(default=12, ge=1, le=50)
+    max_selected_items: int = Field(default=8, ge=1, le=12)
     request_timeout_seconds: int = Field(default=15, ge=3, le=30)
     include_url_patterns: list[str] = Field(default_factory=list, max_length=8)
     exclude_url_patterns: list[str] = Field(default_factory=list, max_length=8)
     title_class_patterns: list[str] = Field(default_factory=list, max_length=8)
     heading_tags: list[Literal["h2", "h3", "h4"]] = Field(default_factory=list, max_length=3)
+    html_card_mode: bool = False
+    require_published_at: bool = False
+    require_summary: bool = False
 
 
 class SourcesConfig(ContractModel):
@@ -82,6 +96,8 @@ class Source(ContractModel):
     region: str
     active: bool
     usage_scope: str
+    source_type: SourceType = "official"
+    evidence_tier: EvidenceTier = "primary"
 
 
 class RawFeedItem(ContractModel):
@@ -94,6 +110,8 @@ class RawFeedItem(ContractModel):
     language: str
     content_html: str | None = None
     preserve_fragment: bool = False
+    source_type: SourceType = "official"
+    evidence_tier: EvidenceTier = "primary"
 
 
 class ArticleFacts(ContractModel):
@@ -140,6 +158,8 @@ class Article(ContractModel):
     schema_version: Literal["1.0.0"] = SCHEMA_VERSION
     id: str
     source_id: str
+    source_type: SourceType = "official"
+    evidence_tier: EvidenceTier = "primary"
     canonical_url: str
     language: str
     published_at: datetime | None = None

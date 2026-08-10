@@ -834,6 +834,13 @@ button {
   color: var(--ne-color-brand-default);
 }
 
+.source-type-badge {
+  color: var(--color-violet-700);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .intel-kicker {
   margin-top: var(--ne-space-8);
 }

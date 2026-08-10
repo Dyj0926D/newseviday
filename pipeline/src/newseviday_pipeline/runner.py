@@ -137,6 +137,8 @@ def _source_contract(source: SourceConfig) -> Source:
         region=source.region,
         active=True,
         usage_scope=source.usage_scope,
+        source_type=source.source_type,
+        evidence_tier=source.evidence_tier,
     )
 
 
@@ -216,7 +218,10 @@ def run_network_pipeline(
         run.stages.append(_stage("fuzzy_dedup", stage_started, len(exact), len(fuzzy)))
 
         stage_started = perf_counter()
-        selected = apply_content_quotas(select_by_topics(fuzzy, topics))
+        selected = apply_content_quotas(
+            select_by_topics(fuzzy, topics),
+            source_limits={source.id: source.max_selected_items for source in enabled_sources},
+        )
         selected_counts = Counter(article.source_id for article in selected)
         for source_id, outcome in outcomes.items():
             outcome.selected_count = selected_counts.get(source_id, 0)

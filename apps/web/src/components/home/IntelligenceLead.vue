@@ -7,6 +7,7 @@ import {
   displayTitle,
   displayWhy,
   formatDateTime,
+  sourceTypeLabel,
   translationStatus,
   topicLabels,
 } from '../../lib/intelligence';
@@ -32,6 +33,9 @@ const emit = defineEmits<{ save: [articleId: string] }>();
       <div class="intel-meta">
         <span class="source-mark">{{ source?.name.slice(0, 1) ?? 'N' }}</span>
         <strong>{{ source?.name ?? article.sourceId }}</strong>
+        <span class="source-type-badge">{{
+          sourceTypeLabel(source?.sourceType ?? article.sourceType)
+        }}</span>
         <span>{{ source?.region ?? '区域未知' }}</span>
         <span v-if="article.language !== 'zh-CN'" class="translation-badge">
           <PhTranslate :size="14" aria-hidden="true" />

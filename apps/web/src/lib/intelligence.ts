@@ -26,6 +26,14 @@ export function languageLabel(language: string): string {
   return language;
 }
 
+export function sourceTypeLabel(sourceType?: Source['sourceType'] | Article['sourceType']): string {
+  if (sourceType === 'academic') return '学术论文';
+  if (sourceType === 'research_institute') return '研究机构';
+  if (sourceType === 'professional_media') return '专业媒体';
+  if (sourceType === 'independent_author') return '作者观察';
+  return '官方一手';
+}
+
 export function translationStatus(article: Article): string {
   if (article.language === 'zh-CN') return '中文原文';
   const chineseReady = Boolean(article.ai?.titleZh?.trim() && article.ai?.summaryZh?.trim());

@@ -48,6 +48,24 @@ ARXIV_SOURCE_ID = "arxiv-cs-ai"
 DEFAULT_SOURCE_LIMITS = {ARXIV_SOURCE_ID: 6}
 ARXIV_MIN_TARGET_RELEVANCE = 0.6
 ARXIV_NARROW_DOMAIN_MIN_TARGET_RELEVANCE = 0.65
+PRODUCT_IMPACT_SOURCE_BASE = {
+    "official": 0.22,
+    "academic": 0.05,
+    "research_institute": 0.12,
+    "professional_media": 0.12,
+    "independent_author": 0.08,
+}
+EVIDENCE_MATURITY_SOURCE_BASE = {
+    "official": 0.50,
+    "academic": 0.35,
+    "research_institute": 0.45,
+    "professional_media": 0.35,
+    "independent_author": 0.25,
+}
+KEY_SIGNAL_CORROBORATION_REQUIRED_SOURCE_TYPES = {
+    "professional_media",
+    "independent_author",
+}
 
 ADVANCEMENT_PATTERNS = (
     "we introduce",
@@ -215,6 +233,8 @@ def normalize_item(
     article = Article(
         id=article_id,
         source_id=item.source_id,
+        source_type=item.source_type,
+        evidence_tier=item.evidence_tier,
         canonical_url=canonical_url,
         language=item.language,
         published_at=item.published_at,
@@ -397,6 +417,14 @@ def _article_text(article: Article) -> str:
     return f"{article.facts.title}\n{article.facts.abstract or ''}".casefold()
 
 
+def _effective_source_type(article: Article) -> str:
+    """Keep pre-migration arXiv fixtures and snapshots source-aware."""
+
+    if article.source_id == ARXIV_SOURCE_ID and article.source_type == "official":
+        return "academic"
+    return article.source_type
+
+
 def _contains_chinese(value: str | None) -> bool:
     return bool(value and CHINESE_CHARACTER_PATTERN.search(value))
 
@@ -462,8 +490,8 @@ def content_score_breakdown(
     if narrow_domain:
         technical_generality *= 0.45
 
-    official_product_source = article.source_id != ARXIV_SOURCE_ID
-    product_industry_impact = 0.22 if official_product_source else 0.05
+    source_type = _effective_source_type(article)
+    product_industry_impact = PRODUCT_IMPACT_SOURCE_BASE[source_type]
     product_industry_impact += 0.33 if _contains_any(text, PRODUCT_IMPACT_PATTERNS) else 0.0
     product_industry_impact += 0.16 if _contains_any(text, ENGINEERING_PATTERNS) else 0.0
     product_industry_impact += 0.14 if quantitative else 0.0
@@ -485,7 +513,7 @@ def content_score_breakdown(
         else 0.0
     )
 
-    evidence_maturity = 0.35 if article.source_id == ARXIV_SOURCE_ID else 0.5
+    evidence_maturity = EVIDENCE_MATURITY_SOURCE_BASE[source_type]
     evidence_maturity += 0.18 if quantitative else 0.0
     evidence_maturity += 0.16 if _contains_any(text, BENCHMARK_PATTERNS) else 0.0
     evidence_maturity += 0.14 if _contains_any(text, ARTIFACT_PATTERNS) else 0.0
@@ -576,6 +604,8 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
     gate_failures: list[str] = []
     if not chinese_display_ready(article):
         gate_failures.append(CHINESE_READINESS_FAILURE)
+    if _effective_source_type(article) in KEY_SIGNAL_CORROBORATION_REQUIRED_SOURCE_TYPES:
+        gate_failures.append("媒体报道或作者观点不能单独作为 Key Signal")
     if (article.content_score or 0.0) < 0.75:
         gate_failures.append("内容总分低于 75")
     if values.target_relevance < 0.65:
