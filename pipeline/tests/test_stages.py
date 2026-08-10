@@ -37,10 +37,13 @@ def test_canonical_url_removes_tracking_and_fragment() -> None:
 
 
 def test_canonical_url_can_preserve_a_meaningful_section_fragment() -> None:
-    assert canonicalize_url(
-        "https://api-docs.deepseek.com/updates/#deepseek-v4",
-        preserve_fragment=True,
-    ) == "https://api-docs.deepseek.com/updates#deepseek-v4"
+    assert (
+        canonicalize_url(
+            "https://api-docs.deepseek.com/updates/#deepseek-v4",
+            preserve_fragment=True,
+        )
+        == "https://api-docs.deepseek.com/updates#deepseek-v4"
+    )
 
 
 def test_exact_and_fuzzy_deduplication_are_deterministic() -> None:
@@ -207,6 +210,28 @@ def test_arxiv_requires_strong_target_relevance_before_entering_the_feed() -> No
 
     assert specialist not in selected
     assert official in selected
+
+
+def test_arxiv_rejects_fresh_complete_paper_with_only_weak_topic_overlap() -> None:
+    candidate = normalize_item(
+        item(
+            "https://arxiv.org/abs/2608.54321",
+            "Strategy-first synthesis planning for complex natural products",
+            "We introduce an LLM framework and dataset for molecular synthesis planning. " * 6,
+        ),
+        collected_at=NOW,
+    )[0]
+    candidate.source_id = "arxiv-cs-ai"
+    candidate.published_at = NOW
+    candidate.topic_scores = {
+        "metadata-governance": 0.55,
+        "foundation-models": 0.425,
+        "ai-products-agents": 0.45,
+    }
+
+    selected = apply_content_quotas([candidate], max_total=10)
+
+    assert candidate not in selected
 
 
 def test_key_signal_uses_a_separate_editorial_gate() -> None:

@@ -25,7 +25,9 @@ PROMPT_VERSION = "article-enrichment-v3"
 PROFILE_PROMPT_VERSION = "profile-enhancement-v1"
 MIN_ENRICHMENT_EVIDENCE_CHARS = 120
 TRANSLATION_PRIORITY_SCORE = 0.60
+MIN_PAID_TARGET_RELEVANCE = 0.60
 MAX_PAID_ENRICHMENT_AGE_DAYS = 45
+MAX_NEW_ENRICHMENTS_PER_SOURCE = 3
 HOME_PRIORITY_WINDOW = 8
 SOURCE_REPEAT_PENALTY = 1.0
 SchemaModel = TypeVar("SchemaModel", bound=BaseModel)
@@ -47,6 +49,7 @@ class EnrichmentTelemetry:
     skipped_thin_evidence: int = 0
     skipped_below_quality_floor: int = 0
     skipped_stale: int = 0
+    skipped_source_cap: int = 0
     skipped_after_call_limit: int = 0
 
 
@@ -286,6 +289,11 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
 def _paid_enrichment_skip_reason(article: Article, generated_at: datetime) -> str | None:
     if (article.content_score or 0.0) < TRANSLATION_PRIORITY_SCORE:
         return "below_quality_floor"
+    if (
+        article.content_score_breakdown is None
+        or article.content_score_breakdown.target_relevance < MIN_PAID_TARGET_RELEVANCE
+    ):
+        return "below_quality_floor"
     published_at = article.published_at or article.collected_at
     if generated_at - published_at > timedelta(days=MAX_PAID_ENRICHMENT_AGE_DAYS):
         return "stale"
@@ -316,6 +324,7 @@ def enrich_snapshot(
         for article in (accepted_snapshot.articles if accepted_snapshot else [])
         if article.ai is not None
     }
+    new_enrichments_by_source: dict[str, int] = {}
     for article in _enrichment_priority_order(result.articles):
         published_enrichment = article.ai or accepted_ai.get(article.content_hash)
         if published_enrichment is not None:
@@ -333,6 +342,9 @@ def enrich_snapshot(
             continue
         if skip_reason == "stale":
             stats.skipped_stale += 1
+            continue
+        if new_enrichments_by_source.get(article.source_id, 0) >= MAX_NEW_ENRICHMENTS_PER_SOURCE:
+            stats.skipped_source_cap += 1
             continue
         terminology_instruction = _terminology_instruction(evidence, terminology)
         terminology_signature = hashlib.sha256(terminology_instruction.encode("utf-8")).hexdigest()[
@@ -372,6 +384,9 @@ def enrich_snapshot(
             stats.model_calls = model_calls
         else:
             stats.cache_hits += 1
+        new_enrichments_by_source[article.source_id] = (
+            new_enrichments_by_source.get(article.source_id, 0) + 1
+        )
         article.ai = GeneratedText(
             title_zh=enrichment.title_zh,
             summary_zh=enrichment.summary_zh,

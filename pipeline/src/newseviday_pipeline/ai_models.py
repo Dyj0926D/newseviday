@@ -29,6 +29,7 @@ class AiUsageReport(ContractModel):
     skipped_thin_evidence: int = Field(ge=0)
     skipped_below_quality_floor: int = Field(ge=0)
     skipped_stale: int = Field(ge=0)
+    skipped_source_cap: int = Field(ge=0)
     skipped_after_call_limit: int = Field(ge=0)
     prompt_tokens: int = Field(ge=0)
     completion_tokens: int = Field(ge=0)

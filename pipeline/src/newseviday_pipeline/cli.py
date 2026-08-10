@@ -290,6 +290,7 @@ def enrich(args: argparse.Namespace) -> int:
         skipped_thin_evidence=telemetry.skipped_thin_evidence,
         skipped_below_quality_floor=telemetry.skipped_below_quality_floor,
         skipped_stale=telemetry.skipped_stale,
+        skipped_source_cap=telemetry.skipped_source_cap,
         skipped_after_call_limit=telemetry.skipped_after_call_limit,
         prompt_tokens=usage.prompt_tokens,
         completion_tokens=usage.completion_tokens,

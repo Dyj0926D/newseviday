@@ -196,6 +196,8 @@ def test_article_enrichment_rotates_across_sources(tmp_path: Path) -> None:
         article.ai = None
         article.content_score = 0.8
         article.published_at = datetime(2026, 8, 5, tzinfo=UTC)
+        assert article.content_score_breakdown is not None
+        article.content_score_breakdown.target_relevance = 0.8
 
     result, model_calls = enrich_snapshot(
         snapshot,
@@ -360,6 +362,60 @@ def test_article_enrichment_does_not_pay_for_stale_backlog(tmp_path: Path) -> No
 
     assert model_calls == 0
     assert telemetry.skipped_stale == 1
+
+
+def test_article_enrichment_requires_target_relevance_for_new_calls(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    article = snapshot.articles[0]
+    article.ai = None
+    article.content_score = 0.9
+    article.published_at = datetime(2026, 8, 9, tzinfo=UTC)
+    article.facts.abstract = "Complete but weakly relevant evidence. " * 8
+    assert article.content_score_breakdown is not None
+    article.content_score_breakdown.target_relevance = 0.59
+    telemetry = EnrichmentTelemetry()
+
+    _result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        telemetry=telemetry,
+        now=datetime(2026, 8, 10, tzinfo=UTC),
+    )
+
+    assert model_calls == 0
+    assert telemetry.skipped_below_quality_floor == 1
+
+
+def test_article_enrichment_caps_new_items_per_source(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:4]
+    for article in snapshot.articles:
+        article.source_id = "same-source"
+        article.ai = None
+        article.content_score = 0.8
+        article.published_at = datetime(2026, 8, 9, tzinfo=UTC)
+        assert article.content_score_breakdown is not None
+        article.content_score_breakdown.target_relevance = 0.8
+    telemetry = EnrichmentTelemetry()
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        telemetry=telemetry,
+        max_model_calls=5,
+        now=datetime(2026, 8, 10, tzinfo=UTC),
+    )
+
+    assert model_calls == 3
+    assert sum(article.ai is not None for article in result.articles) == 3
+    assert telemetry.skipped_source_cap == 1
 
 
 def test_article_enrichment_rejects_call_cap_above_ten(tmp_path: Path) -> None:
