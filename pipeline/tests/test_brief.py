@@ -47,7 +47,7 @@ def test_weekly_brief_generates_once_and_reuses_the_published_period(tmp_path: P
         accepted_snapshot=None,
         client=client,
         cache=FileAiCache(tmp_path),
-        now=datetime(2026, 8, 10, 5, tzinfo=UTC),
+        now=datetime(2026, 8, 8, 2, tzinfo=UTC),
     )
 
     assert generated.status == "generated"
@@ -56,13 +56,15 @@ def test_weekly_brief_generates_once_and_reuses_the_published_period(tmp_path: P
     assert len(generated.snapshot.briefs) == 1
     assert generated.snapshot.briefs[0].generated_by is not None
     assert generated.snapshot.briefs[0].generated_by.provider == "deepseek"
+    assert generated.period_start == datetime(2026, 7, 31, 16, tzinfo=UTC)
+    assert generated.period_end == datetime(2026, 8, 7, 16, tzinfo=UTC)
 
     reused = update_weekly_brief(
         generated.snapshot,
         accepted_snapshot=generated.snapshot,
         client=FakeBriefClient(),
         cache=FileAiCache(tmp_path),
-        now=datetime(2026, 8, 10, 6, tzinfo=UTC),
+        now=datetime(2026, 8, 8, 3, tzinfo=UTC),
     )
     assert reused.status == "current"
     assert reused.model_calls == 0
@@ -70,7 +72,7 @@ def test_weekly_brief_generates_once_and_reuses_the_published_period(tmp_path: P
     assert reused.snapshot.snapshot_id == generated.snapshot.snapshot_id
 
 
-def test_weekly_brief_is_carried_on_non_monday_refresh(tmp_path: Path) -> None:
+def test_weekly_brief_is_carried_on_non_saturday_refresh(tmp_path: Path) -> None:
     source = load_snapshot(SNAPSHOT)
     accepted = apply_editorial_package(source, load_editorial_package(PACKAGE))
     incoming = source.model_copy(deep=True)
@@ -84,6 +86,6 @@ def test_weekly_brief_is_carried_on_non_monday_refresh(tmp_path: Path) -> None:
         now=datetime(2026, 8, 11, 2, tzinfo=UTC),
     )
 
-    assert carried.status == "current"
+    assert carried.status == "carried"
     assert carried.model_calls == 0
     assert carried.snapshot.briefs[0].id == accepted.briefs[0].id

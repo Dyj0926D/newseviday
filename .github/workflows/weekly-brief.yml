@@ -2,8 +2,8 @@ name: Weekly trend brief
 
 on:
   schedule:
-    # Monday 12:30 Asia/Shanghai. The brief covers the previous Monday-Sunday.
-    - cron: '30 4 * * 1'
+    # Saturday 10:00 Asia/Shanghai. The brief covers the previous Saturday-Friday.
+    - cron: '0 2 * * 6'
   workflow_dispatch:
     inputs:
       allow_model:
