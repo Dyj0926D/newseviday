@@ -48,6 +48,7 @@ class SourceConfig(ContractModel):
     name: str = Field(min_length=1)
     adapter: Literal["atom", "rss", "json", "html"]
     url: HttpUrl
+    homepage_url: HttpUrl | None = None
     language: str = Field(min_length=2, max_length=8)
     region: str = Field(min_length=2)
     enabled: bool = False

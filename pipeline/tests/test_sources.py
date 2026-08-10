@@ -12,7 +12,7 @@ from newseviday_pipeline.embeddings import HashingEmbedder, cosine_similarity
 from newseviday_pipeline.extraction import clean_html_text
 from newseviday_pipeline.models import SourceConfig, TopicConfig
 from newseviday_pipeline.network import FetchResult, validate_public_url
-from newseviday_pipeline.runner import run_network_pipeline
+from newseviday_pipeline.runner import _source_contract, run_network_pipeline
 
 
 def source(source_id: str) -> SourceConfig:
@@ -189,6 +189,17 @@ def test_parse_source_can_require_date_and_summary_before_source_cap() -> None:
     parsed = parse_source(content, configured)
 
     assert [item.url for item in parsed] == ["https://example.com/issues/2"]
+
+
+def test_source_contract_can_separate_feed_and_public_homepage() -> None:
+    configured = source("weekly-media").model_copy(
+        update={"homepage_url": "https://weekly-media.example/issues"}
+    )
+
+    public_source = _source_contract(configured)
+
+    assert public_source.feed_url == "https://weekly-media.example/feed.xml"
+    assert public_source.homepage_url == "https://weekly-media.example/issues"
 
 
 def test_html_heading_listing_creates_stable_fragment_links() -> None:

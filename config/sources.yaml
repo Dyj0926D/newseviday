@@ -140,8 +140,9 @@ sources:
 
   - id: the-batch
     name: The Batch
-    adapter: html
-    url: https://www.deeplearning.ai/the-batch
+    adapter: rss
+    url: https://charonhub.deeplearning.ai/tag/the-batch/rss/
+    homepage_url: https://www.deeplearning.ai/the-batch
     language: en
     region: 北美
     enabled: true
@@ -150,12 +151,7 @@ sources:
     evidence_tier: secondary
     max_items: 8
     max_selected_items: 2
-    html_card_mode: true
-    require_published_at: true
-    require_summary: true
-    include_url_patterns:
-      - ^https://www\.deeplearning\.ai/the-batch/issue-\d+$
-    note: DeepLearning.AI 编辑型周刊，按 Issue 卡片采集标题、日期、导语和原文链接
+    note: DeepLearning.AI 编辑型周刊，使用其官方发布后台 RSS 采集 Issue 标题、日期、导语和原文链接
 
   - id: mlcommons-news
     name: MLCommons News
