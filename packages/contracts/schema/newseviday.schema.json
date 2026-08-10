@@ -30,7 +30,7 @@
         "summaryZh": { "type": ["string", "null"] },
         "whyItMatters": { "type": ["string", "null"] },
         "keyPoints": { "type": "array", "items": { "type": "string" } },
-        "provider": { "const": "deepseek" },
+        "provider": { "enum": ["deepseek", "editorial"] },
         "model": { "type": "string", "minLength": 1 },
         "promptVersion": { "type": "string", "minLength": 1 },
         "generatedAt": { "$ref": "#/$defs/isoDateTime" }

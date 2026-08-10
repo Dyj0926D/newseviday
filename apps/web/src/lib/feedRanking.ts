@@ -10,6 +10,27 @@ function articleScore(article: Article): number {
   return article.contentScore ?? 0;
 }
 
+function articleTimestamp(article: Article): number {
+  return new Date(article.publishedAt ?? article.collectedAt).getTime();
+}
+
+export function isWithinPublishedWindow(
+  article: Article,
+  anchor: string,
+  windowDays: number,
+): boolean {
+  if (!article.publishedAt) return true;
+  const age = new Date(anchor).getTime() - new Date(article.publishedAt).getTime();
+  return age >= 0 && age <= windowDays * 24 * 60 * 60 * 1000;
+}
+
+export function sortLatestArticles(articles: Article[]): Article[] {
+  return [...articles].sort(
+    (left, right) =>
+      articleTimestamp(right) - articleTimestamp(left) || articleScore(right) - articleScore(left),
+  );
+}
+
 function tripleCount(sourceIds: string[]): number {
   return sourceIds.reduce(
     (count, sourceId, index) =>

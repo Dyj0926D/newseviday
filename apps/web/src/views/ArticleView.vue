@@ -116,7 +116,15 @@ watch(
           <div class="ai-disclosure">
             <PhSparkle v-if="article.ai" :size="17" weight="fill" aria-hidden="true" />
             <PhCheckCircle v-else :size="17" aria-hidden="true" />
-            <span>{{ article.ai ? 'AI 结构化整理，请以原始来源为准' : '来源标题与摘要，未经 AI 改写' }}</span>
+            <span>
+              {{
+                article.ai?.provider === 'deepseek'
+                  ? 'AI 结构化整理，请以原始来源为准'
+                  : article.ai?.provider === 'editorial'
+                    ? '编辑整理，请以原始来源为准'
+                    : '来源标题与摘要，未经改写'
+              }}
+            </span>
             <small v-if="article.ai">
               {{ article.ai.model === 'demo-fixture' ? '演示整理' : article.ai.model }} ·
               {{ formatDateTime(article.ai.generatedAt) }}

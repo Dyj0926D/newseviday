@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "generatedAt": "2026-08-10T04:25:00Z",
+  "articles": [
+    {
+      "contentHash": "024419f6d6a77ad00636d2979398ec477f0fe954f4a85c1440849acf0bf8e06e",
+      "titleZh": "CoinRAG：用细粒度信息单元复用 KV Cache，降低长上下文 RAG 成本",
+      "summaryZh": "CoinRAG 将检索片段拆成与问题相关的细粒度语义单元，离线计算并复用这些单元的 KV Cache，再与片段级上下文组合。LongBench 多跳问答实验中，它在快速预填充的延迟约束下，将答案质量 F1 相对提升 5.3%。",
+      "whyItMatters": "长上下文 RAG 的成本瓶颈不只在检索，也在重复编码无关上下文；细粒度缓存复用提供了一条可验证的工程优化路径。",
+      "keyPoints": [
+        "两阶段检索定位问题相关语义单元",
+        "复用离线计算的细粒度 KV Cache",
+        "在延迟约束下改善质量与成本平衡"
+      ]
+    },
+    {
+      "contentHash": "ba38f57af7b3dd17c13b2aebe2000620ffd33e69fb4a62b74d0cc1b0066240ab",
+      "titleZh": "PsychoAgent：面向情感显著性与冲突记忆的 LLM Agent 架构",
+      "summaryZh": "PsychoAgent 将事实记忆与情感记忆分开管理，再由冲突感知控制器整合。系统先按语义相关性筛选情感记忆，再按显著性重排；在三个受控场景中，关键冲突记忆的检索率高于对照方法，但人工评分差异尚未达到统计显著。",
+      "whyItMatters": "它展示了 Agent 记忆可从单一语义相似度扩展到可检查的多因素检索，但现有实验规模较小，仍属于研究验证。",
+      "keyPoints": [
+        "事实记忆与情感记忆分层管理",
+        "语义过滤后按情感显著性重排",
+        "检索改善明确，输出质量证据仍有限"
+      ]
+    },
+    {
+      "contentHash": "13a2ca00fdbea33b5a122342afc2c5b67170114937df77d7e4a8abac080a4457",
+      "titleZh": "FinRank：面向 SEC 文件证据溯源的金融问答与检索基准",
+      "summaryZh": "FinRank 收录 22 家公司的 10-K 与 10-Q 文件，共 1185 条人工编写问答，并提供黄金证据和易混淆的困难负例。它分别评估段落检索、重排和困难负例识别；最佳受测嵌入模型在汇总证据库上的 Recall@10 仅为 44.8%。",
+      "whyItMatters": "金融问答即使答案数字正确，也可能引用了错误公司、期间或披露位置；该基准把证据归属正确性单独纳入评测。",
+      "keyPoints": [
+        "1185 条人工问答覆盖 22 家公司",
+        "困难负例来自相似期间与可比公司",
+        "分别衡量检索、重排和负例识别"
+      ]
+    },
+    {
+      "contentHash": "6f5cb82fa82099da6738517979c87ffa8e1b04db3c1982bd2b9e249a8c53bc7c",
+      "titleZh": "如何规模化管理 AI 编程成本",
+      "summaryZh": "文章聚焦组织扩大 AI 编程工具使用后产生的成本管理问题。来源摘要确认，Databricks 已观察到 Agent 编程带来的可量化价值，并围绕规模化使用时的投入控制展开讨论；具体方法和数据仍需回到原文核验。",
+      "whyItMatters": "AI 编程进入团队规模后，采用率、交付价值与推理成本需要放在同一套运营指标中衡量。",
+      "keyPoints": [
+        "关注团队规模化使用后的成本问题",
+        "强调价值衡量与投入控制并行",
+        "具体方法需以原文内容为准"
+      ]
+    },
+    {
+      "contentHash": "a4e5963b9ae0e9fad97bda49a961d270a6bff342358a6e39d540b253aa5d84dd",
+      "titleZh": "什么是 AI 助手？",
+      "summaryZh": "文章介绍 AI 助手的基本构成：利用语言模型、数据检索和推理来理解用户请求。当前来源摘要只提供了定义性信息，具体架构、使用场景与实施建议需要打开原文确认。",
+      "whyItMatters": "将模型、检索和推理拆开，有助于产品团队区分聊天界面与具备数据访问、任务执行能力的 AI 助手。",
+      "keyPoints": [
+        "核心能力包括语言模型、检索和推理",
+        "目标是理解并处理用户请求",
+        "来源摘要较短，细节需回原文核验"
+      ]
+    },
+    {
+      "contentHash": "aaeaa892ea6a66d00483b1667417bf01b565c301537709923a1fa3419167cea6",
+      "titleZh": "什么是 Agentic Workflow？",
+      "summaryZh": "文章讨论组织如何从单次提示词交互转向 Agentic Workflow。来源摘要明确了这一演进方向，但没有完整展开工作流编排、工具调用和治理细节，因此页面只保留可由来源支持的核心定义。",
+      "whyItMatters": "产品从“回答问题”走向“完成任务”时，需要重新设计步骤编排、状态管理、异常处理和人工确认边界。",
+      "keyPoints": [
+        "从单次交互转向多步骤工作流",
+        "关注 Agent 对任务过程的组织",
+        "实施细节需回原文继续核验"
+      ]
+    },
+    {
+      "contentHash": "565f07e8223aea3283402975e1d24ca5f15d29824fb26f8a996ac135b1d8fa21",
+      "titleZh": "从提问到行动：全球用户如何把 ChatGPT 用到实际工作中",
+      "summaryZh": "OpenAI Signals 汇总不同国家和地区的 ChatGPT 采用情况、使用趋势与行为变化，用于观察用户如何把对话式 AI 用到实际任务中。当前来源摘要没有给出具体国家排名或增长数字，页面不补充未经支持的结论。",
+      "whyItMatters": "真实使用数据可以帮助产品经理判断 AI 需求正从试用转向哪些工作任务，但跨地区差异仍需结合原始数据阅读。",
+      "keyPoints": [
+        "提供国家和地区层面的采用观察",
+        "关注使用趋势与行为变化",
+        "具体数据与口径以原始页面为准"
+      ]
+    },
+    {
+      "contentHash": "eb8e908b61a292d20d5a65e594382f559e1738a7a4e6c778ab3a5a19ef1804c4",
+      "titleZh": "ChatGPT Work 与 Codex 面向教学和学习的新插件",
+      "summaryZh": "OpenAI 发布面向 K–12 教师、高校教育者和学生的教育插件，覆盖学习、教学、研究与构建等任务。来源摘要确认了目标人群和场景范围，具体插件能力、可用地区与使用条件需要查看原文。",
+      "whyItMatters": "教育场景正在从通用问答向角色化工具扩展，产品设计需要同步考虑年龄、教学流程和内容可信边界。",
+      "keyPoints": [
+        "覆盖教师、教育者和学生",
+        "面向学习、教学、研究与构建任务",
+        "可用范围与能力细节需查原文"
+      ]
+    },
+    {
+      "contentHash": "6e3fe7db1eb57da5945e60f2a7e34c822b23fd1efe4288af26e9c7683863765e",
+      "titleZh": "六个月构建低延迟实时语音 AI 系统的工程实践",
+      "summaryZh": "OpenAI 介绍 GPT-Live 的持续语音交互方案：通过无固定轮次的语音模型和低延迟架构，减少传统你问我答式轮次切换，使对话响应更快、更自然。来源摘要未披露完整技术指标，工程细节需回原文核验。",
+      "whyItMatters": "实时语音产品的体验取决于模型能力与端到端延迟共同作用，交互范式也会从轮次对话转向持续协作。",
+      "keyPoints": [
+        "采用无固定轮次的持续语音交互",
+        "以低延迟架构改善响应体验",
+        "完整工程指标需查看原文"
+      ]
+    },
+    {
+      "contentHash": "ae1d2f2fc2a37649a373849707315355d2b86d9bc868f13159294eee1e97ef34",
+      "titleZh": "DeepSeek-V4-Flash 正式版 API 开放公测",
+      "summaryZh": "DeepSeek-V4-Flash 正式版 API 开放公测，调用方式保持不变，并原生支持 Responses API。官方称本次更新重点增强 Agent 能力，列出 Terminal Bench、NL2Repo、Toolathlon 等多项基准结果；V4-Pro 与 App/Web 模型不在本次更新范围内。",
+      "whyItMatters": "对 Agent 产品而言，接口兼容性、工具任务表现和迁移成本比单一通用榜单更直接影响模型选型。",
+      "keyPoints": [
+        "API 调用方式保持不变",
+        "原生支持 Responses API",
+        "本次只更新 V4-Flash API"
+      ]
+    },
+    {
+      "contentHash": "046266c591d3677a998d98902d168a8c7c20f92e29c3a4aa5802f983bc9b3168",
+      "titleZh": "大多数时候，先把 Agent Harness 用好就够了",
+      "summaryZh": "文章主张先理解并稳定使用 Agent Harness 的基础能力，再按复杂工作流需要增加技能、MCP、指令或自定义 Agent。作者以 GitHub Copilot 的多种界面为例，强调共享 Harness 让核心工作方式可以跨工具复用。",
+      "whyItMatters": "Agent 产品容易堆叠工具和配置；先固化任务流程、上下文与验证方式，通常更利于团队形成可复用的使用方法。",
+      "keyPoints": [
+        "先掌握 Harness 的核心工作方式",
+        "复杂任务再增加技能与外部工具",
+        "共享 Harness 有利于跨界面复用"
+      ]
+    },
+    {
+      "contentHash": "c4804358880b281aff36e187deeb13d686a1cff664c7555713ff426e9600a0dd",
+      "titleZh": "GitHub Copilot App 入门：从项目和多 Agent 会话开始",
+      "summaryZh": "GitHub Copilot App 将 Agent 会话与项目连接，使每个会话获得对应代码库、文件和工具上下文。用户可以同时维护多个任务会话，在修复缺陷、审查代码和探索方案之间切换，并保留各自的工作进度。",
+      "whyItMatters": "AI 编程产品正在从单一聊天框转向多任务工作空间，项目上下文和会话隔离会直接影响复杂任务的连续性。",
+      "keyPoints": [
+        "Agent 会话绑定具体项目上下文",
+        "支持多个任务会话并行推进",
+        "减少重复准备代码环境的成本"
+      ]
+    },
+    {
+      "contentHash": "403fab5b056e4bfa08948f9026b52403cd6eb05b8085aaa27a8bb153d2ea37c8",
+      "titleZh": "Anthropic 发布 Claude Opus 5",
+      "summaryZh": "Anthropic 发布 Claude Opus 5，官方将其定位为 Opus 系列的一次明显升级，重点面向长时间运行的 Agent，并改善编程和专业工作表现。当前来源摘要没有提供具体基准、价格或可用范围，相关判断需查看原文。",
+      "whyItMatters": "长任务稳定性正在成为高端模型的核心产品指标，但性能、成本和可用性仍需放在同一评测口径下比较。",
+      "keyPoints": [
+        "重点支持长时间运行的 Agent",
+        "官方称编程与专业工作能力改善",
+        "基准、价格和范围需回原文核验"
+      ]
+    },
+    {
+      "contentHash": "982d3556ebac423477d13e5f620375a9d2812377fd1e748eb2e32f89f12bff66",
+      "titleZh": "如何用 Canvas 构建可交互的 Agent 体验",
+      "summaryZh": "GitHub Copilot App 的 Canvas 为开发者和 Agent 提供共享可交互界面。Agent 可以持续更新画布，用户通过点击、编辑等方式直接操作信息，并把反馈传回 Agent；示例包括问题分拣和代码库结构可视化。",
+      "whyItMatters": "当任务涉及可视化、批量决策或多源信息时，直接操作界面比连续聊天更高效，也扩展了 Agent 产品的交互形态。",
+      "keyPoints": [
+        "Canvas 是用户与 Agent 的共享界面",
+        "支持点击、编辑和实时更新",
+        "适合分拣、可视化等非线性任务"
+      ]
+    }
+  ],
+  "brief": {
+    "id": "brief-2026-08-03-2026-08-09-v1",
+    "title": "Agent 工程进入工作流、检索与成本协同优化阶段",
+    "periodStart": "2026-08-02T16:00:00Z",
+    "periodEnd": "2026-08-09T15:59:59.999999Z",
+    "publishedAt": "2026-08-10T04:25:00Z",
+    "sections": [
+      {
+        "heading": "Agent 产品的工程重心从单次回答转向完整工作流",
+        "body": "Databricks 同期讨论 Agentic Workflow 与规模化 AI 编程成本，OpenAI 的使用数据把观察口径从“用户是否提问”扩展到“AI 如何进入实际任务”，CoinRAG 则把长上下文 RAG 的重复计算拆成细粒度缓存优化。这些信息共同表明，Agent 落地的关注点正转向工作流编排、检索效率与运行成本。判断边界是：来源覆盖厂商文章与一篇论文，尚不能代表所有企业的采用情况。",
+        "evidenceIds": [
+          "evidence-aaeaa892ea6a66d00483",
+          "evidence-6f5cb82fa82099da6738",
+          "evidence-565f07e8223aea328340",
+          "evidence-024419f6d6a77ad00636"
+        ]
+      },
+      {
+        "heading": "AI 助手继续向具体角色与实时交互场景扩展",
+        "body": "Databricks 以模型、检索和推理解释 AI 助手的基本组成；OpenAI 同期发布教育角色插件与持续语音交互实践，分别对应垂直任务和新交互形态。可以观察到，AI 助手的产品定义正在从通用聊天延伸到具体角色、数据访问和持续交互。判断边界是：三条信息主要来自两家厂商，商业效果与用户留存仍缺少独立证据。",
+        "evidenceIds": [
+          "evidence-a4e5963b9ae0e9fad97b",
+          "evidence-eb8e908b61a292d20d5a",
+          "evidence-6e3fe7db1eb57da5945e"
+        ]
+      }
+    ]
+  }
+}

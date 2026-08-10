@@ -167,7 +167,7 @@ onBeforeUnmount(() => {
               <RouterLink to="/eval">质量评测</RouterLink>
               <RouterLink to="/status">更新状态</RouterLink>
             </nav>
-            <p>所有 AI 整理均保留原始来源与内容更新时间。</p>
+            <p>所有中文整理均保留原始来源与内容更新时间。</p>
           </aside>
         </div>
       </Transition>

@@ -107,7 +107,7 @@ class GeneratedText(ContractModel):
     summary_zh: str | None = None
     why_it_matters: str | None = None
     key_points: list[str] = Field(default_factory=list)
-    provider: Literal["deepseek"] = "deepseek"
+    provider: Literal["deepseek", "editorial"] = "deepseek"
     model: str
     prompt_version: str
     generated_at: datetime

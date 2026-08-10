@@ -38,7 +38,13 @@ const contributingSources = computed(() => {
   return (content.snapshot?.sources ?? []).filter((source) => sourceIds.has(source.id));
 });
 const aiArticleCount = computed(
-  () => (content.snapshot?.articles ?? []).filter((article) => Boolean(article.ai)).length,
+  () =>
+    (content.snapshot?.articles ?? []).filter((article) => article.ai?.provider === 'deepseek').length,
+);
+const editorialArticleCount = computed(
+  () =>
+    (content.snapshot?.articles ?? []).filter((article) => article.ai?.provider === 'editorial')
+      .length,
 );
 const ragAvailable = computed(
   () => runtime.status?.rag.state === 'available' || runtime.status?.rag.state === 'saving-mode',
@@ -230,7 +236,7 @@ onMounted(async () => {
               <strong>受控生产快照</strong><span>当前
                 {{ content.snapshot?.articles.length ?? 0 }} 条内容来自
                 {{ contributingSources.length }} 个实际贡献来源，其中
-                {{ aiArticleCount }} 篇经 AI 结构化整理。</span>
+                {{ aiArticleCount }} 篇由 AI 结构化整理，{{ editorialArticleCount }} 篇经编辑整理。</span>
             </template>
           </li>
           <li>

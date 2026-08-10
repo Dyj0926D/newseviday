@@ -57,13 +57,17 @@ test('home, article and original evidence form a working route chain', async ({ 
   );
 });
 
-test('trend brief stays honest until enough history exists', async ({ page }) => {
+test('trend brief exposes evidence-bound weekly conclusions', async ({ page }) => {
   await page.goto('/brief');
   await expect(
     page.getByRole('heading', { level: 1, name: '把分散信号整理成可验证的趋势' }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: '当前没有可用简报' })).toBeVisible();
-  await expect(page.getByText('内容不足或生成失败时不会覆盖上一版成功快照。')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Agent 工程进入工作流、检索与成本协同优化阶段' }),
+  ).toBeVisible();
+  await expect(page.getByText('证据约束的 7 日趋势简报')).toBeVisible();
+  await expect(page.locator('.trend-block')).toHaveCount(2);
+  await expect(page.locator('.trend-evidence a')).toHaveCount(7);
 });
 
 test('optional profile saves locally and changes the recommendation view', async ({ page }) => {

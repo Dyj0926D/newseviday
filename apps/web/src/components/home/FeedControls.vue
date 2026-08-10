@@ -108,10 +108,11 @@ const emit = defineEmits<{
           :value="time"
           @change="emit('update:time', ($event.target as HTMLSelectElement).value)"
         >
-          <option value="">不限时间</option>
+          <option value="">近 30 天（默认）</option>
           <option value="24h">24 小时</option>
           <option value="3d">3 天</option>
           <option value="7d">7 天</option>
+          <option value="all">不限时间（含待整理原文）</option>
         </select>
       </label>
     </div>

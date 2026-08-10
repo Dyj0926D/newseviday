@@ -12,6 +12,13 @@ export function displayWhy(article: Article): string | null {
   return article.ai?.whyItMatters?.trim() || null;
 }
 
+export function isChineseDisplayReady(article: Article): boolean {
+  if (article.language === 'zh-CN') {
+    return Boolean(article.facts.title.trim() && article.facts.abstract?.trim());
+  }
+  return Boolean(article.ai?.titleZh?.trim() && article.ai?.summaryZh?.trim());
+}
+
 export function languageLabel(language: string): string {
   if (language === 'en') return '英文原文';
   if (language === 'zh-CN') return '中文';

@@ -5,15 +5,26 @@ import re
 import tempfile
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any, Protocol, TypeVar
 
 import httpx
 from pydantic import BaseModel
 
-from newseviday_pipeline.ai_models import ArticleEnrichment, ProfileEnhancement
-from newseviday_pipeline.models import Article, ContentSnapshot, GeneratedText, TopicConfig
+from newseviday_pipeline.ai_models import (
+    ArticleEnrichment,
+    ProfileEnhancement,
+    TrendBriefDraft,
+)
+from newseviday_pipeline.models import (
+    Article,
+    Brief,
+    BriefSection,
+    ContentSnapshot,
+    GeneratedText,
+    TopicConfig,
+)
 from newseviday_pipeline.stages import (
     chinese_display_ready,
     key_signal_assessment,
@@ -23,6 +34,8 @@ from newseviday_pipeline.terminology import TerminologyConfig
 
 PROMPT_VERSION = "article-enrichment-v3"
 PROFILE_PROMPT_VERSION = "profile-enhancement-v1"
+BRIEF_PROMPT_VERSION = "weekly-trend-brief-v1"
+SHANGHAI_TIMEZONE = timezone(timedelta(hours=8), name="Asia/Shanghai")
 MIN_ENRICHMENT_EVIDENCE_CHARS = 120
 TRANSLATION_PRIORITY_SCORE = 0.60
 MIN_PAID_TARGET_RELEVANCE = 0.60
@@ -316,6 +329,8 @@ def enrich_snapshot(
         raise ValueError("max_model_calls_must_be_between_0_and_10")
     generated_at = now or datetime.now(UTC)
     result = snapshot.model_copy(deep=True)
+    if accepted_snapshot is not None and not result.briefs and accepted_snapshot.briefs:
+        result.briefs = [accepted_snapshot.briefs[0].model_copy(deep=True)]
     stats = telemetry or EnrichmentTelemetry()
     model_calls = 0
     topic_description = ", ".join(f"{topic.id}={topic.label}" for topic in topics)
@@ -408,6 +423,185 @@ def enrich_snapshot(
     result.snapshot_id = f"{snapshot.snapshot_id}-ai-{suffix}"
     result.generated_at = generated_at
     return result, model_calls
+
+
+@dataclass(frozen=True)
+class BriefUpdateResult:
+    snapshot: ContentSnapshot
+    status: str
+    model_calls: int
+    period_start: datetime
+    period_end: datetime
+
+
+def _last_complete_week(now: datetime) -> tuple[datetime, datetime]:
+    local_now = now.astimezone(SHANGHAI_TIMEZONE)
+    current_monday = local_now.date() - timedelta(days=local_now.weekday())
+    period_end_exclusive = datetime.combine(current_monday, time.min, tzinfo=SHANGHAI_TIMEZONE)
+    period_start = period_end_exclusive - timedelta(days=7)
+    return period_start.astimezone(UTC), period_end_exclusive.astimezone(UTC)
+
+
+def _brief_period_matches(brief: Brief, start: datetime, end_exclusive: datetime) -> bool:
+    inclusive_end = end_exclusive - timedelta(microseconds=1)
+    return brief.period_start == start and brief.period_end == inclusive_end
+
+
+def _with_brief_suffix(snapshot: ContentSnapshot, signature_value: str) -> ContentSnapshot:
+    result = snapshot.model_copy(deep=True)
+    signature = hashlib.sha256(signature_value.encode("utf-8")).hexdigest()[:8]
+    result.snapshot_id = f"{snapshot.snapshot_id}-brief-{signature}"
+    return result
+
+
+def _carry_brief(snapshot: ContentSnapshot, brief: Brief) -> ContentSnapshot:
+    if snapshot.briefs and snapshot.briefs[0].id == brief.id:
+        return snapshot
+    result = _with_brief_suffix(snapshot, f"{brief.id}:{snapshot.snapshot_id}")
+    result.briefs = [brief.model_copy(deep=True)]
+    return result
+
+
+def update_weekly_brief(
+    snapshot: ContentSnapshot,
+    *,
+    accepted_snapshot: ContentSnapshot | None,
+    client: StructuredCompletionClient | None,
+    cache: FileAiCache,
+    now: datetime | None = None,
+    generate_if_due: bool = True,
+) -> BriefUpdateResult:
+    generated_at = now or datetime.now(UTC)
+    period_start, period_end_exclusive = _last_complete_week(generated_at)
+    accepted_brief = (
+        accepted_snapshot.briefs[0]
+        if accepted_snapshot is not None and accepted_snapshot.briefs
+        else None
+    )
+
+    if accepted_brief and _brief_period_matches(
+        accepted_brief,
+        period_start,
+        period_end_exclusive,
+    ):
+        result = _carry_brief(snapshot, accepted_brief)
+        return BriefUpdateResult(result, "current", 0, period_start, period_end_exclusive)
+
+    is_due = generated_at.astimezone(SHANGHAI_TIMEZONE).weekday() == 0
+    if not generate_if_due or not is_due or client is None:
+        if accepted_brief is None:
+            return BriefUpdateResult(snapshot, "not_due", 0, period_start, period_end_exclusive)
+        result = _carry_brief(snapshot, accepted_brief)
+        return BriefUpdateResult(result, "carried", 0, period_start, period_end_exclusive)
+
+    candidates = [
+        article
+        for article in snapshot.articles
+        if article.published_at is not None
+        and period_start <= article.published_at < period_end_exclusive
+        and article.evidence_ids
+        and chinese_display_ready(article)
+    ]
+    source_ids = {article.source_id for article in candidates}
+    if len(candidates) < 4 or len(source_ids) < 2:
+        if accepted_brief is None:
+            return BriefUpdateResult(
+                snapshot,
+                "insufficient_evidence",
+                0,
+                period_start,
+                period_end_exclusive,
+            )
+        result = _carry_brief(snapshot, accepted_brief)
+        return BriefUpdateResult(
+            result,
+            "insufficient_evidence_carried",
+            0,
+            period_start,
+            period_end_exclusive,
+        )
+
+    candidate_signature = ":".join(sorted(article.content_hash for article in candidates))
+    cache_key = _cache_key(candidate_signature, client.model, BRIEF_PROMPT_VERSION)
+    draft = cache.get(cache_key, TrendBriefDraft)
+    model_calls = 0
+    if draft is None:
+        evidence_rows = [
+            {
+                "evidenceId": article.evidence_ids[0],
+                "sourceId": article.source_id,
+                "publishedAt": (
+                    article.published_at.isoformat() if article.published_at is not None else None
+                ),
+                "title": article.ai.title_zh if article.ai else article.facts.title,
+                "summary": article.ai.summary_zh if article.ai else article.facts.abstract,
+            }
+            for article in sorted(
+                candidates,
+                key=lambda item: item.published_at or item.collected_at,
+                reverse=True,
+            )
+        ]
+        payload = client.complete_json(
+            system=(
+                "你是 NewsEviday 的趋势情报编辑。只能根据给定证据归纳共同变化，并输出 JSON。"
+                "不得引入证据外的数字、因果关系、公司计划或市场结论。"
+            ),
+            user=(
+                f"覆盖周期：{period_start.date().isoformat()} 至 "
+                f"{(period_end_exclusive - timedelta(days=1)).date().isoformat()}。\n"
+                "输出 title 和 1 至 3 个 sections。每个 section 包含 heading、body、evidenceIds；"
+                "每节必须引用 2 至 5 条证据，并覆盖至少 2 个不同 sourceId。"
+                "body 用中文说明共同变化和判断边界，避免把单篇文章写成行业趋势。\n"
+                f"<untrusted-evidence>\n{json.dumps(evidence_rows, ensure_ascii=False)}\n"
+                "</untrusted-evidence>"
+            ),
+        )
+        draft = TrendBriefDraft.model_validate(payload)
+        cache.put(cache_key, draft)
+        model_calls = 1
+
+    evidence_to_source = {
+        evidence_id: article.source_id
+        for article in candidates
+        for evidence_id in article.evidence_ids
+    }
+    sections: list[BriefSection] = []
+    for section in draft.sections:
+        evidence_ids = list(dict.fromkeys(section.evidence_ids))
+        if any(item not in evidence_to_source for item in evidence_ids):
+            raise ValueError("weekly_brief_contains_unknown_evidence")
+        if len({evidence_to_source[item] for item in evidence_ids}) < 2:
+            raise ValueError("weekly_brief_section_requires_two_sources")
+        sections.append(
+            BriefSection(
+                heading=section.heading,
+                body=section.body,
+                evidence_ids=evidence_ids,
+            )
+        )
+
+    inclusive_end = period_end_exclusive - timedelta(microseconds=1)
+    brief_signature = hashlib.sha256(
+        f"{candidate_signature}:{client.model}:{BRIEF_PROMPT_VERSION}".encode()
+    ).hexdigest()[:12]
+    brief = Brief(
+        id=f"brief-{period_start.date().isoformat()}-{brief_signature}",
+        title=draft.title,
+        period_start=period_start,
+        period_end=inclusive_end,
+        sections=sections,
+        generated_by=GeneratedText(
+            provider="deepseek",
+            model=client.model,
+            prompt_version=BRIEF_PROMPT_VERSION,
+            generated_at=generated_at,
+        ),
+        published_at=generated_at,
+    )
+    result = _with_brief_suffix(snapshot, f"{brief.id}:{snapshot.snapshot_id}")
+    result.briefs = [brief]
+    return BriefUpdateResult(result, "generated", model_calls, period_start, period_end_exclusive)
 
 
 def enhance_profile(

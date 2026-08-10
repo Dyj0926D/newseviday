@@ -1,12 +1,14 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260810T031024Z-e3340841-ai-12c83ca0",
-  "generatedAt": "2026-08-10T03:10:27.076878Z",
+  "snapshotId": "snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab",
+  "generatedAt": "2026-08-10T04:34:40.855679Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 9,
   "contributingSourceCount": 8,
+  "structuredArticleCount": 23,
   "aiArticleCount": 9,
+  "editorialArticleCount": 14,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
@@ -41,6 +43,11 @@
   ],
   "keySignalEligibleCount": 1,
   "highValueChineseGapCount": 0,
+  "recentWindowDays": 30,
+  "recentArticleCount": 20,
+  "recentChineseReadyCount": 20,
+  "recentChineseGapCount": 0,
+  "trendBriefCount": 1,
   "potentialStoryClusters": [
     {
       "id": "story-001",

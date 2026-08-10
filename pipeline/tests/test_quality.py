@@ -28,6 +28,10 @@ def test_quality_report_exposes_content_gaps_without_model_calls(tmp_path: Path)
     assert "topicCounts" in payload
     assert "potentialStoryClusters" in payload
     assert "highValueChineseGapCount" in payload
+    assert "structuredArticleCount" in payload
+    assert "editorialArticleCount" in payload
+    assert "recentChineseGapCount" in payload
+    assert "trendBriefCount" in payload
     assert "keySignalEligibleCount" in payload
     assert "zeroContributionSourceIds" in payload
     assert "missingAbstractBySource" in payload
