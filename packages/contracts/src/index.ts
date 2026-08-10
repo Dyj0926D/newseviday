@@ -242,6 +242,16 @@ export interface PipelineStageResult {
   reason: string | null;
 }
 
+export interface SourceRunOutcome {
+  sourceId: string;
+  fetchStatus: 'succeeded' | 'failed';
+  parseStatus: 'succeeded' | 'failed' | 'skipped';
+  itemCount: number;
+  selectedCount: number;
+  finalUrl: string | null;
+  errorCode: string | null;
+}
+
 export interface PipelineRun {
   schemaVersion: typeof SCHEMA_VERSION;
   id: string;
@@ -250,6 +260,7 @@ export interface PipelineRun {
   status: 'running' | 'succeeded' | 'failed';
   configVersion: number;
   sourceIds: string[];
+  sourceOutcomes: SourceRunOutcome[];
   stages: PipelineStageResult[];
   errorCode: string | null;
 }

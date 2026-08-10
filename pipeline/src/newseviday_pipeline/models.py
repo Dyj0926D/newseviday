@@ -50,9 +50,7 @@ class SourceConfig(ContractModel):
     include_url_patterns: list[str] = Field(default_factory=list, max_length=8)
     exclude_url_patterns: list[str] = Field(default_factory=list, max_length=8)
     title_class_patterns: list[str] = Field(default_factory=list, max_length=8)
-    heading_tags: list[Literal["h2", "h3", "h4"]] = Field(
-        default_factory=list, max_length=3
-    )
+    heading_tags: list[Literal["h2", "h3", "h4"]] = Field(default_factory=list, max_length=3)
 
 
 class SourcesConfig(ContractModel):
@@ -219,6 +217,16 @@ class PipelineStageResult(ContractModel):
     reason: str | None = None
 
 
+class SourceRunOutcome(ContractModel):
+    source_id: str
+    fetch_status: Literal["succeeded", "failed"]
+    parse_status: Literal["succeeded", "failed", "skipped"]
+    item_count: int = Field(default=0, ge=0)
+    selected_count: int = Field(default=0, ge=0)
+    final_url: str | None = None
+    error_code: str | None = None
+
+
 class PipelineRun(ContractModel):
     schema_version: Literal["1.0.0"] = SCHEMA_VERSION
     id: str
@@ -227,6 +235,7 @@ class PipelineRun(ContractModel):
     status: Literal["running", "succeeded", "failed"]
     config_version: int
     source_ids: list[str] = Field(default_factory=list)
+    source_outcomes: list[SourceRunOutcome] = Field(default_factory=list)
     stages: list[PipelineStageResult] = Field(default_factory=list)
     error_code: str | None = None
 
@@ -251,9 +260,10 @@ class RagTrace(ContractModel):
     route: Literal["single_fact", "comparison", "timeline", "policy_scope"] | None = None
     retrieval_rounds: int | None = Field(default=None, ge=0, le=2)
     sufficiency_reason: str | None = None
-    stop_reason: Literal[
-        "evidence_sufficient", "evidence_insufficient", "policy_scope", "round_limit"
-    ] | None = None
+    stop_reason: (
+        Literal["evidence_sufficient", "evidence_insufficient", "policy_scope", "round_limit"]
+        | None
+    ) = None
     latency_ms: int = Field(ge=0)
 
 

@@ -75,11 +75,14 @@ def build_parser() -> argparse.ArgumentParser:
         "enrich", help="Add one-call structured AI enrichment to a validated snapshot"
     )
     enrich_parser.add_argument("snapshot", type=Path)
+    enrich_parser.add_argument(
+        "--accepted-snapshot",
+        type=Path,
+        help="Reuse only AI fields that have already been published in this snapshot.",
+    )
     enrich_parser.add_argument("--output", type=Path, default=Path("data/enriched"))
     enrich_parser.add_argument("--cache", type=Path, default=Path("data/runtime/ai-cache"))
-    enrich_parser.add_argument(
-        "--terminology", type=Path, default=Path("config/terminology.yaml")
-    )
+    enrich_parser.add_argument("--terminology", type=Path, default=Path("config/terminology.yaml"))
     enrich_parser.add_argument("--terminology-threshold", type=float, default=0.95)
     enrich_parser.add_argument(
         "--allow-model",
@@ -115,9 +118,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     eval_parser.add_argument("snapshot", type=Path)
     eval_parser.add_argument("dataset", type=Path)
-    eval_parser.add_argument(
-        "--report", type=Path, default=Path("data/runtime/eval/latest.json")
-    )
+    eval_parser.add_argument("--report", type=Path, default=Path("data/runtime/eval/latest.json"))
     eval_parser.add_argument("--minimum-score", type=float, default=0.08)
     audit_parser = subparsers.add_parser(
         "audit-snapshot", help="Create a deterministic content operations quality report"
@@ -249,6 +250,7 @@ def enrich(args: argparse.Namespace) -> int:
         return 2
     _runtime, _sources, topics = load_project_config()
     snapshot = load_snapshot(args.snapshot)
+    accepted_snapshot = load_snapshot(args.accepted_snapshot) if args.accepted_snapshot else None
     terminology = load_terminology(args.terminology)
     client = DeepSeekStructuredClient.from_environment()
     telemetry = EnrichmentTelemetry()
@@ -258,6 +260,7 @@ def enrich(args: argparse.Namespace) -> int:
         cache=FileAiCache(args.cache),
         topics=topics.topics,
         terminology=terminology,
+        accepted_snapshot=accepted_snapshot,
         max_model_calls=args.max_model_calls,
         telemetry=telemetry,
     )
@@ -266,10 +269,7 @@ def enrich(args: argparse.Namespace) -> int:
     usage_complete = client.usage_reported_calls == model_calls
     estimated_cost = (
         round(
-            (
-                usage.prompt_tokens * input_price
-                + usage.completion_tokens * output_price
-            )
+            (usage.prompt_tokens * input_price + usage.completion_tokens * output_price)
             / 1_000_000,
             6,
         )
@@ -285,8 +285,11 @@ def enrich(args: argparse.Namespace) -> int:
         usage_reported_calls=client.usage_reported_calls,
         usage_complete=usage_complete,
         cache_hits=telemetry.cache_hits,
+        accepted_enrichment_reuses=telemetry.accepted_enrichment_reuses,
         enriched_article_count=telemetry.enriched_articles,
         skipped_thin_evidence=telemetry.skipped_thin_evidence,
+        skipped_below_quality_floor=telemetry.skipped_below_quality_floor,
+        skipped_stale=telemetry.skipped_stale,
         skipped_after_call_limit=telemetry.skipped_after_call_limit,
         prompt_tokens=usage.prompt_tokens,
         completion_tokens=usage.completion_tokens,
@@ -482,9 +485,7 @@ def _update_archive_manifest(snapshot: ContentSnapshot, web_data: Path) -> Path:
         article_entries[article.id] = {
             "id": article.id,
             "title": (
-                article.ai.title_zh
-                if article.ai and article.ai.title_zh
-                else article.facts.title
+                article.ai.title_zh if article.ai and article.ai.title_zh else article.facts.title
             ),
             "originalTitle": article.facts.title,
             "sourceId": article.source_id,
