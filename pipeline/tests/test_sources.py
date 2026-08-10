@@ -152,16 +152,21 @@ def test_html_card_listing_uses_semantic_article_boundaries() -> None:
 
 def test_parse_source_propagates_source_type_and_evidence_tier() -> None:
     configured = source("media-source").model_copy(
-        update={"source_type": "professional_media", "evidence_tier": "secondary"}
+        update={
+            "source_type": "professional_media",
+            "evidence_tier": "secondary",
+            "max_summary_chars": 120,
+        }
     )
 
     parsed = parse_source(
-        rss("AI market update", "https://media-source.example/posts/1", "Evidence"),
+        rss("AI market update", "https://media-source.example/posts/1", "Evidence " * 40),
         configured,
     )
 
     assert parsed[0].source_type == "professional_media"
     assert parsed[0].evidence_tier == "secondary"
+    assert len(parsed[0].summary or "") == 120
 
 
 def test_parse_source_can_require_date_and_summary_before_source_cap() -> None:

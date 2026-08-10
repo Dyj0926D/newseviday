@@ -136,22 +136,24 @@ sources:
     evidence_tier: secondary
     max_items: 12
     max_selected_items: 3
+    max_summary_chars: 1200
     note: 专业科技媒体的 AI 报道，用于补充行业背景与外部观察，不能单独支撑 Key Signal
 
-  - id: the-batch
-    name: The Batch
+  - id: ieee-spectrum-ai
+    name: IEEE Spectrum AI
     adapter: rss
-    url: https://charonhub.deeplearning.ai/tag/the-batch/rss/
-    homepage_url: https://www.deeplearning.ai/the-batch
+    url: https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss
+    homepage_url: https://spectrum.ieee.org/topic/artificial-intelligence/
     language: en
     region: 北美
     enabled: true
     usage_scope: metadata_and_excerpt
     source_type: professional_media
     evidence_tier: secondary
-    max_items: 8
-    max_selected_items: 2
-    note: DeepLearning.AI 编辑型周刊，使用其官方发布后台 RSS 采集 Issue 标题、日期、导语和原文链接
+    max_items: 12
+    max_selected_items: 3
+    max_summary_chars: 1200
+    note: IEEE 旗下工程科技媒体的 AI 专题，用于补充产业、工程与治理背景，不能单独支撑 Key Signal
 
   - id: mlcommons-news
     name: MLCommons News
@@ -165,6 +167,7 @@ sources:
     evidence_tier: primary
     max_items: 12
     max_selected_items: 3
+    max_summary_chars: 1200
     note: AI 基准、性能评测和产业协作的一手机构动态
 
   - id: metr-blog
@@ -179,6 +182,7 @@ sources:
     evidence_tier: primary
     max_items: 12
     max_selected_items: 3
+    max_summary_chars: 1200
     html_card_mode: true
     include_url_patterns:
       - ^https://metr\.org/blog/\d{4}-\d{2}-\d{2}-[a-z0-9-]+/?$
@@ -196,6 +200,7 @@ sources:
     evidence_tier: opinion
     max_items: 12
     max_selected_items: 2
+    max_summary_chars: 1200
     note: 独立开发者对 LLM 工具和工程实践的观察，仅作观点与案例线索
 
   - id: interconnects
@@ -210,4 +215,5 @@ sources:
     evidence_tier: opinion
     max_items: 12
     max_selected_items: 2
+    max_summary_chars: 1200
     note: 独立研究者对模型、开源与产业进展的分析，仅作观点与趋势线索
