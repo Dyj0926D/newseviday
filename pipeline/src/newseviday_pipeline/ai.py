@@ -434,10 +434,15 @@ class BriefUpdateResult:
     period_end: datetime
 
 
-def _last_complete_week(now: datetime) -> tuple[datetime, datetime]:
+def _last_complete_seven_day_window(now: datetime) -> tuple[datetime, datetime]:
     local_now = now.astimezone(SHANGHAI_TIMEZONE)
-    current_monday = local_now.date() - timedelta(days=local_now.weekday())
-    period_end_exclusive = datetime.combine(current_monday, time.min, tzinfo=SHANGHAI_TIMEZONE)
+    days_since_saturday = (local_now.weekday() - 5) % 7
+    current_or_previous_saturday = local_now.date() - timedelta(days=days_since_saturday)
+    period_end_exclusive = datetime.combine(
+        current_or_previous_saturday,
+        time.min,
+        tzinfo=SHANGHAI_TIMEZONE,
+    )
     period_start = period_end_exclusive - timedelta(days=7)
     return period_start.astimezone(UTC), period_end_exclusive.astimezone(UTC)
 
@@ -472,7 +477,7 @@ def update_weekly_brief(
     generate_if_due: bool = True,
 ) -> BriefUpdateResult:
     generated_at = now or datetime.now(UTC)
-    period_start, period_end_exclusive = _last_complete_week(generated_at)
+    period_start, period_end_exclusive = _last_complete_seven_day_window(generated_at)
     accepted_brief = (
         accepted_snapshot.briefs[0]
         if accepted_snapshot is not None and accepted_snapshot.briefs
@@ -487,7 +492,7 @@ def update_weekly_brief(
         result = _carry_brief(snapshot, accepted_brief)
         return BriefUpdateResult(result, "current", 0, period_start, period_end_exclusive)
 
-    is_due = generated_at.astimezone(SHANGHAI_TIMEZONE).weekday() == 0
+    is_due = generated_at.astimezone(SHANGHAI_TIMEZONE).weekday() == 5
     if not generate_if_due or not is_due or client is None:
         if accepted_brief is None:
             return BriefUpdateResult(snapshot, "not_due", 0, period_start, period_end_exclusive)
