@@ -126,7 +126,9 @@ def run_fixture_pipeline(
 
 def _source_contract(source: SourceConfig) -> Source:
     parts = urlsplit(str(source.url))
-    homepage = f"{parts.scheme}://{parts.netloc}"
+    homepage = (
+        str(source.homepage_url) if source.homepage_url else f"{parts.scheme}://{parts.netloc}"
+    )
     return Source(
         id=source.id,
         name=source.name,
