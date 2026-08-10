@@ -246,6 +246,7 @@ jobs:
                       f"| Cache hits | {usage['cacheHits']} |",
                       f"| Skipped below quality floor | {usage.get('skippedBelowQualityFloor', 0)} |",
                       f"| Skipped stale | {usage.get('skippedStale', 0)} |",
+                      f"| Skipped by source cap | {usage.get('skippedSourceCap', 0)} |",
                       f"| Total tokens | {usage['totalTokens']} |",
                       f"| Estimated cost (CNY) | {cost if cost is not None else 'unavailable'} |",
                       f"| Usage complete | {usage['usageComplete']} |",
