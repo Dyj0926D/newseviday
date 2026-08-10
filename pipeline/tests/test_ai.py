@@ -194,6 +194,7 @@ def test_article_enrichment_rotates_across_sources(tmp_path: Path) -> None:
     snapshot.articles[3].source_id = "source-c"
     for article in snapshot.articles:
         article.ai = None
+        article.key_signal = None
         article.content_score = 0.8
         article.published_at = datetime(2026, 8, 5, tzinfo=UTC)
         assert article.content_score_breakdown is not None
