@@ -1,56 +1,75 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab",
-  "generatedAt": "2026-08-10T04:34:40.855679Z",
+  "snapshotId": "snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28",
+  "generatedAt": "2026-08-11T03:12:10.371079Z",
   "gate": "observe",
   "articleCount": 40,
-  "configuredSourceCount": 9,
-  "contributingSourceCount": 8,
-  "structuredArticleCount": 23,
-  "aiArticleCount": 9,
-  "editorialArticleCount": 14,
-  "missingAbstractCount": 0,
-  "missingAbstractRate": 0.0,
-  "missingAbstractBySource": {},
+  "configuredSourceCount": 15,
+  "contributingSourceCount": 13,
+  "structuredArticleCount": 12,
+  "aiArticleCount": 8,
+  "editorialArticleCount": 4,
+  "missingAbstractCount": 2,
+  "missingAbstractRate": 0.05,
+  "missingAbstractBySource": {
+    "huggingface-blog": 2
+  },
   "sourceCounts": {
-    "anthropic-news": 1,
-    "arxiv-cs-ai": 4,
-    "databricks-blog": 3,
-    "dbt-labs-blog": 3,
-    "deepseek-updates": 8,
+    "arxiv-cs-ai": 1,
+    "databricks-blog": 1,
+    "dbt-labs-blog": 2,
+    "deepseek-updates": 1,
     "github-ai-ml": 8,
-    "openai-news": 5,
-    "qwen-blog": 8
+    "huggingface-blog": 2,
+    "ieee-spectrum-ai": 2,
+    "interconnects": 2,
+    "mit-technology-review-ai": 3,
+    "mlcommons-news": 3,
+    "openai-news": 6,
+    "qwen-blog": 7,
+    "simon-willison-llms": 2
   },
   "zeroContributionSourceIds": [
-    "huggingface-blog"
+    "anthropic-news",
+    "metr-blog"
   ],
   "topicCounts": {
     "data-platform": 2,
     "data-agent": 0,
     "semantic-layer": 0,
     "intelligent-lakehouse": 0,
-    "rag-eval": 10,
-    "metadata-governance": 0,
-    "foundation-models": 24,
-    "ai-products-agents": 17
+    "rag-eval": 9,
+    "metadata-governance": 1,
+    "foundation-models": 27,
+    "ai-products-agents": 23
   },
   "topicGaps": [
     "data-agent",
     "intelligent-lakehouse",
-    "metadata-governance",
     "semantic-layer"
   ],
-  "keySignalEligibleCount": 1,
-  "highValueChineseGapCount": 0,
+  "keySignalEligibleCount": 0,
+  "highValueChineseGapCount": 1,
   "recentWindowDays": 30,
-  "recentArticleCount": 20,
-  "recentChineseReadyCount": 20,
-  "recentChineseGapCount": 0,
+  "recentArticleCount": 25,
+  "recentChineseReadyCount": 9,
+  "recentChineseGapCount": 16,
   "trendBriefCount": 1,
   "potentialStoryClusters": [
     {
       "id": "story-001",
+      "articleIds": [
+        "article-c60b75d4c49e5375c4e0",
+        "article-dfb586131bf3d3cb04b4"
+      ],
+      "sourceCount": 2,
+      "sharedTerms": [
+        "glimmer",
+        "muse"
+      ]
+    },
+    {
+      "id": "story-002",
       "articleIds": [
         "article-13844026d0b31ab87e4a",
         "article-2a7072ece5f3372bd87b"
@@ -63,6 +82,7 @@
     }
   ],
   "issues": [
-    "4 个配置主题暂时没有入选内容"
+    "3 个配置主题暂时没有入选内容",
+    "近 30 天有 16 条外文内容待中文整理"
   ]
 }

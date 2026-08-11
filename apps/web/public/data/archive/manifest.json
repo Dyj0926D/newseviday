@@ -1,7 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "updatedAt": "2026-08-10T04:25:00Z",
+  "updatedAt": "2026-08-11T03:12:06.477237Z",
   "snapshots": [
+    {
+      "snapshotId": "snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28",
+      "generatedAt": "2026-08-11T03:12:06.477237Z",
+      "path": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json",
+      "articleCount": 40
+    },
     {
       "snapshotId": "snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab",
       "generatedAt": "2026-08-10T04:25:00Z",
@@ -40,6 +46,126 @@
     }
   ],
   "articles": [
+    {
+      "id": "article-c60b75d4c49e5375c4e0",
+      "title": "Introducing Muse Glimmer",
+      "originalTitle": "Introducing Muse Glimmer",
+      "sourceId": "simon-willison-llms",
+      "publishedAt": "2026-08-10T23:56:03Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-78fa5480c2928e961a7e",
+      "title": "AI professors are negotiating the new realities of academic research",
+      "originalTitle": "AI professors are negotiating the new realities of academic research",
+      "sourceId": "mit-technology-review-ai",
+      "publishedAt": "2026-08-10T20:00:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-65c11cd6697d24998d9d",
+      "title": "Using the GitHub Copilot SDK for Java",
+      "originalTitle": "Using the GitHub Copilot SDK for Java",
+      "sourceId": "github-ai-ml",
+      "publishedAt": "2026-08-10T19:30:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-5890b1cfd4cc38aa3885",
+      "title": "Build Low-Latency Multilingual Voice Agents: Open Weights & Full Deployment Control with NVIDIA Magpie TTS",
+      "originalTitle": "Build Low-Latency Multilingual Voice Agents: Open Weights & Full Deployment Control with NVIDIA Magpie TTS",
+      "sourceId": "huggingface-blog",
+      "publishedAt": "2026-08-10T16:25:36Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-dbdea3c6cf8c5a13f42a",
+      "title": "KGCaRe：利用LLM自动构建知识图谱与上下文检索的可解释复杂条件问答",
+      "originalTitle": "KGCaRe: Explainable Complex Conditional Question Answering using Automatic Knowledge Graph Construction and Context Retrieval with LLMs",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-08-10T16:05:58Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-775f2a780d36285039dc",
+      "title": "5 useful things you'll learn in my new post-training textbook (shipping now!)",
+      "originalTitle": "5 useful things you'll learn in my new post-training textbook (shipping now!)",
+      "sourceId": "interconnects",
+      "publishedAt": "2026-08-10T13:02:42Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-95f74aeac90a93bb12ce",
+      "title": "Model ML completes finance work more efficiently with GPT-5.6 Sol",
+      "originalTitle": "Model ML completes finance work more efficiently with GPT-5.6 Sol",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-08-10T12:00:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-081601c279be28d3ef5a",
+      "title": "Expanding Daybreak as the Cyber Defense Window Narrows",
+      "originalTitle": "Expanding Daybreak as the Cyber Defense Window Narrows",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-08-10T10:00:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-ab1a6f84a0444402bad3",
+      "title": "AI for science needs reasoning, not just data",
+      "originalTitle": "AI for science needs reasoning, not just data",
+      "sourceId": "mit-technology-review-ai",
+      "publishedAt": "2026-08-10T09:00:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-95a48cb6f6be3fc00d60",
+      "title": "These startups are chasing the next big thing in LLMs",
+      "originalTitle": "These startups are chasing the next big thing in LLMs",
+      "sourceId": "mit-technology-review-ai",
+      "publishedAt": "2026-08-10T09:00:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-6476741ad7bd8e8e5ea0",
+      "title": "How Zapier transformed core marketing processes with ChatGPT Work",
+      "originalTitle": "How Zapier transformed core marketing processes with ChatGPT Work",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-08-10T00:00:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-0e82d8998833621ad9c9",
+      "title": "Virgin Atlantic sharpens customer journeys with ChatGPT Work",
+      "originalTitle": "Virgin Atlantic sharpens customer journeys with ChatGPT Work",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-08-10T00:00:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-2a5c0cad5d8b2f9d8e4a",
+      "title": "Premium seats are coming to ChatGPT Business",
+      "originalTitle": "Premium seats are coming to ChatGPT Business",
+      "sourceId": "openai-news",
+      "publishedAt": "2026-08-10T00:00:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-dfb586131bf3d3cb04b4",
+      "title": "Meta is back with Muse Glimmer: local, agentic, multimodal, and open source",
+      "originalTitle": "Meta is back with Muse Glimmer: local, agentic, multimodal, and open source",
+      "sourceId": "huggingface-blog",
+      "publishedAt": "2026-08-10T00:00:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-3cc0e82c60b9214c6b80",
+      "title": "GitHub Models is now retired",
+      "originalTitle": "GitHub Models is now retired",
+      "sourceId": "simon-willison-llms",
+      "publishedAt": "2026-08-09T22:48:05Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
     {
       "id": "article-ac90d732aad851eb833a",
       "title": "CoinRAG：用细粒度信息单元复用 KV Cache，降低长上下文 RAG 成本",
@@ -94,7 +220,7 @@
       "originalTitle": "How HSP GRUPPE builds AI capabilities for tax advisory",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-07T09:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-13844026d0b31ab87e4a",
@@ -102,7 +228,7 @@
       "originalTitle": "What are Agentic Workflows?",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-08-06T21:36:15Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-1441b6270a33709513b4",
@@ -110,7 +236,15 @@
       "originalTitle": "A guide to slash commands in the GitHub Copilot app",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-06T19:49:34Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-f73d3a1c30182798f362",
+      "title": "AI Safety Regulations in the U.S. Could Give Hackers an Edge",
+      "originalTitle": "AI Safety Regulations in the U.S. Could Give Hackers an Edge",
+      "sourceId": "ieee-spectrum-ai",
+      "publishedAt": "2026-08-06T19:25:39Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-7b16ffe70ac1c0968e4b",
@@ -225,12 +359,20 @@
       "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
     },
     {
+      "id": "article-fe6af3901edfb4eec807",
+      "title": "Should Researchers Write Papers for AI Instead of People?",
+      "originalTitle": "Should Researchers Write Papers for AI Instead of People?",
+      "sourceId": "ieee-spectrum-ai",
+      "publishedAt": "2026-08-05T12:00:03Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
       "id": "article-f1d4877545a986a0c734",
       "title": "GitHub 法律团队用 Copilot CLI 简化工作流程",
       "originalTitle": "How the GitHub legal team used Copilot CLI to streamline their workflows",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-04T19:02:34Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-c99ec862b4e71599bc42",
@@ -358,7 +500,7 @@
       "originalTitle": "DeepSeek-V4-Flash Update",
       "sourceId": "deepseek-updates",
       "publishedAt": "2026-07-31T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-994add5868193c37f04d",
@@ -398,7 +540,7 @@
       "originalTitle": "The harness is all you need (mostly)",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-27T18:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-3bbd8b07cb5a7e5a4148",
@@ -406,7 +548,7 @@
       "originalTitle": "GitHub Copilot app for Beginners: Getting started",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-27T16:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-c34a327604b5be4a7c98",
@@ -422,7 +564,7 @@
       "originalTitle": "Copilot vs. raw API access: What are you actually paying for?",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-22T19:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-24abb84d61b2e52549cc",
@@ -438,7 +580,7 @@
       "originalTitle": "Better tools made Copilot code review worse. Here’s how we actually improved it.",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-10T15:57:47Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-2a7072ece5f3372bd87b",
@@ -446,7 +588,15 @@
       "originalTitle": "Automating cross-repo documentation with GitHub Agentic Workflows",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-08T21:11:56Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-5353db8781d0d27664dd",
+      "title": "Agentic Inference for MLPerf Inference",
+      "originalTitle": "Agentic Inference for MLPerf Inference",
+      "sourceId": "mlcommons-news",
+      "publishedAt": "2026-07-08T14:40:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-5b150c21cc84194b8733",
@@ -454,7 +604,7 @@
       "originalTitle": "The productivity gains hiding in your data infrastructure",
       "sourceId": "dbt-labs-blog",
       "publishedAt": "2026-07-08T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-a1589d27ac1cdc88f4a7",
@@ -470,7 +620,7 @@
       "originalTitle": "Data platforms were built to store. Intelligence platforms are built to reason.",
       "sourceId": "dbt-labs-blog",
       "publishedAt": "2026-07-02T15:24:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-2e0b2f76a5b7e197d60e",
@@ -479,6 +629,30 @@
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-06-25T22:59:45Z",
       "snapshotPath": "versions/snapshot-20260806T084432Z-9adae754-ai-bb56da47.json"
+    },
+    {
+      "id": "article-4921a1e88aedab165d84",
+      "title": "MLCommons Releases MLPerf Training v6.0 Results",
+      "originalTitle": "MLCommons Releases MLPerf Training v6.0 Results",
+      "sourceId": "mlcommons-news",
+      "publishedAt": "2026-06-16T14:56:24Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-089ed41263c9f0149dde",
+      "title": "Frontier post-training recipe review with Finbarr Timbers",
+      "originalTitle": "Frontier post-training recipe review with Finbarr Timbers",
+      "sourceId": "interconnects",
+      "publishedAt": "2026-06-16T13:29:30Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
+    },
+    {
+      "id": "article-a1d9501d681b885c2616",
+      "title": "MLCommons Releases MLPerf Mobile v6.0 with New Generative AI Benchmarks for On-Device LLMs",
+      "originalTitle": "MLCommons Releases MLPerf Mobile v6.0 with New Generative AI Benchmarks for On-Device LLMs",
+      "sourceId": "mlcommons-news",
+      "publishedAt": "2026-06-15T14:40:00Z",
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-9cb994c900dd494fae54",
@@ -502,7 +676,7 @@
       "originalTitle": "Qwen3Guard: Real-time Safety for Your Token Stream",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-09-22T20:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-2c308d1299a47f0fd6c1",
@@ -510,7 +684,7 @@
       "originalTitle": "Qwen-Image: Crafting with Native Text Rendering",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-08-04T14:08:30Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-2a193a141e55541a5d0e",
@@ -518,7 +692,7 @@
       "originalTitle": "Qwen-MT: Where Speed Meets Smart Translation",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-07-24T14:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-45b66faad922efd28827",
@@ -526,7 +700,7 @@
       "originalTitle": "Qwen3-Coder: Agentic Coding in the World",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-07-22T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-c775f203f583e33b82a3",
@@ -534,7 +708,7 @@
       "originalTitle": "Time to Speak Some Dialects, Qwen-TTS!",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-06-27T07:01:30Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-740aa8b36f962c482d6b",
@@ -550,7 +724,7 @@
       "originalTitle": "Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-06-05T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-3d7b702ae4535a131393",
@@ -566,7 +740,7 @@
       "originalTitle": "Qwen3: Think Deeper, Act Faster",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-04-28T20:00:00Z",
-      "snapshotPath": "versions/snapshot-20260810T031024Z-e3340841-ai-12c83ca0-editorial-3f3f57ab.json"
+      "snapshotPath": "versions/snapshot-20260811T031203Z-e6f3475b-ai-27b7cb28.json"
     },
     {
       "id": "article-7d620e492d990b3c0dc3",
