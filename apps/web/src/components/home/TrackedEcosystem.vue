@@ -83,8 +83,11 @@ const ecosystem: EcosystemItem[] = [
 
 .tracked-ecosystem__viewport {
   position: relative;
+  width: 100%;
+  max-width: 100%;
   margin-top: 1.5rem;
-  overflow: hidden;
+  contain: inline-size layout paint;
+  overflow: clip;
   mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
