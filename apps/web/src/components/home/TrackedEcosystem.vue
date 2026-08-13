@@ -142,6 +142,26 @@ const ecosystem: EcosystemItem[] = [
   }
 }
 
+@media (min-width: 768px) and (max-width: 1023px) {
+  .tracked-ecosystem__track {
+    position: relative;
+    width: 100%;
+    animation: none;
+  }
+
+  .tracked-ecosystem__list {
+    width: 100%;
+    justify-content: space-around;
+    gap: 1rem;
+    overflow: hidden;
+  }
+
+  .tracked-ecosystem__list[aria-hidden='true'],
+  .tracked-ecosystem__list li:nth-child(n + 7) {
+    display: none;
+  }
+}
+
 @media (max-width: 767px) {
   .tracked-ecosystem {
     padding-block: 0.75rem 1.5rem;
