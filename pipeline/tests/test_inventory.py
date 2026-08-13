@@ -76,10 +76,9 @@ def test_release_guard_passes_after_five_new_chinese_items() -> None:
 
 def test_release_guard_blocks_an_untranslated_inventory_regression() -> None:
     accepted, incoming = _fresh_candidate(chinese_ready_count=0)
-    candidate = merge_rolling_inventory(incoming, accepted)
 
     report = evaluate_release_guard(
-        candidate,
+        incoming,
         accepted,
         now=incoming.generated_at,
     )
