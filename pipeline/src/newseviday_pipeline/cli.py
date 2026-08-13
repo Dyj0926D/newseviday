@@ -22,12 +22,19 @@ from newseviday_pipeline.dedup_eval import evaluate_dedup_dataset, write_dedup_r
 from newseviday_pipeline.editorial import apply_editorial_package, load_editorial_package
 from newseviday_pipeline.embeddings import HashingEmbedder, OpenAICompatibleEmbedder
 from newseviday_pipeline.evaluation import evaluate_rag, load_gold_dataset, write_eval_report
+from newseviday_pipeline.inventory import merge_rolling_inventory
 from newseviday_pipeline.models import ContentSnapshot
-from newseviday_pipeline.quality import audit_snapshot, write_quality_report
+from newseviday_pipeline.quality import (
+    audit_snapshot,
+    evaluate_release_guard,
+    write_quality_report,
+    write_release_guard_report,
+)
 from newseviday_pipeline.rag import build_dense_index, vectorize_ndjson, write_index
 from newseviday_pipeline.runner import run_fixture_pipeline, run_network_pipeline
 from newseviday_pipeline.settings import load_project_config
 from newseviday_pipeline.snapshot import SnapshotPublisher, load_snapshot
+from newseviday_pipeline.stages import chinese_display_ready
 from newseviday_pipeline.terminology import load_terminology, terminology_consistency
 
 PIPELINE_STAGES = (
@@ -124,6 +131,13 @@ def build_parser() -> argparse.ArgumentParser:
     editorial_parser.add_argument("snapshot", type=Path)
     editorial_parser.add_argument("package", type=Path)
     editorial_parser.add_argument("--output", type=Path, default=Path("data/editorial-output"))
+    inventory_parser = subparsers.add_parser(
+        "merge-inventory",
+        help="Merge a fresh collection with the accepted rolling public inventory",
+    )
+    inventory_parser.add_argument("snapshot", type=Path)
+    inventory_parser.add_argument("--accepted-snapshot", type=Path, required=True)
+    inventory_parser.add_argument("--output", type=Path, default=Path("data/rolling"))
     index_parser = subparsers.add_parser(
         "build-index", help="Build a versioned dense retrieval artifact"
     )
@@ -150,6 +164,14 @@ def build_parser() -> argparse.ArgumentParser:
     audit_parser.add_argument("snapshot", type=Path)
     audit_parser.add_argument(
         "--report", type=Path, default=Path("data/runtime/quality/latest.json")
+    )
+    guard_parser = subparsers.add_parser(
+        "compare-quality", help="Compare a candidate with the accepted public snapshot"
+    )
+    guard_parser.add_argument("snapshot", type=Path)
+    guard_parser.add_argument("--accepted-snapshot", type=Path, required=True)
+    guard_parser.add_argument(
+        "--report", type=Path, default=Path("data/runtime/quality/release-guard.json")
     )
     publish_parser = subparsers.add_parser(
         "publish-web", help="Atomically publish a validated snapshot and optional Eval report"
@@ -430,6 +452,29 @@ def apply_editorial(args: argparse.Namespace) -> int:
     return 0
 
 
+def merge_inventory(args: argparse.Namespace) -> int:
+    incoming = load_snapshot(args.snapshot)
+    accepted = load_snapshot(args.accepted_snapshot)
+    result = merge_rolling_inventory(incoming, accepted)
+    SnapshotPublisher(args.output).publish(result)
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "snapshotId": result.snapshot_id,
+                "articleCount": len(result.articles),
+                "chineseReadyCount": sum(
+                    chinese_display_ready(article) for article in result.articles
+                ),
+                "output": str(args.output / "current.json"),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 0
+
+
 def _optional_nonnegative_float(name: str) -> float | None:
     value = os.environ.get(name, "").strip()
     if not value:
@@ -509,6 +554,16 @@ def eval_rag(args: argparse.Namespace) -> int:
 def audit(args: argparse.Namespace) -> int:
     report = audit_snapshot(load_snapshot(args.snapshot))
     write_quality_report(report, args.report)
+    print(report.model_dump_json(by_alias=True, indent=2))
+    return 1 if report.gate == "fail" else 0
+
+
+def compare_quality(args: argparse.Namespace) -> int:
+    report = evaluate_release_guard(
+        load_snapshot(args.snapshot),
+        load_snapshot(args.accepted_snapshot),
+    )
+    write_release_guard_report(report, args.report)
     print(report.model_dump_json(by_alias=True, indent=2))
     return 1 if report.gate == "fail" else 0
 
@@ -646,12 +701,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         return update_brief(args)
     if args.command == "apply-editorial":
         return apply_editorial(args)
+    if args.command == "merge-inventory":
+        return merge_inventory(args)
     if args.command == "build-index":
         return build_index(args)
     if args.command == "eval-rag":
         return eval_rag(args)
     if args.command == "audit-snapshot":
         return audit(args)
+    if args.command == "compare-quality":
+        return compare_quality(args)
     if args.command == "publish-web":
         return publish_web(args)
     if args.command == "run" and args.dry_run:

@@ -83,12 +83,19 @@ const ecosystem: EcosystemItem[] = [
 
 .tracked-ecosystem__viewport {
   position: relative;
+  width: 100%;
+  height: 2rem;
+  max-width: 100%;
   margin-top: 1.5rem;
+  contain: inline-size layout paint;
   overflow: hidden;
   mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
 .tracked-ecosystem__track {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   width: max-content;
   animation: ecosystem-marquee 42s linear infinite;
@@ -135,6 +142,26 @@ const ecosystem: EcosystemItem[] = [
   }
 }
 
+@media (min-width: 768px) and (max-width: 1023px) {
+  .tracked-ecosystem__track {
+    position: relative;
+    width: 100%;
+    animation: none;
+  }
+
+  .tracked-ecosystem__list {
+    width: 100%;
+    justify-content: space-around;
+    gap: 1rem;
+    overflow: hidden;
+  }
+
+  .tracked-ecosystem__list[aria-hidden='true'],
+  .tracked-ecosystem__list li:nth-child(n + 7) {
+    display: none;
+  }
+}
+
 @media (max-width: 767px) {
   .tracked-ecosystem {
     padding-block: 0.75rem 1.5rem;
@@ -166,6 +193,7 @@ const ecosystem: EcosystemItem[] = [
   }
 
   .tracked-ecosystem__track {
+    position: relative;
     animation: none;
   }
 

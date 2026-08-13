@@ -64,7 +64,7 @@ jobs:
               echo "Scheduled refresh is paused by DAILY_REFRESH_ENABLED."
               exit 0
             fi
-            if [[ -n "$DAILY_REFRESH_END_DATE" && "$(date -u +%F)" > "$DAILY_REFRESH_END_DATE" ]]; then
+            if [[ -n "$DAILY_REFRESH_END_DATE" && "$(TZ=Asia/Shanghai date +%F)" > "$DAILY_REFRESH_END_DATE" ]]; then
               echo "RUN_REFRESH=false" >> "$GITHUB_ENV"
               echo "Scheduled trial window ended on $DAILY_REFRESH_END_DATE."
               exit 0
@@ -79,28 +79,45 @@ jobs:
             echo "MODEL_CALL_LIMIT=${{ inputs.max_model_calls }}" >> "$GITHUB_ENV"
             echo "OPEN_PULL_REQUEST=${{ inputs.open_pull_request }}" >> "$GITHUB_ENV"
           fi
-      - name: Avoid overlapping scheduled content pull requests
+      - name: Retire stale content pull requests and avoid same-day overlap
         if: env.RUN_REFRESH == 'true' && github.event_name == 'schedule'
         env:
           GH_TOKEN: ${{ github.token }}
           SCHEDULE_EXPRESSION: ${{ github.event.schedule }}
         shell: bash
         run: |
-          open_refresh_pr="$(gh pr list \
+          local_today="$(TZ=Asia/Shanghai date +%F)"
+          same_day_pr=""
+          while IFS=$'\t' read -r pr_number head_ref created_at; do
+            [[ -n "$pr_number" ]] || continue
+            pr_local_day="$(TZ=Asia/Shanghai date -d "$created_at" +%F)"
+            if [[ "$pr_local_day" == "$local_today" ]]; then
+              same_day_pr="$pr_number"
+              continue
+            fi
+            gh pr close "$pr_number" \
+              --repo "$GITHUB_REPOSITORY" \
+              --delete-branch \
+              --comment "被 ${local_today} 的新一轮内容候选替代。旧候选产物仍保留在对应 Actions artifact 中。"
+            echo "Retired stale content PR #${pr_number} from ${pr_local_day}."
+          done < <(gh pr list \
             --repo "$GITHUB_REPOSITORY" \
             --state open \
             --limit 100 \
-            --json number,headRefName \
-            --jq '[.[] | select(.headRefName | startswith("content-refresh/"))][0].number // empty')"
-          if [[ -n "$open_refresh_pr" ]]; then
+            --json number,headRefName,createdAt \
+            --jq '.[] | select(.headRefName | startswith("content-refresh/")) | [.number, .headRefName, .createdAt] | @tsv')
+          if [[ -n "$same_day_pr" ]]; then
             echo "RUN_REFRESH=false" >> "$GITHUB_ENV"
-            echo "Scheduled refresh skipped because content PR #${open_refresh_pr} is still open."
+            echo "Scheduled refresh skipped because today's content PR #${same_day_pr} is still open."
+            printf '## Controlled content refresh\n\nSkipped: same-day content PR #%s is still open.\n' \
+              "$same_day_pr" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if [[ "$SCHEDULE_EXPRESSION" == "47 3 * * *" ]]; then
             successful_run_today=""
             while IFS=$'\t' read -r candidate_run_id candidate_created_at; do
-              [[ "${candidate_created_at%%T*}" == "$(date -u +%F)" ]] || continue
+              candidate_local_day="$(TZ=Asia/Shanghai date -d "$candidate_created_at" +%F)"
+              [[ "$candidate_local_day" == "$local_today" ]] || continue
               artifact_count="$(gh api \
                 "repos/${GITHUB_REPOSITORY}/actions/runs/${candidate_run_id}/artifacts" \
                 --jq '[.artifacts[] | select((.expired | not) and (.name | startswith("content-refresh-")))] | length')"
@@ -192,14 +209,19 @@ jobs:
           --allow-network --output data/runtime/content-refresh
       - name: Select deterministic snapshot
         if: env.RUN_REFRESH == 'true'
-        run: echo "PUBLISH_SNAPSHOT=data/runtime/content-refresh/current.json" >> "$GITHUB_ENV"
+        run: |
+          python -m uv run --project pipeline newseviday-pipeline merge-inventory \
+            data/runtime/content-refresh/current.json \
+            --accepted-snapshot apps/web/public/data/current.json \
+            --output data/runtime/content-rolling
+          echo "PUBLISH_SNAPSHOT=data/runtime/content-rolling/current.json" >> "$GITHUB_ENV"
       - name: Optional paid AI enrichment
         if: env.RUN_REFRESH == 'true' && env.ALLOW_MODEL == 'true'
         run: |
           test -n "$DEEPSEEK_API_KEY"
           test -n "$DEEPSEEK_MODEL"
           python -m uv run --project pipeline newseviday-pipeline enrich \
-            data/runtime/content-refresh/current.json \
+            data/runtime/content-rolling/current.json \
             --accepted-snapshot apps/web/public/data/current.json \
             --output data/runtime/content-enriched \
             --cache data/runtime/ai-cache \
@@ -227,6 +249,15 @@ jobs:
           python -m uv run --project pipeline newseviday-pipeline audit-snapshot \
             "$PUBLISH_SNAPSHOT" \
             --report data/runtime/quality/latest.json
+          if python -m uv run --project pipeline newseviday-pipeline compare-quality \
+            "$PUBLISH_SNAPSHOT" \
+            --accepted-snapshot apps/web/public/data/current.json \
+            --report data/runtime/quality/release-guard.json; then
+            echo "RELEASE_ELIGIBLE=true" >> "$GITHUB_ENV"
+          else
+            echo "RELEASE_ELIGIBLE=false" >> "$GITHUB_ENV"
+            echo "::warning::Candidate failed the comparative release guard; artifacts are retained and no pull request will be opened."
+          fi
       - name: Write controlled refresh summary
         if: env.RUN_REFRESH == 'true'
         shell: bash
@@ -237,6 +268,7 @@ jobs:
           from pathlib import Path
 
           quality_path = Path("data/runtime/quality/latest.json")
+          guard_path = Path("data/runtime/quality/release-guard.json")
           usage_path = Path("data/runtime/quality/ai-usage-latest.json")
           run_paths = sorted(Path("data/runtime/content-refresh/runs").glob("*.json"))
           lines = ["## Controlled content refresh", "", "| Item | Value |", "| --- | ---: |"]
@@ -268,6 +300,16 @@ jobs:
                       f"| Topic gaps | {len(quality['topicGaps'])} |",
                       f"| Eligible Key Signals | {quality.get('keySignalEligibleCount', 0)} |",
                       f"| Quality gate | {quality['gate']} |",
+                  ]
+              )
+          if guard_path.exists():
+              guard = json.loads(guard_path.read_text(encoding="utf-8"))
+              lines.extend(
+                  [
+                      f"| Release guard | {guard['gate']} |",
+                      f"| Recent Chinese-ready | {guard['candidateRecentChineseReadyCount']} / {guard['candidateRecentArticleCount']} |",
+                      f"| Required Chinese-ready | {guard['requiredRecentChineseReadyCount']} |",
+                      f"| Release issues | {'; '.join(guard['issues']) or 'none'} |",
                   ]
               )
           if usage_path.exists():
@@ -306,7 +348,7 @@ jobs:
             fi
           fi
       - name: Publish into web workspace
-        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true'
+        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true' && env.RELEASE_ELIGIBLE == 'true'
         run: |
           publish_args=("$PUBLISH_SNAPSHOT" --web-data apps/web/public/data)
           if [[ -f data/runtime/rag/eval-latest.json ]]; then
@@ -317,7 +359,7 @@ jobs:
           fi
           python -m uv run --project pipeline newseviday-pipeline publish-web "${publish_args[@]}"
       - name: Verify publish candidate
-        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true'
+        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true' && env.RELEASE_ELIGIBLE == 'true'
         run: |
           npm ci
           npm run security:scan
@@ -330,6 +372,7 @@ jobs:
           name: content-refresh-${{ github.run_id }}-${{ env.ALLOW_MODEL }}
           path: |
             data/runtime/content-refresh/
+            data/runtime/content-rolling/
             data/runtime/content-enriched/
             data/runtime/content-briefed/
             data/runtime/ai-cache/
@@ -338,7 +381,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - name: Commit snapshot candidate
-        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true'
+        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true' && env.RELEASE_ELIGIBLE == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -357,7 +400,7 @@ jobs:
           echo "PUBLISH_BRANCH=$branch" >> "$GITHUB_ENV"
           echo "PUBLISH_HAS_CHANGES=true" >> "$GITHUB_ENV"
       - name: Open snapshot pull request
-        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true' && env.PUBLISH_HAS_CHANGES == 'true'
+        if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true' && env.RELEASE_ELIGIBLE == 'true' && env.PUBLISH_HAS_CHANGES == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
