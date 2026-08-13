@@ -154,7 +154,7 @@ jobs:
         run: python -m uv sync --project pipeline --frozen
       - name: Restore cumulative AI cache
         if: env.RUN_REFRESH == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: data/runtime/ai-cache
           key: ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'config/terminology.yaml') }}-${{ github.run_id }}
@@ -367,7 +367,7 @@ jobs:
           npm run build --workspace @newseviday/web
       - name: Upload review artifacts
         if: always() && env.RUN_REFRESH == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: content-refresh-${{ github.run_id }}-${{ env.ALLOW_MODEL }}
           path: |
