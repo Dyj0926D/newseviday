@@ -149,10 +149,22 @@ test('six fixed acceptance viewports keep every public route readable', async ({
     for (const path of publicPaths) {
       await page.goto(path);
       await expect(page.locator('main')).toBeVisible();
-      const hasOverflow = await page.evaluate(
-        () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-      );
-      expect(hasOverflow, `unexpected overflow at ${path} on ${viewport.width}px`).toBe(false);
+      const overflow = await page.evaluate(() => ({
+        hasOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        offenders: [...document.querySelectorAll<HTMLElement>('body *')]
+          .filter((element) => element.getBoundingClientRect().right > window.innerWidth + 1)
+          .slice(0, 5)
+          .map((element) => ({
+            className: element.className,
+            right: Math.round(element.getBoundingClientRect().right),
+            tagName: element.tagName,
+            text: element.textContent?.trim().slice(0, 80),
+          })),
+      }));
+      expect(
+        overflow.hasOverflow,
+        `unexpected overflow at ${path} on ${viewport.width}px: ${JSON.stringify(overflow.offenders)}`,
+      ).toBe(false);
     }
   }
 });

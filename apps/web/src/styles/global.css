@@ -1362,6 +1362,17 @@ button {
     width: 100%;
   }
 
+  .intel-meta {
+    min-width: 0;
+    flex-wrap: wrap;
+    row-gap: var(--ne-space-2);
+  }
+
+  .intel-meta > * {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
   .signal-overview {
     grid-template-columns: 1fr;
   }
