@@ -52,6 +52,7 @@ def test_rolling_inventory_preserves_published_chinese_content() -> None:
     assert result.articles == sorted(
         result.articles,
         key=lambda article: (
+            chinese_display_ready(article),
             article.published_at or article.collected_at,
             article.content_score or 0,
         ),

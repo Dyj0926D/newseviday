@@ -113,9 +113,14 @@ def merge_rolling_inventory(
             break
         select(article)
 
-    # Feed order is explicitly time-first. Content score still decides ties and admission.
+    # Public consumers that read snapshot order directly see Chinese-ready items first;
+    # within each language state, publication time remains the primary ordering signal.
     selected.sort(
-        key=lambda article: (_article_time(article), article.content_score or 0.0),
+        key=lambda article: (
+            chinese_display_ready(article),
+            _article_time(article),
+            article.content_score or 0.0,
+        ),
         reverse=True,
     )
 
