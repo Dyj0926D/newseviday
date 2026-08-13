@@ -84,14 +84,18 @@ const ecosystem: EcosystemItem[] = [
 .tracked-ecosystem__viewport {
   position: relative;
   width: 100%;
+  height: 2rem;
   max-width: 100%;
   margin-top: 1.5rem;
   contain: inline-size layout paint;
-  overflow: clip;
+  overflow: hidden;
   mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
 .tracked-ecosystem__track {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   width: max-content;
   animation: ecosystem-marquee 42s linear infinite;
@@ -169,6 +173,7 @@ const ecosystem: EcosystemItem[] = [
   }
 
   .tracked-ecosystem__track {
+    position: relative;
     animation: none;
   }
 
