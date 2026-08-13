@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import re
 import tempfile
@@ -45,6 +46,26 @@ class SnapshotQualityReport(ContractModel):
     recent_chinese_gap_count: int
     trend_brief_count: int
     potential_story_clusters: list[StoryCluster]
+    issues: list[str]
+
+
+class ReleaseGuardReport(ContractModel):
+    schema_version: str = "1.0.0"
+    generated_at: datetime
+    gate: str
+    candidate_snapshot_id: str
+    baseline_snapshot_id: str
+    candidate_quality_gate: str
+    candidate_recent_article_count: int
+    candidate_recent_chinese_ready_count: int
+    baseline_recent_chinese_ready_count: int
+    required_recent_chinese_ready_count: int
+    candidate_recent_chinese_ready_rate: float = Field(ge=0, le=1)
+    minimum_recent_chinese_ready_rate: float = Field(ge=0, le=1)
+    candidate_missing_abstract_rate: float = Field(ge=0, le=1)
+    maximum_missing_abstract_rate: float = Field(ge=0, le=1)
+    candidate_key_signal_count: int
+    baseline_key_signal_count: int
     issues: list[str]
 
 
@@ -210,9 +231,85 @@ def audit_snapshot(
     )
 
 
+def evaluate_release_guard(
+    candidate: ContentSnapshot,
+    baseline: ContentSnapshot,
+    *,
+    now: datetime | None = None,
+) -> ReleaseGuardReport:
+    """Block public inventory regressions while still allowing artifacts to be reviewed."""
+
+    anchor = now or datetime.now(UTC)
+    candidate_quality = audit_snapshot(candidate, now=anchor)
+    baseline_quality = audit_snapshot(baseline, now=anchor)
+    baseline_ready = baseline_quality.recent_chinese_ready_count
+    required_ready = (
+        min(baseline_ready, max(12, math.ceil(baseline_ready * 0.8)))
+        if baseline_ready
+        else 0
+    )
+    candidate_ready_rate = (
+        candidate_quality.recent_chinese_ready_count / candidate_quality.recent_article_count
+        if candidate_quality.recent_article_count
+        else 0.0
+    )
+    baseline_ready_rate = (
+        baseline_ready / baseline_quality.recent_article_count
+        if baseline_quality.recent_article_count
+        else 0.0
+    )
+    minimum_ready_rate = min(0.8, max(0.55, baseline_ready_rate - 0.4))
+    maximum_missing_rate = min(0.5, max(0.2, baseline_quality.missing_abstract_rate + 0.1))
+    issues: list[str] = []
+    if candidate_quality.gate == "fail":
+        issues.append("候选快照未通过基础质量门禁")
+    if candidate_quality.recent_chinese_ready_count < required_ready:
+        issues.append("近 30 天中文可读内容低于已发布库存的保底要求")
+    if candidate_ready_rate < minimum_ready_rate:
+        issues.append("近 30 天中文可读内容占比下降过多")
+    if candidate_quality.missing_abstract_rate > maximum_missing_rate:
+        issues.append("来源摘要缺失率相对已发布版本上升过多")
+    return ReleaseGuardReport(
+        generated_at=anchor,
+        gate="fail" if issues else "pass",
+        candidate_snapshot_id=candidate.snapshot_id,
+        baseline_snapshot_id=baseline.snapshot_id,
+        candidate_quality_gate=candidate_quality.gate,
+        candidate_recent_article_count=candidate_quality.recent_article_count,
+        candidate_recent_chinese_ready_count=candidate_quality.recent_chinese_ready_count,
+        baseline_recent_chinese_ready_count=baseline_ready,
+        required_recent_chinese_ready_count=required_ready,
+        candidate_recent_chinese_ready_rate=round(candidate_ready_rate, 4),
+        minimum_recent_chinese_ready_rate=round(minimum_ready_rate, 4),
+        candidate_missing_abstract_rate=candidate_quality.missing_abstract_rate,
+        maximum_missing_abstract_rate=round(maximum_missing_rate, 4),
+        candidate_key_signal_count=candidate_quality.key_signal_eligible_count,
+        baseline_key_signal_count=baseline_quality.key_signal_eligible_count,
+        issues=issues,
+    )
+
+
 def write_quality_report(report: SnapshotQualityReport, output: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     handle, name = tempfile.mkstemp(dir=output.parent, prefix="quality-", suffix=".tmp")
+    temporary = Path(name)
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8", newline="\n") as stream:
+            json.dump(
+                report.model_dump(mode="json", by_alias=True),
+                stream,
+                ensure_ascii=False,
+                indent=2,
+            )
+            stream.write("\n")
+        temporary.replace(output)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def write_release_guard_report(report: ReleaseGuardReport, output: Path) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    handle, name = tempfile.mkstemp(dir=output.parent, prefix="release-guard-", suffix=".tmp")
     temporary = Path(name)
     try:
         with os.fdopen(handle, "w", encoding="utf-8", newline="\n") as stream:
