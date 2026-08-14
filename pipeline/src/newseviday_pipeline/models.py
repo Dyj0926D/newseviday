@@ -135,6 +135,9 @@ class GeneratedText(ContractModel):
 
 class ContentScoreBreakdown(ContractModel):
     target_relevance: float = Field(ge=0, le=1)
+    event_significance: float = Field(default=0, ge=0, le=1)
+    decision_impact: float = Field(default=0, ge=0, le=1)
+    adoption_momentum: float = Field(default=0, ge=0, le=1)
     technical_advancement: float = Field(ge=0, le=1)
     engineering_applicability: float = Field(ge=0, le=1)
     technical_generality: float = Field(ge=0, le=1)
@@ -152,6 +155,7 @@ class KeySignalAssessment(ContractModel):
     actionability: float = Field(ge=0, le=1)
     generality: float = Field(ge=0, le=1)
     freshness: float = Field(ge=0, le=1)
+    event_types: list[str] = Field(default_factory=list, max_length=5)
     reasons: list[str] = Field(default_factory=list, max_length=5)
     gate_failures: list[str] = Field(default_factory=list, max_length=8)
 

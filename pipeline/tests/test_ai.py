@@ -261,6 +261,49 @@ def test_article_enrichment_translates_key_candidate_before_a_higher_raw_score(
     assert result.articles[1].ai is None
 
 
+def test_article_enrichment_allows_a_major_event_below_profile_relevance_floor(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    article = snapshot.articles[0]
+    now = datetime(2026, 8, 14, 3, 30, tzinfo=UTC)
+    article.source_id = "official-model-updates"
+    article.source_type = "official"
+    article.evidence_tier = "primary"
+    article.language = "en"
+    article.published_at = datetime(2026, 8, 13, tzinfo=UTC)
+    article.collected_at = now
+    article.facts.title = "DeepSeek-V4-Pro Update"
+    article.facts.abstract = (
+        "The GA release has been rolled out on the APP, Web, and API. The model "
+        "significantly enhances agent capabilities in production environments and reports "
+        "multiple benchmark results. The API now natively supports the Responses API, "
+        "thinking effort levels, and peak or off-peak pricing that takes effect this week. "
+    ) * 2
+    article.topic_scores = {"rag-eval": 0.55, "foundation-models": 0.425}
+    article.ai = None
+    apply_article_scoring(article, anchor=now)
+    assert article.content_score_breakdown is not None
+    assert article.content_score_breakdown.target_relevance < 0.6
+    assert article.content_score_breakdown.event_significance >= 0.7
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        max_model_calls=1,
+        now=now,
+    )
+
+    assert model_calls == 1
+    assert result.articles[0].ai is not None
+    assert result.articles[0].key_signal is not None
+    assert result.articles[0].key_signal.eligible
+
+
 def test_article_enrichment_injects_relevant_terminology(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
