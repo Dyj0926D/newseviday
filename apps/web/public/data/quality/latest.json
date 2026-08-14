@@ -1,26 +1,26 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260813T082859Z-e9a036c6-editorial-c4e387e8-rolling-11fb8f13",
-  "generatedAt": "2026-08-13T08:40:37.382238Z",
+  "snapshotId": "snapshot-20260814T080417Z-a60b3da1-rolling-ba7c087f-ai-e0c98c75",
+  "generatedAt": "2026-08-14T08:04:26.253923Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
   "contributingSourceCount": 12,
-  "structuredArticleCount": 28,
-  "aiArticleCount": 9,
+  "structuredArticleCount": 29,
+  "aiArticleCount": 10,
   "editorialArticleCount": 19,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
   "sourceCounts": {
     "anthropic-news": 1,
-    "arxiv-cs-ai": 6,
+    "arxiv-cs-ai": 5,
     "databricks-blog": 3,
-    "deepseek-updates": 1,
+    "deepseek-updates": 4,
     "github-ai-ml": 8,
     "ieee-spectrum-ai": 1,
     "interconnects": 2,
-    "mit-technology-review-ai": 3,
+    "mit-technology-review-ai": 1,
     "mlcommons-news": 3,
     "openai-news": 8,
     "qwen-blog": 2,
@@ -36,10 +36,10 @@
     "data-agent": 0,
     "semantic-layer": 0,
     "intelligent-lakehouse": 0,
-    "rag-eval": 15,
+    "rag-eval": 14,
     "metadata-governance": 0,
-    "foundation-models": 24,
-    "ai-products-agents": 23
+    "foundation-models": 25,
+    "ai-products-agents": 24
   },
   "topicGaps": [
     "data-agent",
@@ -48,16 +48,39 @@
     "metadata-governance",
     "semantic-layer"
   ],
-  "keySignalEligibleCount": 0,
-  "highValueChineseGapCount": 1,
+  "keySignalEligibleCount": 1,
+  "highSignificanceEventCount": 2,
+  "highSignificanceChineseGapCount": 0,
+  "eventTypeCounts": {
+    "adoption_momentum": 1,
+    "capability_update": 3,
+    "policy_regulation": 1,
+    "product_launch": 8,
+    "security_risk": 1,
+    "technical_breakthrough": 1
+  },
+  "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
-  "recentArticleCount": 34,
-  "recentChineseReadyCount": 25,
-  "recentChineseGapCount": 9,
+  "recentArticleCount": 31,
+  "recentChineseReadyCount": 27,
+  "recentChineseGapCount": 4,
   "trendBriefCount": 1,
-  "potentialStoryClusters": [],
+  "potentialStoryClusters": [
+    {
+      "id": "story-001",
+      "articleIds": [
+        "article-af87c1f98b4ce7bda274",
+        "article-ed532247d82463b31d1b"
+      ],
+      "sourceCount": 2,
+      "sharedTerms": [
+        "deepseek",
+        "pro"
+      ]
+    }
+  ],
   "issues": [
     "5 个配置主题暂时没有入选内容",
-    "近 30 天有 9 条外文内容待中文整理"
+    "近 30 天有 4 条外文内容待中文整理"
   ]
 }
