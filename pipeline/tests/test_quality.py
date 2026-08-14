@@ -33,6 +33,9 @@ def test_quality_report_exposes_content_gaps_without_model_calls(tmp_path: Path)
     assert "recentChineseGapCount" in payload
     assert "trendBriefCount" in payload
     assert "keySignalEligibleCount" in payload
+    assert "highSignificanceEventCount" in payload
+    assert "highSignificanceChineseGapCount" in payload
+    assert "eventTypeCounts" in payload
     assert "zeroContributionSourceIds" in payload
     assert "missingAbstractBySource" in payload
     assert all(
@@ -54,6 +57,24 @@ def test_story_clusters_ignore_generic_question_words() -> None:
     snapshot.articles = [left, right]
 
     assert detect_story_clusters(snapshot) == []
+
+
+def test_story_clusters_group_hyphenated_and_spaced_product_names() -> None:
+    snapshot = load_snapshot(SNAPSHOT)
+    left = snapshot.articles[0].model_copy(deep=True)
+    right = snapshot.articles[1].model_copy(deep=True)
+    left.id = "article-deepseek-official"
+    left.source_id = "deepseek-updates"
+    left.facts.title = "DeepSeek-V4-Pro Update"
+    right.id = "article-deepseek-analysis"
+    right.source_id = "independent-analysis"
+    right.facts.title = "DeepSeek V4 Pro 0813 on OpenRouter"
+    snapshot.articles = [left, right]
+
+    clusters = detect_story_clusters(snapshot)
+
+    assert len(clusters) == 1
+    assert set(clusters[0].shared_terms) == {"deepseek", "pro"}
 
 
 def test_quality_report_counts_source_and_chinese_readiness_gaps() -> None:

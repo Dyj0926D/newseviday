@@ -163,6 +163,12 @@ export interface GeneratedText {
 
 export interface ContentScoreBreakdown {
   targetRelevance: number;
+  /** Magnitude of a concrete change event, independent from profile affinity. */
+  eventSignificance?: number;
+  /** Likelihood that the event changes product, technical, compliance, or cost decisions. */
+  decisionImpact?: number;
+  /** Observable adoption, usage, distribution, or market-momentum evidence. */
+  adoptionMomentum?: number;
   technicalAdvancement: number;
   engineeringApplicability: number;
   technicalGenerality: number;
@@ -180,6 +186,7 @@ export interface KeySignalAssessment {
   actionability: number;
   generality: number;
   freshness: number;
+  eventTypes?: string[];
   reasons: string[];
   gateFailures: string[];
 }

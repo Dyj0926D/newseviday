@@ -27,6 +27,7 @@ from newseviday_pipeline.models import (
 )
 from newseviday_pipeline.stages import (
     chinese_display_ready,
+    high_significance_event_candidate,
     key_signal_assessment,
     key_signal_waiting_for_chinese,
 )
@@ -262,6 +263,9 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
         high_value_translation_bonus = (
             10.0 if needs_chinese and score >= TRANSLATION_PRIORITY_SCORE else 0.0
         )
+        event_translation_bonus = (
+            50.0 if needs_chinese and high_significance_event_candidate(article) else 0.0
+        )
         homepage_translation_bonus = 4.0 if needs_chinese and article.id in homepage_ids else 0.0
         cross_language_bonus = (
             0.08 if needs_chinese and not article.language.casefold().startswith("zh") else 0.0
@@ -270,6 +274,7 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
         editorial_priority = 0.25 * (article.key_signal.score if article.key_signal else 0.0)
         return (
             key_translation_bonus
+            + event_translation_bonus
             + high_value_translation_bonus
             + homepage_translation_bonus
             + score
@@ -301,13 +306,14 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
 
 
 def _paid_enrichment_skip_reason(article: Article, generated_at: datetime) -> str | None:
-    if (article.content_score or 0.0) < TRANSLATION_PRIORITY_SCORE:
-        return "below_quality_floor"
-    if (
-        article.content_score_breakdown is None
-        or article.content_score_breakdown.target_relevance < MIN_PAID_TARGET_RELEVANCE
-    ):
-        return "below_quality_floor"
+    if not high_significance_event_candidate(article):
+        if (article.content_score or 0.0) < TRANSLATION_PRIORITY_SCORE:
+            return "below_quality_floor"
+        if (
+            article.content_score_breakdown is None
+            or article.content_score_breakdown.target_relevance < MIN_PAID_TARGET_RELEVANCE
+        ):
+            return "below_quality_floor"
     published_at = article.published_at or article.collected_at
     if generated_at - published_at > timedelta(days=MAX_PAID_ENRICHMENT_AGE_DAYS):
         return "stale"

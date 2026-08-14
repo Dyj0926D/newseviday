@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "Deterministic cross-event regression set for Key Signal eligibility and high-significance enrichment priority.",
+  "generatedAt": "2026-08-14T06:00:00Z",
+  "cases": [
+    {
+      "id": "major-model-api-update",
+      "sourceType": "official",
+      "evidenceTier": "primary",
+      "title": "DeepSeek-V4-Pro Update",
+      "abstract": "The GA release of DeepSeek-V4-Pro has been rolled out on the APP, Web, and API. The model significantly enhances agent capabilities in production environments and reports results across multiple agent benchmarks. The API now natively supports the OpenAI Responses API format. Thinking effort supports low, high, and max levels. API pricing will change with peak and off-peak prices taking effect on August 16, 2026.",
+      "topicScores": { "rag-eval": 0.55, "foundation-models": 0.425 },
+      "expectedEventTypes": ["product_launch", "capability_update"],
+      "expectedHighSignificance": true,
+      "expectedEligible": true
+    },
+    {
+      "id": "binding-ai-policy",
+      "sourceType": "official",
+      "evidenceTier": "primary",
+      "title": "National regulator issues binding AI model safety rules",
+      "abstract": "The regulator issued binding AI safety regulation that takes effect on September 1. The policy requires model providers and enterprise deployers to document evaluations, report critical incidents, retain audit records, and meet a compliance deadline before production deployment. The rules apply to general-purpose AI services and prohibit deployment without the required risk controls.",
+      "topicScores": { "metadata-governance": 0.55, "foundation-models": 0.425 },
+      "expectedEventTypes": ["policy_regulation"],
+      "expectedHighSignificance": true,
+      "expectedEligible": true
+    },
+    {
+      "id": "new-enterprise-product",
+      "sourceType": "official",
+      "evidenceTier": "primary",
+      "title": "Enterprise semantic data agent platform is generally available",
+      "abstract": "The company launched a production data agent platform that is now available to all enterprise customers. The product provides a governed semantic layer, APIs, deployment workflows, lineage, and evaluation controls. Customers can connect operational databases and deploy agents through the developer platform without changing existing metric definitions.",
+      "topicScores": { "data-agent": 1.0, "semantic-layer": 0.8 },
+      "expectedEventTypes": ["product_launch"],
+      "expectedHighSignificance": true,
+      "expectedEligible": true
+    },
+    {
+      "id": "quantified-feature-adoption",
+      "sourceType": "research_institute",
+      "evidenceTier": "primary",
+      "title": "Agent workflow adoption reaches 2 million active users",
+      "abstract": "A longitudinal adoption study reports that the agent workflow reached 2 million active users across enterprise and developer deployments. Usage grew 240% year over year, with customers using the feature in production workflows rather than one-off trials. The report describes its sampling method, compares adoption across sectors, and publishes the underlying measurement definitions.",
+      "topicScores": { "ai-products-agents": 0.45, "foundation-models": 0.425 },
+      "expectedEventTypes": ["adoption_momentum"],
+      "expectedHighSignificance": true,
+      "expectedEligible": true
+    },
+    {
+      "id": "generalizable-technical-breakthrough",
+      "sourceType": "academic",
+      "evidenceTier": "primary",
+      "title": "Open-source RAG framework improves production latency by 35%",
+      "abstract": "We introduce a general-purpose open-source RAG framework and release the code. Evaluation across models, domains, and datasets shows 35% lower production latency and higher retrieval accuracy than the baseline. The benchmark includes ablations, a public test set, deployment APIs, and reproducible cost and throughput measurements.",
+      "topicScores": { "rag-eval": 0.9, "data-platform": 0.7 },
+      "expectedEventTypes": ["technical_breakthrough"],
+      "expectedHighSignificance": true,
+      "expectedEligible": true
+    },
+    {
+      "id": "major-market-structure-change",
+      "sourceType": "official",
+      "evidenceTier": "primary",
+      "title": "AI infrastructure company announces a $2 billion acquisition",
+      "abstract": "The company announced the acquisition of a model-serving platform for $2 billion. The merger combines the API, inference platform, enterprise contracts, and engineering teams. The transaction changes product ownership and migration decisions for existing customers and is expected to close after regulatory approval.",
+      "topicScores": { "foundation-models": 0.425, "ai-products-agents": 0.45 },
+      "expectedEventTypes": ["market_structure"],
+      "expectedHighSignificance": true,
+      "expectedEligible": true
+    },
+    {
+      "id": "material-api-risk",
+      "sourceType": "official",
+      "evidenceTier": "primary",
+      "title": "Critical AI API outage triggers customer migration guidance",
+      "abstract": "The provider reported a critical service outage affecting the production API and agent workflows for six hours. The incident caused failed requests across multiple regions. The company published mitigation steps, compatibility guidance, a migration path, and a post-incident review covering reliability and security controls.",
+      "topicScores": { "ai-products-agents": 0.45, "foundation-models": 0.425 },
+      "expectedEventTypes": ["security_risk"],
+      "expectedHighSignificance": true,
+      "expectedEligible": true
+    },
+    {
+      "id": "minor-marketing-update",
+      "sourceType": "official",
+      "evidenceTier": "primary",
+      "title": "Our popular assistant feature gets a refreshed icon",
+      "abstract": "The product team updated the feature icon and refreshed several colors in the interface. The post says users will enjoy the new appearance but provides no adoption measurement, workflow change, compatibility impact, pricing change, benchmark, or broad product capability.",
+      "topicScores": { "ai-products-agents": 0.45 },
+      "expectedEventTypes": ["capability_update"],
+      "expectedHighSignificance": false,
+      "expectedEligible": false
+    },
+    {
+      "id": "narrow-complete-paper",
+      "sourceType": "academic",
+      "evidenceTier": "primary",
+      "title": "Modern Greek police language processing benchmark",
+      "abstract": "We propose a new benchmark and dataset for Modern Greek police language processing. The paper evaluates several language models and reports complete quantitative results for this specialist language setting. The work does not demonstrate cross-domain use, production applicability, or a general-purpose technical change.",
+      "topicScores": { "foundation-models": 0.8 },
+      "expectedEventTypes": [],
+      "expectedHighSignificance": false,
+      "expectedEligible": false
+    },
+    {
+      "id": "uncorroborated-media-launch",
+      "sourceType": "professional_media",
+      "evidenceTier": "secondary",
+      "title": "Report says a major AI agent product is now available",
+      "abstract": "A media report says a new enterprise agent product has launched and is now available to developers. The article describes APIs, production workflows, and pricing changes, but it does not link to a first-party announcement or provide independent corroboration from another source.",
+      "topicScores": { "ai-products-agents": 0.9 },
+      "expectedEventTypes": ["product_launch"],
+      "expectedHighSignificance": true,
+      "expectedEligible": false
+    },
+    {
+      "id": "unmeasured-popularity-claim",
+      "sourceType": "independent_author",
+      "evidenceTier": "opinion",
+      "title": "This AI coding feature seems extremely popular",
+      "abstract": "The author argues that a coding feature appears popular based on anecdotes and social-media discussion. The post provides no active-user count, download number, customer sample, usage growth, market share, or repeatable adoption methodology. It remains an opinion and a lead for further verification.",
+      "topicScores": { "ai-products-agents": 0.9 },
+      "expectedEventTypes": [],
+      "expectedHighSignificance": false,
+      "expectedEligible": false
+    },
+    {
+      "id": "routine-how-to",
+      "sourceType": "official",
+      "evidenceTier": "primary",
+      "title": "How to configure an existing API client",
+      "abstract": "This tutorial explains how to configure an existing API client, set environment variables, send a request, and inspect a response. It does not announce a new product, policy, capability, price, adoption milestone, benchmark result, incident, or market change.",
+      "topicScores": { "ai-products-agents": 0.45 },
+      "expectedEventTypes": [],
+      "expectedHighSignificance": false,
+      "expectedEligible": false
+    }
+  ]
+}

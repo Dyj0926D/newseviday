@@ -1,4 +1,6 @@
+import json
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 import pytest
 
@@ -13,6 +15,7 @@ from newseviday_pipeline.stages import (
     content_value_score,
     exact_deduplicate,
     fuzzy_deduplicate,
+    high_significance_event_candidate,
     normalize_item,
     select_by_topics,
 )
@@ -311,7 +314,7 @@ def test_key_signal_rejects_a_narrow_low_relevance_paper() -> None:
 
     assert candidate.key_signal is not None
     assert not candidate.key_signal.eligible
-    assert "目标用户相关性低于 65" in candidate.key_signal.gate_failures
+    assert "学术内容缺少高相关、可泛化的突破证据" in candidate.key_signal.gate_failures
 
 
 def test_key_signal_rejects_an_uncorroborated_media_report() -> None:
@@ -374,3 +377,46 @@ def test_chinese_source_satisfies_display_gate_without_model_output() -> None:
     assert candidate.ai is None
     assert candidate.key_signal is not None
     assert CHINESE_READINESS_FAILURE not in candidate.key_signal.gate_failures
+
+
+def test_key_signal_gold_set_covers_multiple_change_event_types() -> None:
+    root = Path(__file__).resolve().parents[2]
+    payload = json.loads(
+        (root / "pipeline" / "eval" / "key-signal-gold-v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    for index, case in enumerate(payload["cases"]):
+        candidate = normalize_item(
+            RawFeedItem(
+                source_id=f"gold-source-{index}",
+                source_type=case["sourceType"],
+                evidence_tier=case["evidenceTier"],
+                url=f"https://example.com/key-signal-gold/{case['id']}",
+                title=case["title"],
+                summary=case["abstract"],
+                language="en",
+            ),
+            collected_at=NOW,
+        )[0]
+        candidate.published_at = NOW
+        candidate.topic_scores = case["topicScores"]
+        candidate.ai = GeneratedText(
+            title_zh=f"黄金样例 {index + 1} 的中文标题",
+            summary_zh="该样例提供中文导读，用于单独验证事件显著性、证据门禁和重点情报资格。",
+            why_it_matters="用于验证跨类型变化事件能被稳定识别。",
+            key_points=["验证事件分类", "验证重点情报门禁"],
+            model="eval-fixture",
+            prompt_version="key-signal-gold-v1",
+            generated_at=NOW,
+        )
+
+        apply_article_scoring(candidate, anchor=NOW)
+
+        assert candidate.key_signal is not None, case["id"]
+        assert candidate.key_signal.event_types == case["expectedEventTypes"], case["id"]
+        assert high_significance_event_candidate(candidate) is case[
+            "expectedHighSignificance"
+        ], case["id"]
+        assert candidate.key_signal.eligible is case["expectedEligible"], case["id"]

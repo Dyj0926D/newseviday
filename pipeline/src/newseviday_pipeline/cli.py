@@ -33,6 +33,10 @@ from newseviday_pipeline.quality import (
 from newseviday_pipeline.rag import build_dense_index, vectorize_ndjson, write_index
 from newseviday_pipeline.runner import run_fixture_pipeline, run_network_pipeline
 from newseviday_pipeline.settings import load_project_config
+from newseviday_pipeline.signal_eval import (
+    evaluate_key_signal_dataset,
+    write_key_signal_eval_report,
+)
 from newseviday_pipeline.snapshot import SnapshotPublisher, load_snapshot
 from newseviday_pipeline.stages import chinese_display_ready
 from newseviday_pipeline.terminology import load_terminology, terminology_consistency
@@ -158,6 +162,13 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("dataset", type=Path)
     eval_parser.add_argument("--report", type=Path, default=Path("data/runtime/eval/latest.json"))
     eval_parser.add_argument("--minimum-score", type=float, default=0.08)
+    signal_eval_parser = subparsers.add_parser(
+        "eval-key-signal", help="Evaluate change-event detection and Key Signal eligibility"
+    )
+    signal_eval_parser.add_argument("dataset", type=Path)
+    signal_eval_parser.add_argument(
+        "--report", type=Path, default=Path("data/runtime/quality/key-signal-eval.json")
+    )
     audit_parser = subparsers.add_parser(
         "audit-snapshot", help="Create a deterministic content operations quality report"
     )
@@ -551,6 +562,13 @@ def eval_rag(args: argparse.Namespace) -> int:
     return 0
 
 
+def eval_key_signal(args: argparse.Namespace) -> int:
+    report = evaluate_key_signal_dataset(args.dataset)
+    write_key_signal_eval_report(report, args.report)
+    print(report.model_dump_json(by_alias=True, indent=2))
+    return 0 if report.gate == "pass" else 1
+
+
 def audit(args: argparse.Namespace) -> int:
     report = audit_snapshot(load_snapshot(args.snapshot))
     write_quality_report(report, args.report)
@@ -707,6 +725,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return build_index(args)
     if args.command == "eval-rag":
         return eval_rag(args)
+    if args.command == "eval-key-signal":
+        return eval_key_signal(args)
     if args.command == "audit-snapshot":
         return audit(args)
     if args.command == "compare-quality":

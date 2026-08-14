@@ -42,6 +42,22 @@ def test_fixture_run_remains_offline_and_model_free(
     assert (tmp_path / "current.json").exists()
 
 
+def test_key_signal_eval_cli_writes_a_gate_report(
+    tmp_path: Path, capsys: CaptureFixture[str]
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    dataset = root / "pipeline" / "eval" / "key-signal-gold-v1.json"
+    report = tmp_path / "key-signal-eval.json"
+
+    assert main(["eval-key-signal", str(dataset), "--report", str(report)]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["gate"] == "pass"
+    assert payload["eligibility"]["f1"] == 1.0
+    assert payload["eventTypeExactAccuracy"] == 1.0
+    assert report.exists()
+
+
 def test_enrich_rejects_call_cap_above_ten(capsys: CaptureFixture[str]) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = root / "apps" / "web" / "public" / "data" / "current.json"

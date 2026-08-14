@@ -249,6 +249,9 @@ jobs:
           python -m uv run --project pipeline newseviday-pipeline audit-snapshot \
             "$PUBLISH_SNAPSHOT" \
             --report data/runtime/quality/latest.json
+          python -m uv run --project pipeline newseviday-pipeline eval-key-signal \
+            pipeline/eval/key-signal-gold-v1.json \
+            --report data/runtime/quality/key-signal-eval.json
           if python -m uv run --project pipeline newseviday-pipeline compare-quality \
             "$PUBLISH_SNAPSHOT" \
             --accepted-snapshot apps/web/public/data/current.json \
@@ -269,6 +272,7 @@ jobs:
 
           quality_path = Path("data/runtime/quality/latest.json")
           guard_path = Path("data/runtime/quality/release-guard.json")
+          signal_eval_path = Path("data/runtime/quality/key-signal-eval.json")
           usage_path = Path("data/runtime/quality/ai-usage-latest.json")
           run_paths = sorted(Path("data/runtime/content-refresh/runs").glob("*.json"))
           lines = ["## Controlled content refresh", "", "| Item | Value |", "| --- | ---: |"]
@@ -299,6 +303,8 @@ jobs:
                       f"| Missing abstracts | {quality['missingAbstractCount']} |",
                       f"| Topic gaps | {len(quality['topicGaps'])} |",
                       f"| Eligible Key Signals | {quality.get('keySignalEligibleCount', 0)} |",
+                      f"| High-significance events | {quality.get('highSignificanceEventCount', 0)} |",
+                      f"| High-significance Chinese gaps | {quality.get('highSignificanceChineseGapCount', 0)} |",
                       f"| Quality gate | {quality['gate']} |",
                   ]
               )
@@ -310,6 +316,15 @@ jobs:
                       f"| Recent Chinese-ready | {guard['candidateRecentChineseReadyCount']} / {guard['candidateRecentArticleCount']} |",
                       f"| Required Chinese-ready | {guard['requiredRecentChineseReadyCount']} |",
                       f"| Release issues | {'; '.join(guard['issues']) or 'none'} |",
+                  ]
+              )
+          if signal_eval_path.exists():
+              signal_eval = json.loads(signal_eval_path.read_text(encoding="utf-8"))
+              lines.extend(
+                  [
+                      f"| Key Signal Eval gate | {signal_eval['gate']} |",
+                      f"| Key Signal eligibility F1 | {signal_eval['eligibility']['f1']} |",
+                      f"| Event type exact accuracy | {signal_eval['eventTypeExactAccuracy']} |",
                   ]
               )
           if usage_path.exists():

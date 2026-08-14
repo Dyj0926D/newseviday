@@ -51,6 +51,9 @@
       ],
       "properties": {
         "targetRelevance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "eventSignificance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "decisionImpact": { "type": "number", "minimum": 0, "maximum": 1 },
+        "adoptionMomentum": { "type": "number", "minimum": 0, "maximum": 1 },
         "technicalAdvancement": { "type": "number", "minimum": 0, "maximum": 1 },
         "engineeringApplicability": { "type": "number", "minimum": 0, "maximum": 1 },
         "technicalGenerality": { "type": "number", "minimum": 0, "maximum": 1 },
@@ -82,6 +85,11 @@
         "actionability": { "type": "number", "minimum": 0, "maximum": 1 },
         "generality": { "type": "number", "minimum": 0, "maximum": 1 },
         "freshness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "eventTypes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "maxItems": 5
+        },
         "reasons": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },

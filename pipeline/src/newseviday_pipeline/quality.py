@@ -10,7 +10,10 @@ from pathlib import Path
 from pydantic import Field
 
 from newseviday_pipeline.models import ContentSnapshot, ContractModel
-from newseviday_pipeline.stages import chinese_display_ready
+from newseviday_pipeline.stages import (
+    chinese_display_ready,
+    high_significance_event_candidate,
+)
 
 
 class StoryCluster(ContractModel):
@@ -39,6 +42,9 @@ class SnapshotQualityReport(ContractModel):
     topic_counts: dict[str, int]
     topic_gaps: list[str]
     key_signal_eligible_count: int
+    high_significance_event_count: int
+    high_significance_chinese_gap_count: int
+    event_type_counts: dict[str, int]
     high_value_chinese_gap_count: int
     recent_window_days: int
     recent_article_count: int
@@ -109,7 +115,8 @@ STOP_TERMS = {
 
 
 def _title_terms(value: str) -> set[str]:
-    terms = re.findall(r"[a-z0-9][a-z0-9-]{2,}|[\u4e00-\u9fff]{2,6}", value.casefold())
+    normalized = value.casefold().replace("-", " ")
+    terms = re.findall(r"[a-z0-9][a-z0-9]{2,}|[\u4e00-\u9fff]{2,6}", normalized)
     return {term for term in terms if term not in STOP_TERMS}
 
 
@@ -167,6 +174,19 @@ def audit_snapshot(
     key_signal_eligible_count = sum(
         bool(article.key_signal and article.key_signal.eligible) for article in snapshot.articles
     )
+    high_significance_event_count = sum(
+        high_significance_event_candidate(article) for article in snapshot.articles
+    )
+    high_significance_chinese_gap_count = sum(
+        high_significance_event_candidate(article) and not chinese_display_ready(article)
+        for article in snapshot.articles
+    )
+    event_type_counts = Counter(
+        event_type
+        for article in snapshot.articles
+        if article.key_signal is not None
+        for event_type in article.key_signal.event_types
+    )
     high_value_chinese_gap_count = sum(
         (article.content_score or 0) >= 0.6 and not chinese_display_ready(article)
         for article in snapshot.articles
@@ -220,6 +240,9 @@ def audit_snapshot(
         topic_counts=topic_counts,
         topic_gaps=topic_gaps,
         key_signal_eligible_count=key_signal_eligible_count,
+        high_significance_event_count=high_significance_event_count,
+        high_significance_chinese_gap_count=high_significance_chinese_gap_count,
+        event_type_counts=dict(sorted(event_type_counts.items())),
         high_value_chinese_gap_count=high_value_chinese_gap_count,
         recent_window_days=30,
         recent_article_count=len(recent_articles),
