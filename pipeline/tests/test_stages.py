@@ -400,7 +400,9 @@ def test_key_signal_gold_set_covers_multiple_change_event_types() -> None:
             ),
             collected_at=NOW,
         )[0]
-        candidate.published_at = NOW
+        candidate.published_at = datetime.fromisoformat(
+            case.get("publishedAt", NOW.isoformat()).replace("Z", "+00:00")
+        )
         candidate.topic_scores = case["topicScores"]
         candidate.ai = GeneratedText(
             title_zh=f"黄金样例 {index + 1} 的中文标题",

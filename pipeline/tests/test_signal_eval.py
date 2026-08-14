@@ -15,7 +15,7 @@ def test_key_signal_eval_harness_passes_cross_event_gold_set(tmp_path: Path) -> 
     write_key_signal_eval_report(report, output)
 
     assert report.gate == "pass"
-    assert report.case_count == 12
+    assert report.case_count == 16
     assert report.eligibility.precision == 1.0
     assert report.eligibility.recall == 1.0
     assert report.high_significance.precision == 1.0
