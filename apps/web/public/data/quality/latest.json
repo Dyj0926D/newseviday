@@ -1,26 +1,29 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260813T082859Z-e9a036c6-editorial-c4e387e8-rolling-11fb8f13",
-  "generatedAt": "2026-08-13T08:40:37.382238Z",
+  "snapshotId": "snapshot-20260814T033053Z-9dd50191-rolling-b506619a-ai-63d963ea",
+  "generatedAt": "2026-08-14T03:30:57.661076Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
-  "contributingSourceCount": 12,
+  "contributingSourceCount": 13,
   "structuredArticleCount": 28,
   "aiArticleCount": 9,
   "editorialArticleCount": 19,
-  "missingAbstractCount": 0,
-  "missingAbstractRate": 0.0,
-  "missingAbstractBySource": {},
+  "missingAbstractCount": 1,
+  "missingAbstractRate": 0.025,
+  "missingAbstractBySource": {
+    "huggingface-blog": 1
+  },
   "sourceCounts": {
     "anthropic-news": 1,
-    "arxiv-cs-ai": 6,
+    "arxiv-cs-ai": 5,
     "databricks-blog": 3,
-    "deepseek-updates": 1,
+    "deepseek-updates": 2,
     "github-ai-ml": 8,
+    "huggingface-blog": 1,
     "ieee-spectrum-ai": 1,
     "interconnects": 2,
-    "mit-technology-review-ai": 3,
+    "mit-technology-review-ai": 2,
     "mlcommons-news": 3,
     "openai-news": 8,
     "qwen-blog": 2,
@@ -28,7 +31,6 @@
   },
   "zeroContributionSourceIds": [
     "dbt-labs-blog",
-    "huggingface-blog",
     "metr-blog"
   ],
   "topicCounts": {
@@ -38,7 +40,7 @@
     "intelligent-lakehouse": 0,
     "rag-eval": 15,
     "metadata-governance": 0,
-    "foundation-models": 24,
+    "foundation-models": 25,
     "ai-products-agents": 23
   },
   "topicGaps": [
@@ -49,7 +51,7 @@
     "semantic-layer"
   ],
   "keySignalEligibleCount": 0,
-  "highValueChineseGapCount": 1,
+  "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
   "recentArticleCount": 34,
   "recentChineseReadyCount": 25,
