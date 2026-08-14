@@ -54,6 +54,24 @@ def topic() -> TopicConfig:
     return TopicConfig(id="data-agent", label="Data Agent", keywords=["data agent"])
 
 
+def prepare_enrichable_article(article: Any, *, now: datetime, suffix: str) -> None:
+    """Keep AI-call tests independent from the ordering and scores of the live snapshot."""
+
+    article.facts.title = f"Data Agent platform capability update {suffix}"
+    article.facts.abstract = (
+        "The official Data Agent platform update is available for production customers. "
+        "It adds a governed semantic layer, API compatibility, evaluation traces, and "
+        "deployment controls. Benchmarks across enterprise workflows report 35% lower "
+        "latency while preserving answer quality. The source documents the rollout, "
+        f"migration path, evidence, and reproducible evaluation protocol for case {suffix}."
+    )
+    article.topic_scores = {"data-agent": 1.0}
+    article.published_at = now
+    article.collected_at = now
+    article.ai = None
+    apply_article_scoring(article, anchor=now)
+
+
 def test_deepseek_v4_request_explicitly_disables_thinking(monkeypatch: Any) -> None:
     captured: dict[str, Any] = {}
 
@@ -91,8 +109,8 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:1]
-    snapshot.articles[0].topic_scores = {"semantic-layer": 0.6}
-    snapshot.articles[0].ai = None
+    now = datetime(2026, 8, 2, tzinfo=UTC)
+    prepare_enrichable_article(snapshot.articles[0], now=now, suffix="cache")
     client = FakeStructuredClient()
     cache = FileAiCache(tmp_path)
     first_telemetry = EnrichmentTelemetry()
@@ -102,7 +120,7 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
         client=client,
         cache=cache,
         topics=[topic()],
-        now=datetime(2026, 8, 2, tzinfo=UTC),
+        now=now,
         telemetry=first_telemetry,
     )
     second_client = FakeStructuredClient()
@@ -112,7 +130,7 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
         client=second_client,
         cache=cache,
         topics=[topic()],
-        now=datetime(2026, 8, 2, tzinfo=UTC),
+        now=now,
         telemetry=second_telemetry,
     )
 
@@ -120,7 +138,7 @@ def test_article_enrichment_uses_one_call_and_content_hash_cache(tmp_path: Path)
     assert second_calls == 0
     assert first.articles[0].ai is not None
     assert second.articles[0].ai == first.articles[0].ai
-    assert first.articles[0].topic_scores == {"semantic-layer": 0.6}
+    assert first.articles[0].topic_scores == {"data-agent": 1.0}
     assert first_telemetry.model_calls == 1
     assert first_telemetry.cache_hits == 0
     assert second_telemetry.model_calls == 0
@@ -131,8 +149,9 @@ def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:3]
-    for article in snapshot.articles:
-        article.ai = None
+    now = datetime(2026, 8, 5, tzinfo=UTC)
+    for index, article in enumerate(snapshot.articles):
+        prepare_enrichable_article(article, now=now, suffix=f"cap-{index}")
     client = FakeStructuredClient()
 
     result, model_calls = enrich_snapshot(
@@ -141,7 +160,7 @@ def test_article_enrichment_never_exceeds_hard_call_cap(tmp_path: Path) -> None:
         cache=FileAiCache(tmp_path),
         topics=[topic()],
         max_model_calls=2,
-        now=datetime(2026, 8, 5, tzinfo=UTC),
+        now=now,
     )
 
     assert model_calls == 2
@@ -308,12 +327,16 @@ def test_article_enrichment_injects_relevant_terminology(tmp_path: Path) -> None
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:1]
-    snapshot.articles[0].facts.title = "RAG evaluation update"
+    now = datetime(2026, 8, 14, tzinfo=UTC)
+    prepare_enrichable_article(snapshot.articles[0], now=now, suffix="terminology")
+    snapshot.articles[0].facts.title = "Data Agent platform RAG evaluation update"
     snapshot.articles[0].facts.abstract = (
-        "RAG systems need reproducible evaluation across retrieval, ranking, citation, "
-        "latency, and refusal cases. The source describes a complete repeatable protocol."
+        "The official production Data Agent platform update adds RAG evaluation across "
+        "retrieval, ranking, citation, latency, and refusal cases. Benchmarks report 35% "
+        "lower latency while preserving answer quality. The source describes the API, "
+        "deployment controls, evidence traces, and a complete repeatable protocol."
     )
-    snapshot.articles[0].ai = None
+    apply_article_scoring(snapshot.articles[0], anchor=now)
     client = FakeStructuredClient()
     terminology = TerminologyConfig(
         version=1,
@@ -326,6 +349,7 @@ def test_article_enrichment_injects_relevant_terminology(tmp_path: Path) -> None
         cache=FileAiCache(tmp_path),
         topics=[topic()],
         terminology=terminology,
+        now=now,
     )
 
     assert "RAG -> RAG" in client.users[0]
