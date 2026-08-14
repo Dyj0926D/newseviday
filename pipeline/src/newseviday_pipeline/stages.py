@@ -264,18 +264,41 @@ MAJOR_PRODUCT_SUBJECT_PATTERNS = (
 )
 CAPABILITY_UPDATE_PATTERNS = (
     "update",
+    "updates",
+    "updated",
     "upgrade",
+    "upgrades",
+    "upgraded",
     "enhanced",
     "enhancement",
+    "enhancements",
     "native support",
     "new capability",
     "breaking change",
-    "deprecat",
+    "deprecated",
+    "deprecation",
+    "deprecates",
     "pricing adjustment",
     "price change",
     "更新",
     "升级",
     "增强",
+    "原生支持",
+    "新增能力",
+    "不兼容变更",
+    "弃用",
+    "价格调整",
+)
+STRONG_CAPABILITY_UPDATE_PATTERNS = (
+    "native support",
+    "now supports",
+    "new capability",
+    "breaking change",
+    "deprecated",
+    "deprecation",
+    "deprecates",
+    "pricing adjustment",
+    "price change",
     "原生支持",
     "新增能力",
     "不兼容变更",
@@ -305,7 +328,9 @@ DECISION_CHANGE_PATTERNS = (
     "price",
     "api",
     "breaking change",
-    "deprecat",
+    "deprecated",
+    "deprecation",
+    "deprecates",
     "migration",
     "compatibility",
     "effective on",
@@ -358,11 +383,18 @@ ADOPTION_SCALE_PATTERNS = (
 )
 MARKET_STRUCTURE_PATTERNS = (
     "acquisition",
+    "acquisitions",
     "acquires",
     "acquired",
     "merger",
+    "mergers",
     "funding round",
-    "investment",
+    "invests in",
+    "investment in",
+    "investment into",
+    "investment of",
+    "strategic investment",
+    "minority investment",
     "strategic partnership",
     "收购",
     "并购",
@@ -375,11 +407,16 @@ RISK_INCIDENT_PATTERNS = (
     "security incident",
     "data breach",
     "vulnerability",
+    "vulnerabilities",
     "critical outage",
     "service outage",
-    "recall",
+    "service outages",
+    "product recall",
+    "model recall",
+    "device recall",
     "regulatory investigation",
     "sanction",
+    "sanctions",
     "安全事件",
     "数据泄露",
     "漏洞",
@@ -407,6 +444,16 @@ NARROW_DOMAIN_PATTERNS = (
 )
 QUANTITATIVE_PATTERN = re.compile(
     r"(?:\b\d+(?:\.\d+)?\s*(?:%|x|ms|million|billion)|\b\d+(?:\.\d+)?\s*s\b|\d+(?:\.\d+)?\s*倍)",
+    re.IGNORECASE,
+)
+ADOPTION_QUANTITATIVE_PATTERN = re.compile(
+    r"(?:\b\d+(?:[,.]\d+)?\s*(?:%|percent|thousand|million|billion|k|m|b)?\s*"
+    r"(?:active users?|paying users?|users?|customers?|downloads?|deployments?|"
+    r"adoption(?: rate)?|market share|usage growth)\b|"
+    r"\b(?:active users?|paying users?|customers?|downloads?|deployments?|"
+    r"adoption(?: rate)?|market share|usage)\b[^.!?]{0,32}\b\d+(?:[,.]\d+)?|"
+    r"\d+(?:[,.]\d+)?\s*(?:%|万|百万|千万|亿)?\s*"
+    r"(?:活跃用户|付费用户|用户|客户|下载量|部署量|采用率|市场份额|使用量))",
     re.IGNORECASE,
 )
 CHINESE_CHARACTER_PATTERN = re.compile(r"[\u3400-\u9fff]")
@@ -668,7 +715,7 @@ def _effective_source_type(article: Article) -> str:
 
 
 def _contains_non_negated_any(text: str, patterns: tuple[str, ...]) -> bool:
-    """Ignore simple local negations so absence statements do not become event evidence."""
+    """Match complete English terms and ignore locally negated evidence."""
 
     negation = re.compile(
         r"(?:\bno\b|\bnot\b|\bwithout\b|\blacks?\b|\bdoes not\b|\bdid not\b|未|没有|缺少)"
@@ -676,7 +723,12 @@ def _contains_non_negated_any(text: str, patterns: tuple[str, ...]) -> bool:
         re.IGNORECASE,
     )
     for pattern in patterns:
-        for match in re.finditer(re.escape(pattern), text, re.IGNORECASE):
+        first = pattern[:1]
+        last = pattern[-1:]
+        left_boundary = r"(?<![a-z0-9])" if first.isascii() and first.isalnum() else ""
+        right_boundary = r"(?![a-z0-9])" if last.isascii() and last.isalnum() else ""
+        expression = f"{left_boundary}{re.escape(pattern)}{right_boundary}"
+        for match in re.finditer(expression, text, re.IGNORECASE):
             prefix = text[max(0, match.start() - 144) : match.start()]
             if not negation.search(prefix):
                 return True
@@ -691,6 +743,8 @@ def _event_signal_profile(article: Article, text: str) -> EventSignalProfile:
     surface even when it is not a close lexical match for the user's preferred topics.
     """
 
+    title_text = normalize_text(article.facts.title)
+    lead_text = normalize_text(f"{article.facts.title}. {(article.facts.abstract or '')[:500]}")
     source_type = _effective_source_type(article)
     primary_source = article.evidence_tier == "primary"
     authoritative = source_type in {"official", "research_institute"} and primary_source
@@ -699,26 +753,32 @@ def _event_signal_profile(article: Article, text: str) -> EventSignalProfile:
     has_benchmark = _contains_non_negated_any(text, BENCHMARK_PATTERNS)
     has_comparison = _contains_non_negated_any(text, COMPARISON_PATTERNS)
     has_artifact = _contains_non_negated_any(text, ARTIFACT_PATTERNS)
-    has_broad_availability = _contains_non_negated_any(text, BROAD_AVAILABILITY_PATTERNS)
+    has_broad_availability = _contains_non_negated_any(
+        lead_text, BROAD_AVAILABILITY_PATTERNS
+    )
     has_decision_change = _contains_non_negated_any(text, DECISION_CHANGE_PATTERNS)
     has_major_product_subject = _contains_non_negated_any(
-        text, MAJOR_PRODUCT_SUBJECT_PATTERNS
+        lead_text, MAJOR_PRODUCT_SUBJECT_PATTERNS
     )
 
     event_scores: dict[str, float] = {}
     decision_scores: list[float] = []
     adoption_momentum = 0.0
 
-    if _contains_non_negated_any(text, POLICY_SUBJECT_PATTERNS) and _contains_non_negated_any(
-        text, POLICY_ACTION_PATTERNS
+    if _contains_non_negated_any(
+        lead_text, POLICY_SUBJECT_PATTERNS
+    ) and _contains_non_negated_any(
+        lead_text, POLICY_ACTION_PATTERNS
     ):
         event_scores[EVENT_TYPE_POLICY] = (
             0.70 + (0.14 if authoritative else 0.0) + (0.08 if has_decision_change else 0.0)
         )
         decision_scores.append(0.82 + (0.10 if has_decision_change else 0.0))
 
-    if _contains_non_negated_any(text, PRODUCT_RELEASE_PATTERNS) and _contains_non_negated_any(
-        text, PRODUCT_SUBJECT_PATTERNS
+    if _contains_non_negated_any(
+        lead_text, PRODUCT_RELEASE_PATTERNS
+    ) and _contains_non_negated_any(
+        lead_text, PRODUCT_SUBJECT_PATTERNS
     ):
         event_scores[EVENT_TYPE_PRODUCT_LAUNCH] = (
             0.60
@@ -734,8 +794,11 @@ def _event_signal_profile(article: Article, text: str) -> EventSignalProfile:
             + (0.08 if has_broad_availability else 0.0)
         )
 
-    if _contains_non_negated_any(text, CAPABILITY_UPDATE_PATTERNS) and _contains_non_negated_any(
-        text, PRODUCT_SUBJECT_PATTERNS
+    capability_change = _contains_non_negated_any(
+        title_text, CAPABILITY_UPDATE_PATTERNS
+    ) or _contains_non_negated_any(lead_text, STRONG_CAPABILITY_UPDATE_PATTERNS)
+    if capability_change and _contains_non_negated_any(
+        lead_text, PRODUCT_SUBJECT_PATTERNS
     ):
         event_scores[EVENT_TYPE_CAPABILITY_UPDATE] = (
             0.52
@@ -751,13 +814,14 @@ def _event_signal_profile(article: Article, text: str) -> EventSignalProfile:
         )
 
     has_adoption_signal = _contains_non_negated_any(text, ADOPTION_PATTERNS)
-    has_adoption_scale = quantitative or _contains_non_negated_any(
+    adoption_quantitative = bool(ADOPTION_QUANTITATIVE_PATTERN.search(text))
+    has_adoption_scale = adoption_quantitative or _contains_non_negated_any(
         text, ADOPTION_SCALE_PATTERNS
     )
     if has_adoption_signal and has_adoption_scale:
         adoption_momentum = (
             0.66
-            + (0.12 if quantitative else 0.0)
+            + (0.12 if adoption_quantitative else 0.0)
             + (0.10 if authoritative or research_backed else 0.0)
             + (0.08 if _contains_non_negated_any(text, ADOPTION_SCALE_PATTERNS) else 0.0)
         )
@@ -777,13 +841,13 @@ def _event_signal_profile(article: Article, text: str) -> EventSignalProfile:
         )
         decision_scores.append(0.48 + (0.12 if has_artifact else 0.0))
 
-    if _contains_non_negated_any(text, MARKET_STRUCTURE_PATTERNS):
+    if _contains_non_negated_any(lead_text, MARKET_STRUCTURE_PATTERNS):
         event_scores[EVENT_TYPE_MARKET_STRUCTURE] = (
             0.64 + (0.12 if authoritative else 0.0) + (0.08 if quantitative else 0.0)
         )
         decision_scores.append(0.68 + (0.08 if quantitative else 0.0))
 
-    if _contains_non_negated_any(text, RISK_INCIDENT_PATTERNS):
+    if _contains_non_negated_any(lead_text, RISK_INCIDENT_PATTERNS):
         event_scores[EVENT_TYPE_RISK] = (
             0.68
             + (0.10 if authoritative or research_backed else 0.0)
@@ -1035,6 +1099,8 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
         gate_failures.append("缺少足以改变决策、采用或技术判断的证据")
     if values.target_relevance < 0.35 and values.product_industry_impact < 0.65:
         gate_failures.append("与 AI、产品或技术决策范围关联不足")
+    if values.freshness <= 0:
+        gate_failures.append("发布时间超过 7 天，不进入首页实时 Key Signal")
     if values.evidence_maturity < 0.5 or len((article.facts.abstract or "").strip()) < 120:
         gate_failures.append("证据成熟度不足")
     if _effective_source_type(article) == "academic" and (
@@ -1091,7 +1157,11 @@ def high_significance_event_candidate(article: Article) -> bool:
         return False
     source_type = _effective_source_type(article)
     evidence_floor = 0.35 if source_type == "professional_media" else 0.5
-    if values.event_significance < 0.7 or values.evidence_maturity < evidence_floor:
+    if (
+        values.event_significance < 0.7
+        or values.evidence_maturity < evidence_floor
+        or values.freshness <= 0
+    ):
         return False
     if len((article.facts.abstract or "").strip()) < 120:
         return False

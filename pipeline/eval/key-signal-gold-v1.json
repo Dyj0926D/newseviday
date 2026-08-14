@@ -87,7 +87,7 @@
       "title": "Our popular assistant feature gets a refreshed icon",
       "abstract": "The product team updated the feature icon and refreshed several colors in the interface. The post says users will enjoy the new appearance but provides no adoption measurement, workflow change, compatibility impact, pricing change, benchmark, or broad product capability.",
       "topicScores": { "ai-products-agents": 0.45 },
-      "expectedEventTypes": ["capability_update"],
+      "expectedEventTypes": [],
       "expectedHighSignificance": false,
       "expectedEligible": false
     },
@@ -131,6 +131,51 @@
       "title": "How to configure an existing API client",
       "abstract": "This tutorial explains how to configure an existing API client, set environment variables, send a request, and inspect a response. It does not announce a new product, policy, capability, price, adoption milestone, benchmark result, incident, or market change.",
       "topicScores": { "ai-products-agents": 0.45 },
+      "expectedEventTypes": [],
+      "expectedHighSignificance": false,
+      "expectedEligible": false
+    },
+    {
+      "id": "retrieval-recall-is-not-product-recall",
+      "sourceType": "academic",
+      "evidenceTier": "primary",
+      "title": "Evidence-grounded retrieval benchmark over financial filings",
+      "abstract": "The benchmark contains 1185 question-answer records and evaluates retrieval over regulatory filings. Baseline systems reach 44.8% Recall@10, and pairwise accuracy falls when hard negatives replace random negatives. Recall is an information-retrieval metric in this study; the paper reports no security incident, data breach, outage, product recall, policy action, or market change.",
+      "topicScores": { "rag-eval": 0.9 },
+      "expectedEventTypes": [],
+      "expectedHighSignificance": false,
+      "expectedEligible": false
+    },
+    {
+      "id": "contextual-adoption-is-not-measured-adoption",
+      "sourceType": "academic",
+      "evidenceTier": "primary",
+      "title": "Taxonomy analysis of AI governance tools",
+      "abstract": "Rapid adoption of language models has introduced governance risks. The study maps 21 open-source evaluation tools to 32 taxonomy categories and was designed to identify coverage gaps. It discusses regulatory processes and technical controls, but does not measure product adoption, active users, customers, downloads, deployments, usage growth, market share, or a newly issued policy.",
+      "topicScores": { "metadata-governance": 0.8, "rag-eval": 0.6 },
+      "expectedEventTypes": [],
+      "expectedHighSignificance": false,
+      "expectedEligible": false
+    },
+    {
+      "id": "stale-engineering-update",
+      "sourceType": "official",
+      "evidenceTier": "primary",
+      "title": "Agent review capability update cuts average cost by 20%",
+      "abstract": "The engineering team published a capability update for its agent review product. Benchmarks show 20% lower average review cost while maintaining quality after changing the workflow and shared tools. The result is documented and useful, but the publication is more than seven days old and should not occupy the homepage real-time Key Signal position.",
+      "publishedAt": "2026-07-10T00:00:00Z",
+      "topicScores": { "ai-products-agents": 0.9, "rag-eval": 0.6 },
+      "expectedEventTypes": ["capability_update"],
+      "expectedHighSignificance": false,
+      "expectedEligible": false
+    },
+    {
+      "id": "return-on-investment-is-not-market-structure",
+      "sourceType": "professional_media",
+      "evidenceTier": "secondary",
+      "title": "Scaling AI agents with trustworthy enterprise data",
+      "abstract": "Organizations are adopting agents, but realizing the desired return on investment depends on trustworthy data and infrastructure. The article discusses platform architecture and operational practices. It does not report an acquisition, merger, funding round, strategic investment, strategic partnership, or another change in market structure.",
+      "topicScores": { "data-platform": 0.8, "ai-products-agents": 0.8 },
       "expectedEventTypes": [],
       "expectedHighSignificance": false,
       "expectedEligible": false

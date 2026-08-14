@@ -81,7 +81,10 @@ def evaluate_key_signal_dataset(path: Path) -> KeySignalEvalReport:
             ),
             collected_at=generated_at,
         )[0]
-        article.published_at = generated_at
+        published_at = datetime.fromisoformat(
+            case.get("publishedAt", payload["generatedAt"]).replace("Z", "+00:00")
+        )
+        article.published_at = published_at
         article.topic_scores = case["topicScores"]
         article.ai = GeneratedText(
             title_zh=f"评测样例 {index + 1} 的中文标题",
