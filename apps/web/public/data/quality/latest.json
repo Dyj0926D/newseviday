@@ -1,13 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260814T080417Z-a60b3da1-rolling-ba7c087f-ai-e0c98c75",
-  "generatedAt": "2026-08-14T08:04:26.253923Z",
+  "snapshotId": "snapshot-20260815T021940Z-fcd0c835-rolling-372bb758-ai-028cb037",
+  "generatedAt": "2026-08-15T02:19:47.763366Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
   "contributingSourceCount": 12,
-  "structuredArticleCount": 29,
-  "aiArticleCount": 10,
+  "structuredArticleCount": 28,
+  "aiArticleCount": 9,
   "editorialArticleCount": 19,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
@@ -17,13 +17,13 @@
     "arxiv-cs-ai": 5,
     "databricks-blog": 3,
     "deepseek-updates": 4,
-    "github-ai-ml": 8,
+    "github-ai-ml": 7,
     "ieee-spectrum-ai": 1,
     "interconnects": 2,
     "mit-technology-review-ai": 1,
     "mlcommons-news": 3,
     "openai-news": 8,
-    "qwen-blog": 2,
+    "qwen-blog": 3,
     "simon-willison-llms": 2
   },
   "zeroContributionSourceIds": [
@@ -38,8 +38,8 @@
     "intelligent-lakehouse": 0,
     "rag-eval": 14,
     "metadata-governance": 0,
-    "foundation-models": 25,
-    "ai-products-agents": 24
+    "foundation-models": 26,
+    "ai-products-agents": 23
   },
   "topicGaps": [
     "data-agent",
