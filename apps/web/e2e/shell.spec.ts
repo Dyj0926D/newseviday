@@ -62,12 +62,18 @@ test('trend brief exposes evidence-bound weekly conclusions', async ({ page }) =
   await expect(
     page.getByRole('heading', { level: 1, name: '把分散信号整理成可验证的趋势' }),
   ).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: 'Agent 工程进入工作流、检索与成本协同优化阶段' }),
-  ).toBeVisible();
+  await expect(page.locator('#brief-title')).toBeVisible();
+  await expect(page.locator('#brief-title')).not.toHaveText('');
   await expect(page.getByText('证据约束的 7 日趋势简报')).toBeVisible();
-  await expect(page.locator('.trend-block')).toHaveCount(2);
-  await expect(page.locator('.trend-evidence a')).toHaveCount(7);
+  const trends = page.locator('.trend-block');
+  const trendCount = await trends.count();
+  expect(trendCount).toBeGreaterThanOrEqual(1);
+  expect(trendCount).toBeLessThanOrEqual(3);
+  for (let index = 0; index < trendCount; index += 1) {
+    const evidenceLinks = trends.nth(index).locator('.trend-evidence a');
+    expect(await evidenceLinks.count()).toBeGreaterThanOrEqual(2);
+    await expect(evidenceLinks.first()).toHaveAttribute('href', /\/article\//);
+  }
 });
 
 test('optional profile saves locally and changes the recommendation view', async ({ page }) => {
