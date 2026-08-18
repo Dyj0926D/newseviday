@@ -1083,6 +1083,14 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
         + 0.10 * values.evidence_maturity,
         4,
     )
+    durable_major_event = (
+        article.evidence_tier == "primary"
+        and _effective_source_type(article) in {"official", "research_institute"}
+        and values.freshness > 0
+        and values.event_significance >= 0.85
+        and max(values.decision_impact, values.adoption_momentum) >= 0.75
+        and score >= 0.55
+    )
 
     gate_failures: list[str] = []
     if not chinese_display_ready(article):
@@ -1109,7 +1117,7 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
         or values.technical_generality < 0.55
     ):
         gate_failures.append("学术内容缺少高相关、可泛化的突破证据")
-    if score < 0.65:
+    if score < 0.65 and not durable_major_event:
         gate_failures.append("Key Signal 专用得分低于 65")
 
     reasons: list[str] = [
@@ -1127,6 +1135,8 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
         reasons.append("技术普适性较强")
     if values.freshness >= 0.85:
         reasons.append("24 小时内发布")
+    elif durable_major_event:
+        reasons.append("重大一手事件仍在 7 日观察窗")
 
     return KeySignalAssessment(
         eligible=not gate_failures,
