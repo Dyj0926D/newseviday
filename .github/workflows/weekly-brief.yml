@@ -37,6 +37,7 @@ jobs:
       DEEPSEEK_THINKING_ENABLED: ${{ vars.DEEPSEEK_THINKING_ENABLED || 'false' }}
       WEEKLY_BRIEF_ENABLED: ${{ vars.WEEKLY_BRIEF_ENABLED || 'true' }}
       WEEKLY_REFRESH_MAX_MODEL_CALLS: ${{ vars.WEEKLY_REFRESH_MAX_MODEL_CALLS || '5' }}
+      WEEKLY_REFRESH_AUTO_MERGE: ${{ vars.WEEKLY_REFRESH_AUTO_MERGE || 'false' }}
     steps:
       - name: Resolve weekly policy
         shell: bash
@@ -166,7 +167,7 @@ jobs:
             data/runtime/rag/
           if-no-files-found: warn
           retention-days: 14
-      - name: Commit and open review pull request
+      - name: Commit and optionally publish weekly snapshot
         if: env.RUN_BRIEF == 'true' && env.RELEASE_ELIGIBLE == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -195,8 +196,20 @@ jobs:
           git checkout -b "$branch"
           git commit -m "content: refresh weekly snapshot and trend brief"
           git push origin "$branch"
-          gh pr create \
+          pr_url="$(gh pr create \
             --base main \
             --head "$branch" \
             --title "content: refresh weekly snapshot and trend brief" \
-            --body "Fresh source collection plus an evidence-bound weekly brief, validated against the public release gate."
+            --body "Fresh source collection plus an evidence-bound weekly brief, validated against the public release gate. Scheduled runs may publish automatically when the repository switch is enabled; manual runs remain review-only.")"
+          echo "$pr_url"
+          if [[ "$GITHUB_EVENT_NAME" == "schedule" && "$WEEKLY_REFRESH_AUTO_MERGE" == "true" ]]; then
+            gh pr merge "$pr_url" \
+              --repo "$GITHUB_REPOSITORY" \
+              --squash \
+              --delete-branch
+            printf '## Automatic publication\n\nValidated scheduled weekly snapshot merged: %s\n' \
+              "$pr_url" >> "$GITHUB_STEP_SUMMARY"
+          else
+            printf '## Review required\n\nWeekly candidate: %s\n' \
+              "$pr_url" >> "$GITHUB_STEP_SUMMARY"
+          fi

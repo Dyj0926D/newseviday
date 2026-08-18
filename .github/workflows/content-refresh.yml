@@ -53,6 +53,7 @@ jobs:
       DAILY_REFRESH_ALLOW_MODEL: ${{ vars.DAILY_REFRESH_ALLOW_MODEL || 'false' }}
       DAILY_REFRESH_MAX_MODEL_CALLS: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS || '5' }}
       DAILY_REFRESH_OPEN_PULL_REQUEST: ${{ vars.DAILY_REFRESH_OPEN_PULL_REQUEST || 'true' }}
+      DAILY_REFRESH_AUTO_MERGE: ${{ vars.DAILY_REFRESH_AUTO_MERGE || 'false' }}
       DAILY_REFRESH_END_DATE: ${{ vars.DAILY_REFRESH_END_DATE || '' }}
     steps:
       - name: Resolve refresh policy
@@ -422,13 +423,25 @@ jobs:
           git push origin "$branch"
           echo "PUBLISH_BRANCH=$branch" >> "$GITHUB_ENV"
           echo "PUBLISH_HAS_CHANGES=true" >> "$GITHUB_ENV"
-      - name: Open snapshot pull request
+      - name: Open and optionally publish snapshot pull request
         if: env.RUN_REFRESH == 'true' && env.OPEN_PULL_REQUEST == 'true' && env.RELEASE_ELIGIBLE == 'true' && env.PUBLISH_HAS_CHANGES == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr create \
+          pr_url="$(gh pr create \
             --base main \
             --head "$PUBLISH_BRANCH" \
             --title "content: refresh public snapshot" \
-            --body "Controlled refresh run ${GITHUB_RUN_ID}. Review source quality, AI fields and the snapshot diff before merging."
+            --body "Controlled refresh run ${GITHUB_RUN_ID}. The candidate has passed collection, quality, security, web test and build gates. Scheduled runs may publish automatically when the repository switch is enabled; manual runs remain review-only.")"
+          echo "$pr_url"
+          if [[ "$GITHUB_EVENT_NAME" == "schedule" && "$DAILY_REFRESH_AUTO_MERGE" == "true" ]]; then
+            gh pr merge "$pr_url" \
+              --repo "$GITHUB_REPOSITORY" \
+              --squash \
+              --delete-branch
+            printf '## Automatic publication\n\nValidated scheduled snapshot merged: %s\n' \
+              "$pr_url" >> "$GITHUB_STEP_SUMMARY"
+          else
+            printf '## Review required\n\nSnapshot candidate: %s\n' \
+              "$pr_url" >> "$GITHUB_STEP_SUMMARY"
+          fi
