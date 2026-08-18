@@ -484,6 +484,7 @@ def update_weekly_brief(
     cache: FileAiCache,
     now: datetime | None = None,
     generate_if_due: bool = True,
+    force_generate: bool = False,
 ) -> BriefUpdateResult:
     generated_at = now or datetime.now(UTC)
     period_start, period_end_exclusive = _last_complete_seven_day_window(generated_at)
@@ -502,7 +503,10 @@ def update_weekly_brief(
         return BriefUpdateResult(result, "current", 0, period_start, period_end_exclusive)
 
     local_generated_at = generated_at.astimezone(SHANGHAI_TIMEZONE)
-    is_due = local_generated_at.weekday() == 5 and local_generated_at.time() >= WEEKLY_BRIEF_CUTOFF
+    is_due = force_generate or (
+        local_generated_at.weekday() == 5
+        and local_generated_at.time() >= WEEKLY_BRIEF_CUTOFF
+    )
     if not generate_if_due or not is_due or client is None:
         if accepted_brief is None:
             return BriefUpdateResult(snapshot, "not_due", 0, period_start, period_end_exclusive)

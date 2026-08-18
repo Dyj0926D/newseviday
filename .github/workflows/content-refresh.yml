@@ -65,8 +65,16 @@ jobs:
               exit 0
             fi
             if [[ -n "$DAILY_REFRESH_END_DATE" && "$(TZ=Asia/Shanghai date +%F)" > "$DAILY_REFRESH_END_DATE" ]]; then
+              echo "::error title=Content refresh expired::DAILY_REFRESH_ENABLED is true, but DAILY_REFRESH_END_DATE ended on $DAILY_REFRESH_END_DATE. Extend the window or disable the schedule explicitly."
+              printf '## Controlled content refresh\n\n**Configuration error:** refresh is enabled, but the controlled window ended on `%s`.\n' \
+                "$DAILY_REFRESH_END_DATE" >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+            if [[ "$(TZ=Asia/Shanghai date +%u)" == "6" ]]; then
               echo "RUN_REFRESH=false" >> "$GITHUB_ENV"
-              echo "Scheduled trial window ended on $DAILY_REFRESH_END_DATE."
+              echo "::notice title=Weekly refresh handoff::Saturday collection is owned by the weekly snapshot workflow."
+              printf '## Controlled content refresh\n\nPlanned skip: Saturday collection is handled by the weekly snapshot workflow.\n' \
+                >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
             echo "RUN_REFRESH=true" >> "$GITHUB_ENV"
@@ -105,7 +113,7 @@ jobs:
             --state open \
             --limit 100 \
             --json number,headRefName,createdAt \
-            --jq '.[] | select(.headRefName | startswith("content-refresh/")) | [.number, .headRefName, .createdAt] | @tsv')
+            --jq '.[] | select(.headRefName | startswith("content-refresh/daily-")) | [.number, .headRefName, .createdAt] | @tsv')
           if [[ -n "$same_day_pr" ]]; then
             echo "RUN_REFRESH=false" >> "$GITHUB_ENV"
             echo "Scheduled refresh skipped because today's content PR #${same_day_pr} is still open."
@@ -400,7 +408,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          branch="content-refresh/${GITHUB_RUN_ID}"
+          branch="content-refresh/daily-${GITHUB_RUN_ID}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"

@@ -97,6 +97,28 @@ def test_weekly_brief_is_carried_on_non_saturday_refresh(tmp_path: Path) -> None
     assert carried.snapshot.briefs[0].id == accepted.briefs[0].id
 
 
+def test_weekly_brief_can_force_last_complete_window_after_saturday(tmp_path: Path) -> None:
+    source = load_snapshot(SNAPSHOT)
+    prepared = apply_editorial_package(source, load_editorial_package(PACKAGE))
+    prepared.briefs = []
+    client = FakeBriefClient()
+
+    generated = update_weekly_brief(
+        prepared,
+        accepted_snapshot=None,
+        client=client,
+        cache=FileAiCache(tmp_path),
+        now=datetime(2026, 8, 10, 2, tzinfo=UTC),
+        force_generate=True,
+    )
+
+    assert generated.status == "generated"
+    assert generated.model_calls == 1
+    assert client.calls == 1
+    assert generated.period_start == datetime(2026, 8, 1, 1, tzinfo=UTC)
+    assert generated.period_end == datetime(2026, 8, 8, 1, tzinfo=UTC)
+
+
 def test_weekly_window_uses_previous_cutoff_before_saturday_nine() -> None:
     period_start, period_end = _last_complete_seven_day_window(
         datetime(2026, 8, 8, 0, 30, tzinfo=UTC)
