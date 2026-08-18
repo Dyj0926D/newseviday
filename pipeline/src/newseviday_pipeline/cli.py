@@ -128,6 +128,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Permit one paid DeepSeek call when the weekly brief is due.",
     )
+    brief_parser.add_argument(
+        "--force-generate",
+        action="store_true",
+        help="Generate the last complete weekly window outside the normal Saturday schedule.",
+    )
     editorial_parser = subparsers.add_parser(
         "apply-editorial",
         help="Apply a reviewable editorial package to a validated snapshot",
@@ -411,6 +416,7 @@ def update_brief(args: argparse.Namespace) -> int:
             accepted_snapshot=accepted_snapshot,
             client=client,
             cache=FileAiCache(args.cache),
+            force_generate=args.force_generate,
         )
     except (httpx.HTTPError, ValueError) as error:
         update = update_weekly_brief(

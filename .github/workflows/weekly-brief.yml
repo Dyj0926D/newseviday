@@ -7,7 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       allow_model:
-        description: 'Permit one DeepSeek call when the current weekly brief is missing'
+        description: 'Permit article enrichment and one DeepSeek weekly brief call'
+        required: true
+        type: boolean
+        default: false
+      force_generate:
+        description: 'Regenerate the last complete weekly window outside Saturday'
         required: true
         type: boolean
         default: false
@@ -31,6 +36,7 @@ jobs:
       DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' }}
       DEEPSEEK_THINKING_ENABLED: ${{ vars.DEEPSEEK_THINKING_ENABLED || 'false' }}
       WEEKLY_BRIEF_ENABLED: ${{ vars.WEEKLY_BRIEF_ENABLED || 'true' }}
+      WEEKLY_REFRESH_MAX_MODEL_CALLS: ${{ vars.WEEKLY_REFRESH_MAX_MODEL_CALLS || '5' }}
     steps:
       - name: Resolve weekly policy
         shell: bash
@@ -62,15 +68,42 @@ jobs:
         uses: actions/cache@v5
         with:
           path: data/runtime/ai-cache
-          key: weekly-brief-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py') }}-${{ github.run_id }}
+          key: ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'config/terminology.yaml') }}-${{ github.run_id }}
           restore-keys: |
-            weekly-brief-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py') }}-
-      - name: Build weekly brief candidate
+            ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'config/terminology.yaml') }}-
+      - name: Collect a fresh cutoff corpus
+        if: env.RUN_BRIEF == 'true'
+        run: >-
+          python -m uv run --project pipeline newseviday-pipeline run
+          --allow-network --output data/runtime/weekly-refresh
+      - name: Merge the rolling public inventory
+        if: env.RUN_BRIEF == 'true'
+        run: |
+          python -m uv run --project pipeline newseviday-pipeline merge-inventory \
+            data/runtime/weekly-refresh/current.json \
+            --accepted-snapshot apps/web/public/data/current.json \
+            --output data/runtime/weekly-rolling
+          echo "WEEKLY_INPUT=data/runtime/weekly-rolling/current.json" >> "$GITHUB_ENV"
+      - name: Enrich fresh high-value articles
+        if: env.RUN_BRIEF == 'true' && env.ALLOW_MODEL == 'true'
+        run: |
+          test -n "$DEEPSEEK_API_KEY"
+          test -n "$DEEPSEEK_MODEL"
+          python -m uv run --project pipeline newseviday-pipeline enrich \
+            data/runtime/weekly-rolling/current.json \
+            --accepted-snapshot apps/web/public/data/current.json \
+            --output data/runtime/weekly-enriched \
+            --cache data/runtime/ai-cache \
+            --usage-report data/runtime/quality/weekly-ai-usage.json \
+            --allow-model \
+            --max-model-calls "$WEEKLY_REFRESH_MAX_MODEL_CALLS"
+          echo "WEEKLY_INPUT=data/runtime/weekly-enriched/current.json" >> "$GITHUB_ENV"
+      - name: Build weekly brief candidate from the fresh corpus
         if: env.RUN_BRIEF == 'true'
         shell: bash
         run: |
           brief_args=(
-            apps/web/public/data/current.json
+            "$WEEKLY_INPUT"
             --accepted-snapshot apps/web/public/data/current.json
             --output data/runtime/weekly-brief
             --cache data/runtime/ai-cache
@@ -80,18 +113,43 @@ jobs:
             test -n "$DEEPSEEK_MODEL"
             brief_args+=(--allow-model)
           fi
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_generate }}" == "true" ]]; then
+            brief_args+=(--force-generate)
+          fi
           python -m uv run --project pipeline newseviday-pipeline update-brief "${brief_args[@]}"
+          python -m uv run --project pipeline newseviday-pipeline validate-snapshot \
+            data/runtime/weekly-brief/current.json
+          python -m uv run --project pipeline newseviday-pipeline build-index \
+            data/runtime/weekly-brief/current.json \
+            --output data/runtime/rag/index.json \
+            --vectorize-output data/runtime/rag/vectorize.ndjson
           python -m uv run --project pipeline newseviday-pipeline audit-snapshot \
             data/runtime/weekly-brief/current.json \
             --report data/runtime/quality/latest.json
+          python -m uv run --project pipeline newseviday-pipeline eval-key-signal \
+            pipeline/eval/key-signal-gold-v1.json \
+            --report data/runtime/quality/key-signal-eval.json
+          if python -m uv run --project pipeline newseviday-pipeline compare-quality \
+            data/runtime/weekly-brief/current.json \
+            --accepted-snapshot apps/web/public/data/current.json \
+            --report data/runtime/quality/release-guard.json; then
+            echo "RELEASE_ELIGIBLE=true" >> "$GITHUB_ENV"
+          else
+            echo "RELEASE_ELIGIBLE=false" >> "$GITHUB_ENV"
+            echo "::warning::Weekly candidate failed the comparative release guard; artifacts are retained and no pull request will be opened."
+          fi
+      - name: Publish verified weekly snapshot into the web workspace
+        if: env.RUN_BRIEF == 'true' && env.RELEASE_ELIGIBLE == 'true'
+        run: |
           python -m uv run --project pipeline newseviday-pipeline publish-web \
             data/runtime/weekly-brief/current.json \
             --web-data apps/web/public/data \
             --quality-report data/runtime/quality/latest.json
       - name: Verify publish candidate
-        if: env.RUN_BRIEF == 'true'
+        if: env.RUN_BRIEF == 'true' && env.RELEASE_ELIGIBLE == 'true'
         run: |
           npm ci
+          npm run security:scan
           npm run test --workspace @newseviday/web
           npm run build --workspace @newseviday/web
       - name: Upload review artifacts
@@ -100,12 +158,16 @@ jobs:
         with:
           name: weekly-brief-${{ github.run_id }}
           path: |
+            data/runtime/weekly-refresh/
+            data/runtime/weekly-rolling/
+            data/runtime/weekly-enriched/
             data/runtime/weekly-brief/
             data/runtime/quality/
+            data/runtime/rag/
           if-no-files-found: warn
           retention-days: 14
       - name: Commit and open review pull request
-        if: env.RUN_BRIEF == 'true'
+        if: env.RUN_BRIEF == 'true' && env.RELEASE_ELIGIBLE == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -115,14 +177,26 @@ jobs:
             echo "No weekly brief changes to publish."
             exit 0
           fi
+          while IFS= read -r pr_number; do
+            [[ -n "$pr_number" ]] || continue
+            gh pr close "$pr_number" \
+              --repo "$GITHUB_REPOSITORY" \
+              --delete-branch \
+              --comment "被本次使用最新截止语料生成的周报候选替代。旧候选仍保留在 Actions artifact 中。"
+          done < <(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --limit 100 \
+            --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("content-refresh/weekly-brief-")) | .number')
           branch="content-refresh/weekly-brief-${GITHUB_RUN_ID}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git commit -m "content: refresh weekly trend brief"
+          git commit -m "content: refresh weekly snapshot and trend brief"
           git push origin "$branch"
           gh pr create \
             --base main \
             --head "$branch" \
-            --title "content: refresh weekly trend brief" \
-            --body "Weekly evidence-bound trend brief for editorial review."
+            --title "content: refresh weekly snapshot and trend brief" \
+            --body "Fresh source collection plus an evidence-bound weekly brief, validated against the public release gate."
