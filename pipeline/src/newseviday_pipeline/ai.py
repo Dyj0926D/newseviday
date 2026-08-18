@@ -40,6 +40,9 @@ SHANGHAI_TIMEZONE = timezone(timedelta(hours=8), name="Asia/Shanghai")
 WEEKLY_BRIEF_CUTOFF = time(hour=9)
 MIN_ENRICHMENT_EVIDENCE_CHARS = 120
 TRANSLATION_PRIORITY_SCORE = 0.60
+RECENT_TRANSLATION_SCORE = 0.42
+RECENT_TRANSLATION_MAX_AGE = timedelta(days=3)
+RECENT_TRANSLATION_MIN_TECHNICAL_VALUE = 0.55
 MIN_PAID_TARGET_RELEVANCE = 0.60
 MAX_PAID_ENRICHMENT_AGE_DAYS = 45
 MAX_NEW_ENRICHMENTS_PER_SOURCE = 3
@@ -306,15 +309,31 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
 
 
 def _paid_enrichment_skip_reason(article: Article, generated_at: datetime) -> str | None:
+    values = article.content_score_breakdown
+    published_at = article.published_at or article.collected_at
+    recent_relevant_candidate = (
+        generated_at - published_at <= RECENT_TRANSLATION_MAX_AGE
+        and (article.content_score or 0.0) >= RECENT_TRANSLATION_SCORE
+        and values is not None
+        and values.target_relevance >= MIN_PAID_TARGET_RELEVANCE
+        and max(
+            values.technical_advancement,
+            values.engineering_applicability,
+            values.product_industry_impact,
+        )
+        >= RECENT_TRANSLATION_MIN_TECHNICAL_VALUE
+    )
     if not high_significance_event_candidate(article):
-        if (article.content_score or 0.0) < TRANSLATION_PRIORITY_SCORE:
-            return "below_quality_floor"
         if (
-            article.content_score_breakdown is None
-            or article.content_score_breakdown.target_relevance < MIN_PAID_TARGET_RELEVANCE
+            (article.content_score or 0.0) < TRANSLATION_PRIORITY_SCORE
+            and not recent_relevant_candidate
         ):
             return "below_quality_floor"
-    published_at = article.published_at or article.collected_at
+        if (
+            values is None
+            or values.target_relevance < MIN_PAID_TARGET_RELEVANCE
+        ):
+            return "below_quality_floor"
     if generated_at - published_at > timedelta(days=MAX_PAID_ENRICHMENT_AGE_DAYS):
         return "stale"
     return None
