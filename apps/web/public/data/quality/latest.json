@@ -1,23 +1,23 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260814T080417Z-a60b3da1-rolling-ba7c087f-ai-e0c98c75",
-  "generatedAt": "2026-08-14T08:04:26.253923Z",
+  "snapshotId": "snapshot-20260818T070349Z-18b6bc46-rolling-f99a39d8-ai-45dc6ce5",
+  "generatedAt": "2026-08-18T07:03:56.374381Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
   "contributingSourceCount": 12,
-  "structuredArticleCount": 29,
-  "aiArticleCount": 10,
+  "structuredArticleCount": 28,
+  "aiArticleCount": 9,
   "editorialArticleCount": 19,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
   "sourceCounts": {
     "anthropic-news": 1,
-    "arxiv-cs-ai": 5,
+    "arxiv-cs-ai": 6,
     "databricks-blog": 3,
     "deepseek-updates": 4,
-    "github-ai-ml": 8,
+    "github-ai-ml": 7,
     "ieee-spectrum-ai": 1,
     "interconnects": 2,
     "mit-technology-review-ai": 1,
@@ -38,8 +38,8 @@
     "intelligent-lakehouse": 0,
     "rag-eval": 14,
     "metadata-governance": 0,
-    "foundation-models": 25,
-    "ai-products-agents": 24
+    "foundation-models": 26,
+    "ai-products-agents": 23
   },
   "topicGaps": [
     "data-agent",
@@ -48,8 +48,8 @@
     "metadata-governance",
     "semantic-layer"
   ],
-  "keySignalEligibleCount": 1,
-  "highSignificanceEventCount": 2,
+  "keySignalEligibleCount": 0,
+  "highSignificanceEventCount": 1,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
@@ -61,9 +61,9 @@
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
-  "recentArticleCount": 31,
+  "recentArticleCount": 32,
   "recentChineseReadyCount": 27,
-  "recentChineseGapCount": 4,
+  "recentChineseGapCount": 5,
   "trendBriefCount": 1,
   "potentialStoryClusters": [
     {
@@ -77,10 +77,22 @@
         "deepseek",
         "pro"
       ]
+    },
+    {
+      "id": "story-002",
+      "articleIds": [
+        "article-13844026d0b31ab87e4a",
+        "article-1f08b431314013b7175a"
+      ],
+      "sourceCount": 2,
+      "sharedTerms": [
+        "agentic",
+        "workflows"
+      ]
     }
   ],
   "issues": [
     "5 个配置主题暂时没有入选内容",
-    "近 30 天有 4 条外文内容待中文整理"
+    "近 30 天有 5 条外文内容待中文整理"
   ]
 }
