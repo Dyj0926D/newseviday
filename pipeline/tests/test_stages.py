@@ -288,6 +288,46 @@ def test_key_signal_uses_a_separate_editorial_gate() -> None:
     assert candidate.key_signal is not None and candidate.key_signal.eligible
 
 
+def test_key_signal_keeps_major_primary_event_during_seven_day_window() -> None:
+    candidate = normalize_item(
+        RawFeedItem(
+            source_id="official-release",
+            source_type="official",
+            evidence_tier="primary",
+            url="https://example.com/major-release",
+            title="Model family general availability adds agent API support and new pricing",
+            summary=(
+                "The company officially launches the model family for general availability. "
+                "It is rolled out in app, web, and API for all customers. "
+                "The update adds agent capabilities and native Responses API support. "
+                "The release also changes thinking controls and peak or off-peak pricing. "
+            )
+            * 3,
+            language="en",
+        ),
+        collected_at=NOW,
+    )[0]
+    candidate.published_at = NOW - timedelta(days=6)
+    candidate.topic_scores = {"foundation-models": 0.425, "rag-eval": 0.55}
+    candidate.ai = GeneratedText(
+        title_zh="生产级智能体平台正式发布并调整 API 定价",
+        summary_zh="官方正式发布生产级智能体平台和 API，并同步调整部署能力、兼容方式与定价。",
+        why_it_matters="会影响产品接入、迁移和成本判断。",
+        key_points=["正式可用", "API 能力升级", "定价调整"],
+        model="deepseek-test",
+        prompt_version="test",
+        generated_at=NOW,
+    )
+
+    apply_article_scoring(candidate, anchor=NOW)
+
+    assert candidate.key_signal is not None
+    assert candidate.key_signal.freshness > 0
+    assert candidate.key_signal.score < 0.65
+    assert candidate.key_signal.eligible
+    assert "重大一手事件仍在 7 日观察窗" in candidate.key_signal.reasons
+
+
 def test_key_signal_rejects_a_narrow_low_relevance_paper() -> None:
     candidate = normalize_item(
         item(
