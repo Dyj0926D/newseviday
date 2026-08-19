@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260818T072223Z-8ca7d0df-rolling-3e1edf5a-ai-6a188c0c-brief-c5cb8a1f",
-  "generatedAt": "2026-08-18T07:22:34.367017Z",
+  "snapshotId": "snapshot-20260819T023223Z-8d5efc81-rolling-7d584e2d-ai-04b660d1",
+  "generatedAt": "2026-08-19T02:32:30.551666Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -20,10 +20,10 @@
     "github-ai-ml": 7,
     "ieee-spectrum-ai": 1,
     "interconnects": 2,
-    "mit-technology-review-ai": 1,
+    "mit-technology-review-ai": 2,
     "mlcommons-news": 3,
     "openai-news": 8,
-    "qwen-blog": 2,
+    "qwen-blog": 1,
     "simon-willison-llms": 2
   },
   "zeroContributionSourceIds": [
@@ -37,15 +37,14 @@
     "semantic-layer": 0,
     "intelligent-lakehouse": 0,
     "rag-eval": 14,
-    "metadata-governance": 0,
+    "metadata-governance": 1,
     "foundation-models": 26,
-    "ai-products-agents": 23
+    "ai-products-agents": 24
   },
   "topicGaps": [
     "data-agent",
     "data-platform",
     "intelligent-lakehouse",
-    "metadata-governance",
     "semantic-layer"
   ],
   "keySignalEligibleCount": 1,
@@ -55,15 +54,15 @@
     "adoption_momentum": 1,
     "capability_update": 3,
     "policy_regulation": 1,
-    "product_launch": 8,
+    "product_launch": 7,
     "security_risk": 1,
     "technical_breakthrough": 1
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
-  "recentArticleCount": 32,
+  "recentArticleCount": 33,
   "recentChineseReadyCount": 29,
-  "recentChineseGapCount": 3,
+  "recentChineseGapCount": 4,
   "trendBriefCount": 1,
   "potentialStoryClusters": [
     {
@@ -92,7 +91,7 @@
     }
   ],
   "issues": [
-    "5 个配置主题暂时没有入选内容",
-    "近 30 天有 3 条外文内容待中文整理"
+    "4 个配置主题暂时没有入选内容",
+    "近 30 天有 4 条外文内容待中文整理"
   ]
 }
