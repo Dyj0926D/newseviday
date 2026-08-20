@@ -2,7 +2,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from newseviday_pipeline.embeddings import HashingEmbedder
-from newseviday_pipeline.evaluation import evaluate_rag, load_gold_dataset
+from newseviday_pipeline.evaluation import (
+    build_rag_review_packet,
+    evaluate_rag,
+    load_gold_dataset,
+)
 from newseviday_pipeline.rag import build_dense_index
 from newseviday_pipeline.snapshot import load_snapshot
 
@@ -47,3 +51,33 @@ def test_unreviewed_trial_eval_cannot_pass_production_gate() -> None:
         < report.answer_quality.no_answer_accuracy
     )
     assert report.answer_quality.answerable_pass_rate >= 0.9
+
+
+def test_rag_review_packet_exposes_candidates_and_blank_human_labels() -> None:
+    dataset = load_gold_dataset(DATASET)
+    trial_snapshot = (
+        ROOT
+        / "apps"
+        / "web"
+        / "public"
+        / "data"
+        / "versions"
+        / f"{dataset.corpus_snapshot_id}.json"
+    )
+    snapshot = load_snapshot(trial_snapshot)
+    embedder = HashingEmbedder()
+    index = build_dense_index(snapshot, embedder)
+
+    packet = build_rag_review_packet(
+        snapshot,
+        index,
+        dataset,
+        embedder,
+        now=datetime(2026, 8, 20, tzinfo=UTC),
+    )
+
+    assert len(packet.cases) == 24
+    assert packet.review_status == "pending_human_review"
+    assert packet.cases[0].candidates
+    assert packet.cases[0].human_review.retrieval_evidence_correct is None
+    assert packet.cases[12].answerable is False

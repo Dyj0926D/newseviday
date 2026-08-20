@@ -26,11 +26,16 @@ def test_quality_report_exposes_content_gaps_without_model_calls(tmp_path: Path)
     assert report.gate in {"pass", "observe"}
     assert payload["snapshotId"] == snapshot.snapshot_id
     assert "topicCounts" in payload
+    assert "visibleTopicCounts" in payload
+    assert "visibleTopicGaps" in payload
     assert "potentialStoryClusters" in payload
     assert "highValueChineseGapCount" in payload
     assert "structuredArticleCount" in payload
     assert "editorialArticleCount" in payload
     assert "recentChineseGapCount" in payload
+    assert "visibleRecent24hCount" in payload
+    assert "visibleRecent48hCount" in payload
+    assert "latestVisiblePublishedAt" in payload
     assert "trendBriefCount" in payload
     assert "keySignalEligibleCount" in payload
     assert "highSignificanceEventCount" in payload

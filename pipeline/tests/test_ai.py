@@ -442,6 +442,108 @@ def test_article_enrichment_translates_fresh_relevant_item_below_old_floor(
     assert telemetry.skipped_below_quality_floor == 0
 
 
+def test_article_enrichment_uses_supplemental_lane_for_trusted_product_news(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    article = snapshot.articles[0]
+    now = datetime(2026, 8, 20, 3, tzinfo=UTC)
+    article.ai = None
+    article.source_type = "professional_media"
+    article.published_at = now - timedelta(hours=20)
+    article.content_score = 0.465
+    assert article.content_score_breakdown is not None
+    article.content_score_breakdown.target_relevance = 0.555
+    article.content_score_breakdown.technical_advancement = 0.49
+    article.content_score_breakdown.engineering_applicability = 0.52
+    article.content_score_breakdown.product_industry_impact = 0.75
+    article.facts.abstract = "Trusted reporting on how enterprises are adopting AI products. " * 5
+    telemetry = EnrichmentTelemetry()
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        telemetry=telemetry,
+        now=now,
+    )
+
+    assert model_calls == 1
+    assert result.articles[0].ai is not None
+    assert telemetry.supplemental_translation_calls == 1
+
+
+def test_article_enrichment_does_not_open_supplemental_lane_for_opinion_only_source(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    article = snapshot.articles[0]
+    now = datetime(2026, 8, 20, 3, tzinfo=UTC)
+    article.ai = None
+    article.source_type = "independent_author"
+    article.published_at = now - timedelta(hours=20)
+    article.content_score = 0.465
+    assert article.content_score_breakdown is not None
+    article.content_score_breakdown.target_relevance = 0.555
+    article.content_score_breakdown.product_industry_impact = 0.75
+    article.facts.abstract = "A personal opinion about enterprise AI product adoption. " * 5
+    telemetry = EnrichmentTelemetry()
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        telemetry=telemetry,
+        now=now,
+    )
+
+    assert model_calls == 0
+    assert result.articles[0].ai is None
+    assert telemetry.supplemental_translation_calls == 0
+
+
+def test_article_enrichment_uses_short_safe_lane_for_fresh_official_focus_topic(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    article = snapshot.articles[0]
+    now = datetime(2026, 8, 20, 3, tzinfo=UTC)
+    article.ai = None
+    article.source_type = "official"
+    article.published_at = now - timedelta(hours=12)
+    article.topic_scores = {"data-agent": 0.65}
+    article.content_score = 0.25
+    assert article.content_score_breakdown is not None
+    article.content_score_breakdown.target_relevance = 0.65
+    article.facts.abstract = (
+        "Ask a governed data agent about revenue and route it to the approved metric."
+    )
+    telemetry = EnrichmentTelemetry()
+    client = FakeStructuredClient()
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=client,
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        telemetry=telemetry,
+        now=now,
+    )
+
+    assert model_calls == 1
+    assert result.articles[0].ai is not None
+    assert telemetry.priority_topic_translation_calls == 1
+    assert "来源只提供了标题和短摘录" in client.users[0]
+
+
 def test_article_enrichment_does_not_pay_for_stale_backlog(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")

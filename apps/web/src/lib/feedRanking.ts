@@ -1,5 +1,7 @@
 import type { Article } from '@newseviday/contracts';
 
+import { isChineseDisplayReady } from './intelligence';
+
 interface DiversityOptions {
   firstScreenSize?: number;
   maxPerSourceInFirstScreen?: number;
@@ -29,6 +31,26 @@ export function sortLatestArticles(articles: Article[]): Article[] {
     (left, right) =>
       articleTimestamp(right) - articleTimestamp(left) || articleScore(right) - articleScore(left),
   );
+}
+
+export function summarizeVisibleFreshness(
+  articles: Article[],
+  anchor: string,
+  windowDays = 30,
+): { visibleCount: number; recent24HourCount: number; latestPublishedAt: string | null } {
+  const visible = sortLatestArticles(
+    articles.filter(
+      (article) =>
+        isChineseDisplayReady(article) && isWithinPublishedWindow(article, anchor, windowDays),
+    ),
+  );
+  return {
+    visibleCount: visible.length,
+    recent24HourCount: visible.filter((article) =>
+      isWithinPublishedWindow(article, anchor, 1),
+    ).length,
+    latestPublishedAt: visible[0]?.publishedAt ?? visible[0]?.collectedAt ?? null,
+  };
 }
 
 function tripleCount(sourceIds: string[]): number {

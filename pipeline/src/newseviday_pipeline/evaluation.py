@@ -60,6 +60,48 @@ class PublishedEvalReport(ContractModel):
     note: str
 
 
+class RagReviewCandidate(ContractModel):
+    article_id: str
+    article_title: str
+    chunk_id: str
+    rank: int = Field(ge=1)
+    score: float
+    excerpt: str
+
+
+class RagHumanReviewFields(ContractModel):
+    retrieval_evidence_correct: bool | None = None
+    answerability_decision_correct: bool | None = None
+    citation_supports_answer: bool | None = None
+    notes: str | None = None
+
+
+class RagReviewCase(ContractModel):
+    id: str
+    question: str
+    category: str
+    answerable: bool
+    expected_article_ids: list[str]
+    route: str
+    retrieval_rounds: int
+    evidence_sufficient: bool
+    assessment_reason: str
+    stop_reason: str
+    candidates: list[RagReviewCandidate]
+    human_review: RagHumanReviewFields = Field(default_factory=RagHumanReviewFields)
+
+
+class RagReviewPacket(ContractModel):
+    schema_version: str = "1.0.0"
+    dataset_version: str
+    corpus_snapshot_id: str
+    generated_at: datetime
+    minimum_score: float
+    review_status: str = "pending_human_review"
+    instructions: list[str]
+    cases: list[RagReviewCase]
+
+
 def load_gold_dataset(path: Path) -> RagGoldDataset:
     return RagGoldDataset.model_validate_json(path.read_text(encoding="utf-8"))
 
@@ -180,6 +222,8 @@ def evaluate_rag(
         p50_latency_ms=_percentile(latencies, 0.5),
         p95_latency_ms=_percentile(latencies, 0.95),
     )
+
+
     no_answer_accuracy = (
         round(statistics.fmean(no_answer_results), 4) if no_answer_results else 0.0
     )
@@ -239,6 +283,71 @@ def evaluate_rag(
     )
 
 
+def build_rag_review_packet(
+    snapshot: ContentSnapshot,
+    index: DenseIndexArtifact,
+    dataset: RagGoldDataset,
+    embedder: EmbeddingProvider,
+    *,
+    minimum_score: float = 0.08,
+    now: datetime | None = None,
+) -> RagReviewPacket:
+    """Export per-question evidence and blank human labels without model answers."""
+
+    articles_by_id = {article.id: article for article in snapshot.articles}
+    cases: list[RagReviewCase] = []
+    for question in dataset.questions:
+        agentic = retrieve_with_agent(
+            question.question,
+            snapshot,
+            index,
+            embedder,
+            top_k=10,
+            minimum_score=minimum_score,
+        )
+        candidates = []
+        for item in agentic.candidates[:5]:
+            article = articles_by_id.get(item.chunk.article_id)
+            candidates.append(
+                RagReviewCandidate(
+                    article_id=item.chunk.article_id,
+                    article_title=(article.facts.title if article is not None else ""),
+                    chunk_id=item.chunk.id,
+                    rank=item.rank,
+                    score=item.score,
+                    excerpt=item.chunk.text[:320],
+                )
+            )
+        cases.append(
+            RagReviewCase(
+                id=question.id,
+                question=question.question,
+                category=question.category,
+                answerable=question.answerable,
+                expected_article_ids=question.expected_article_ids,
+                route=agentic.plan.route,
+                retrieval_rounds=agentic.retrieval_rounds,
+                evidence_sufficient=agentic.assessment.sufficient,
+                assessment_reason=agentic.assessment.reason,
+                stop_reason=agentic.assessment.stop_reason,
+                candidates=candidates,
+            )
+        )
+    return RagReviewPacket(
+        dataset_version=dataset.version,
+        corpus_snapshot_id=snapshot.snapshot_id,
+        generated_at=now or datetime.now(UTC),
+        minimum_score=minimum_score,
+        instructions=[
+            "核对 expectedArticleIds 是否完整且确实能够回答问题。",
+            "核对前五条候选是否包含正确证据，并填写 retrievalEvidenceCorrect。",
+            "核对 evidenceSufficient 的回答或拒答判断，并填写 answerabilityDecisionCorrect。",
+            "生成回答开放后再核对逐条引用，并填写 citationSupportsAnswer。",
+        ],
+        cases=cases,
+    )
+
+
 def write_eval_report(report: PublishedEvalReport, output: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     handle, name = tempfile.mkstemp(dir=output.parent, prefix="eval-", suffix=".tmp")
@@ -247,6 +356,24 @@ def write_eval_report(report: PublishedEvalReport, output: Path) -> None:
         with os.fdopen(handle, "w", encoding="utf-8", newline="\n") as stream:
             json.dump(
                 report.model_dump(mode="json", by_alias=True),
+                stream,
+                ensure_ascii=False,
+                indent=2,
+            )
+            stream.write("\n")
+        temporary.replace(output)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def write_rag_review_packet(packet: RagReviewPacket, output: Path) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    handle, name = tempfile.mkstemp(dir=output.parent, prefix="rag-review-", suffix=".tmp")
+    temporary = Path(name)
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8", newline="\n") as stream:
+            json.dump(
+                packet.model_dump(mode="json", by_alias=True),
                 stream,
                 ensure_ascii=False,
                 indent=2,

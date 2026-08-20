@@ -41,6 +41,8 @@ class SnapshotQualityReport(ContractModel):
     zero_contribution_source_ids: list[str]
     topic_counts: dict[str, int]
     topic_gaps: list[str]
+    visible_topic_counts: dict[str, int]
+    visible_topic_gaps: list[str]
     key_signal_eligible_count: int
     high_significance_event_count: int
     high_significance_chinese_gap_count: int
@@ -50,6 +52,9 @@ class SnapshotQualityReport(ContractModel):
     recent_article_count: int
     recent_chinese_ready_count: int
     recent_chinese_gap_count: int
+    visible_recent_24h_count: int
+    visible_recent_48h_count: int
+    latest_visible_published_at: datetime | None
     trend_brief_count: int
     potential_story_clusters: list[StoryCluster]
     issues: list[str]
@@ -72,7 +77,12 @@ class ReleaseGuardReport(ContractModel):
     maximum_missing_abstract_rate: float = Field(ge=0, le=1)
     candidate_key_signal_count: int
     baseline_key_signal_count: int
+    candidate_visible_recent_24h_count: int
+    candidate_visible_recent_48h_count: int
+    baseline_visible_recent_24h_count: int
+    new_article_count: int
     issues: list[str]
+    warnings: list[str]
 
 
 STOP_TERMS = {
@@ -200,6 +210,34 @@ def audit_snapshot(
     ]
     recent_chinese_ready_count = sum(chinese_display_ready(article) for article in recent_articles)
     recent_chinese_gap_count = len(recent_articles) - recent_chinese_ready_count
+    visible_recent_articles = [
+        article for article in recent_articles if chinese_display_ready(article)
+    ]
+    visible_recent_24h_count = sum(
+        anchor - timedelta(hours=24) <= _article_time <= anchor
+        for _article_time in (
+            article.published_at or article.collected_at for article in visible_recent_articles
+        )
+    )
+    visible_recent_48h_count = sum(
+        anchor - timedelta(hours=48) <= _article_time <= anchor
+        for _article_time in (
+            article.published_at or article.collected_at for article in visible_recent_articles
+        )
+    )
+    latest_visible_published_at = max(
+        (article.published_at or article.collected_at for article in visible_recent_articles),
+        default=None,
+    )
+    visible_topic_counts = {
+        topic.id: sum(
+            topic.id in article.topic_scores for article in visible_recent_articles
+        )
+        for topic in snapshot.topics
+    }
+    visible_topic_gaps = sorted(
+        topic_id for topic_id, count in visible_topic_counts.items() if count == 0
+    )
     issues: list[str] = []
     hard_failure = False
     if len(snapshot.articles) < 20:
@@ -213,8 +251,12 @@ def audit_snapshot(
         hard_failure = True
     if topic_gaps:
         issues.append(f"{len(topic_gaps)} 个配置主题暂时没有入选内容")
+    if visible_topic_gaps:
+        issues.append(f"{len(visible_topic_gaps)} 个配置主题暂时没有中文可见内容")
     if recent_chinese_gap_count:
         issues.append(f"近 30 天有 {recent_chinese_gap_count} 条外文内容待中文整理")
+    if visible_recent_24h_count == 0:
+        issues.append("近 24 小时没有中文可见新内容")
 
     return SnapshotQualityReport(
         snapshot_id=snapshot.snapshot_id,
@@ -239,6 +281,8 @@ def audit_snapshot(
         zero_contribution_source_ids=zero_contribution_source_ids,
         topic_counts=topic_counts,
         topic_gaps=topic_gaps,
+        visible_topic_counts=visible_topic_counts,
+        visible_topic_gaps=visible_topic_gaps,
         key_signal_eligible_count=key_signal_eligible_count,
         high_significance_event_count=high_significance_event_count,
         high_significance_chinese_gap_count=high_significance_chinese_gap_count,
@@ -248,6 +292,9 @@ def audit_snapshot(
         recent_article_count=len(recent_articles),
         recent_chinese_ready_count=recent_chinese_ready_count,
         recent_chinese_gap_count=recent_chinese_gap_count,
+        visible_recent_24h_count=visible_recent_24h_count,
+        visible_recent_48h_count=visible_recent_48h_count,
+        latest_visible_published_at=latest_visible_published_at,
         trend_brief_count=len(snapshot.briefs),
         potential_story_clusters=detect_story_clusters(snapshot),
         issues=issues,
@@ -284,6 +331,7 @@ def evaluate_release_guard(
     minimum_ready_rate = min(0.8, max(0.55, baseline_ready_rate - 0.4))
     maximum_missing_rate = min(0.5, max(0.2, baseline_quality.missing_abstract_rate + 0.1))
     issues: list[str] = []
+    warnings: list[str] = []
     if candidate_quality.gate == "fail":
         issues.append("候选快照未通过基础质量门禁")
     if candidate_quality.recent_chinese_ready_count < required_ready:
@@ -292,6 +340,20 @@ def evaluate_release_guard(
         issues.append("近 30 天中文可读内容占比下降过多")
     if candidate_quality.missing_abstract_rate > maximum_missing_rate:
         issues.append("来源摘要缺失率相对已发布版本上升过多")
+    candidate_hashes = {article.content_hash for article in candidate.articles}
+    baseline_hashes = {article.content_hash for article in baseline.articles}
+    new_article_count = len(candidate_hashes - baseline_hashes)
+    if candidate_quality.visible_recent_24h_count == 0:
+        warnings.append("近 24 小时没有中文可见新内容")
+    if candidate_quality.visible_recent_48h_count == 0:
+        warnings.append("近 48 小时没有中文可见新内容")
+    if new_article_count == 0:
+        warnings.append("候选与线上库存没有新增文章")
+    if (
+        candidate_quality.key_signal_eligible_count
+        < baseline_quality.key_signal_eligible_count
+    ):
+        warnings.append("Key Signal 数量下降，请核对是否为时效自然衰减")
     return ReleaseGuardReport(
         generated_at=anchor,
         gate="fail" if issues else "pass",
@@ -308,7 +370,12 @@ def evaluate_release_guard(
         maximum_missing_abstract_rate=round(maximum_missing_rate, 4),
         candidate_key_signal_count=candidate_quality.key_signal_eligible_count,
         baseline_key_signal_count=baseline_quality.key_signal_eligible_count,
+        candidate_visible_recent_24h_count=candidate_quality.visible_recent_24h_count,
+        candidate_visible_recent_48h_count=candidate_quality.visible_recent_48h_count,
+        baseline_visible_recent_24h_count=baseline_quality.visible_recent_24h_count,
+        new_article_count=new_article_count,
         issues=issues,
+        warnings=warnings,
     )
 
 

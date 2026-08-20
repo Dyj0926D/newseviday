@@ -39,13 +39,23 @@ BRIEF_PROMPT_VERSION = "weekly-trend-brief-v2"
 SHANGHAI_TIMEZONE = timezone(timedelta(hours=8), name="Asia/Shanghai")
 WEEKLY_BRIEF_CUTOFF = time(hour=9)
 MIN_ENRICHMENT_EVIDENCE_CHARS = 120
+MIN_TRUSTED_SHORT_EVIDENCE_CHARS = 50
 TRANSLATION_PRIORITY_SCORE = 0.60
 RECENT_TRANSLATION_SCORE = 0.42
 RECENT_TRANSLATION_MAX_AGE = timedelta(days=3)
 RECENT_TRANSLATION_MIN_TECHNICAL_VALUE = 0.55
 MIN_PAID_TARGET_RELEVANCE = 0.60
+SUPPLEMENTAL_TRANSLATION_SCORE = 0.45
+SUPPLEMENTAL_TRANSLATION_TARGET_RELEVANCE = 0.50
+SUPPLEMENTAL_TRANSLATION_MIN_PRODUCT_OR_ENGINEERING_VALUE = 0.70
 MAX_PAID_ENRICHMENT_AGE_DAYS = 45
 MAX_NEW_ENRICHMENTS_PER_SOURCE = 3
+FOCUS_TRANSLATION_TOPICS = {
+    "data-platform",
+    "data-agent",
+    "semantic-layer",
+    "intelligent-lakehouse",
+}
 HOME_PRIORITY_WINDOW = 8
 SOURCE_REPEAT_PENALTY = 1.0
 SchemaModel = TypeVar("SchemaModel", bound=BaseModel)
@@ -69,6 +79,8 @@ class EnrichmentTelemetry:
     skipped_stale: int = 0
     skipped_source_cap: int = 0
     skipped_after_call_limit: int = 0
+    supplemental_translation_calls: int = 0
+    priority_topic_translation_calls: int = 0
 
 
 class StructuredCompletionClient(Protocol):
@@ -269,6 +281,11 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
         event_translation_bonus = (
             50.0 if needs_chinese and high_significance_event_candidate(article) else 0.0
         )
+        focus_topic_translation_bonus = (
+            20.0
+            if needs_chinese and FOCUS_TRANSLATION_TOPICS.intersection(article.topic_scores)
+            else 0.0
+        )
         homepage_translation_bonus = 4.0 if needs_chinese and article.id in homepage_ids else 0.0
         cross_language_bonus = (
             0.08 if needs_chinese and not article.language.casefold().startswith("zh") else 0.0
@@ -279,6 +296,7 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
             key_translation_bonus
             + event_translation_bonus
             + high_value_translation_bonus
+            + focus_topic_translation_bonus
             + homepage_translation_bonus
             + score
             + editorial_priority
@@ -308,6 +326,42 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
     return result
 
 
+def _trusted_fresh_translation_candidate(article: Article, generated_at: datetime) -> bool:
+    values = article.content_score_breakdown
+    published_at = article.published_at or article.collected_at
+    return bool(
+        generated_at - published_at <= RECENT_TRANSLATION_MAX_AGE
+        and article.source_type in {"official", "research_institute", "professional_media"}
+        and (article.content_score or 0.0) >= SUPPLEMENTAL_TRANSLATION_SCORE
+        and values is not None
+        and values.target_relevance >= SUPPLEMENTAL_TRANSLATION_TARGET_RELEVANCE
+        and max(
+            values.technical_advancement,
+            values.engineering_applicability,
+            values.product_industry_impact,
+        )
+        >= SUPPLEMENTAL_TRANSLATION_MIN_PRODUCT_OR_ENGINEERING_VALUE
+    )
+
+
+def _priority_topic_translation_candidate(
+    article: Article,
+    generated_at: datetime,
+    evidence: str,
+) -> bool:
+    values = article.content_score_breakdown
+    published_at = article.published_at or article.collected_at
+    return bool(
+        generated_at - published_at <= RECENT_TRANSLATION_MAX_AGE
+        and article.source_type in {"official", "research_institute"}
+        and FOCUS_TRANSLATION_TOPICS.intersection(article.topic_scores)
+        and (article.content_score or 0.0) >= 0.22
+        and values is not None
+        and values.target_relevance >= MIN_PAID_TARGET_RELEVANCE
+        and len(evidence.strip()) >= MIN_TRUSTED_SHORT_EVIDENCE_CHARS
+    )
+
+
 def _paid_enrichment_skip_reason(article: Article, generated_at: datetime) -> str | None:
     values = article.content_score_breakdown
     published_at = article.published_at or article.collected_at
@@ -323,15 +377,28 @@ def _paid_enrichment_skip_reason(article: Article, generated_at: datetime) -> st
         )
         >= RECENT_TRANSLATION_MIN_TECHNICAL_VALUE
     )
+    trusted_fresh_candidate = _trusted_fresh_translation_candidate(article, generated_at)
+    evidence = article.facts.abstract or article.facts.title
+    priority_topic_candidate = _priority_topic_translation_candidate(
+        article,
+        generated_at,
+        evidence,
+    )
     if not high_significance_event_candidate(article):
         if (
             (article.content_score or 0.0) < TRANSLATION_PRIORITY_SCORE
             and not recent_relevant_candidate
+            and not trusted_fresh_candidate
+            and not priority_topic_candidate
         ):
             return "below_quality_floor"
         if (
             values is None
-            or values.target_relevance < MIN_PAID_TARGET_RELEVANCE
+            or (
+                values.target_relevance < MIN_PAID_TARGET_RELEVANCE
+                and not trusted_fresh_candidate
+                and not priority_topic_candidate
+            )
         ):
             return "below_quality_floor"
     if generated_at - published_at > timedelta(days=MAX_PAID_ENRICHMENT_AGE_DAYS):
@@ -374,7 +441,15 @@ def enrich_snapshot(
             stats.enriched_articles += 1
             continue
         evidence = article.facts.abstract or article.facts.title
-        if len(evidence.strip()) < MIN_ENRICHMENT_EVIDENCE_CHARS:
+        priority_topic_candidate = _priority_topic_translation_candidate(
+            article,
+            generated_at,
+            evidence,
+        )
+        if (
+            len(evidence.strip()) < MIN_ENRICHMENT_EVIDENCE_CHARS
+            and not priority_topic_candidate
+        ):
             stats.skipped_thin_evidence += 1
             continue
         skip_reason = _paid_enrichment_skip_reason(article, generated_at)
@@ -401,6 +476,12 @@ def enrich_snapshot(
             if model_calls >= max_model_calls:
                 stats.skipped_after_call_limit += 1
                 continue
+            summary_instruction = (
+                "来源只提供了标题和短摘录。summaryZh 控制在 30–80 个中文字符，"
+                "只翻译和压缩明确出现的信息；不得推断功能细节、效果、客户或结论。"
+                if len(evidence.strip()) < MIN_ENRICHMENT_EVIDENCE_CHARS
+                else "summaryZh 控制在 120–220 个中文字符，提炼主要变化，避免复述整段摘要；"
+            )
             payload = client.complete_json(
                 system=(
                     "你是 NewsEviday 的结构化情报编辑。只根据给定资料输出 JSON。"
@@ -414,7 +495,7 @@ def enrich_snapshot(
                     "</untrusted-evidence>\n"
                     f"{terminology_instruction}"
                     "输出 titleZh、summaryZh、whyItMatters、keyPoints、topicIds。"
-                    "summaryZh 控制在 120–220 个中文字符，提炼主要变化，避免复述整段摘要；"
+                    f"{summary_instruction}"
                     "whyItMatters 控制在 40–100 个中文字符；"
                     "keyPoints 输出 2–4 条，每条不超过 40 个中文字符。"
                 ),
@@ -423,6 +504,10 @@ def enrich_snapshot(
             cache.put(key, enrichment)
             model_calls += 1
             stats.model_calls = model_calls
+            if priority_topic_candidate:
+                stats.priority_topic_translation_calls += 1
+            elif _trusted_fresh_translation_candidate(article, generated_at):
+                stats.supplemental_translation_calls += 1
         else:
             stats.cache_hits += 1
         new_enrichments_by_source[article.source_id] = (
