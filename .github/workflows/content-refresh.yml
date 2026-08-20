@@ -52,6 +52,9 @@ jobs:
       DAILY_REFRESH_ENABLED: ${{ vars.DAILY_REFRESH_ENABLED || 'false' }}
       DAILY_REFRESH_ALLOW_MODEL: ${{ vars.DAILY_REFRESH_ALLOW_MODEL || 'false' }}
       DAILY_REFRESH_MAX_MODEL_CALLS: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS || '5' }}
+      DAILY_REFRESH_MAX_MODEL_CALLS_PER_RUN: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS_PER_RUN || '10' }}
+      DAILY_REFRESH_ROLLOVER_CAP: ${{ vars.DAILY_REFRESH_ROLLOVER_CAP || '10' }}
+      DAILY_REFRESH_ROLLOVER_SEED: ${{ vars.DAILY_REFRESH_ROLLOVER_SEED || '0' }}
       DAILY_REFRESH_OPEN_PULL_REQUEST: ${{ vars.DAILY_REFRESH_OPEN_PULL_REQUEST || 'true' }}
       DAILY_REFRESH_AUTO_MERGE: ${{ vars.DAILY_REFRESH_AUTO_MERGE || 'false' }}
       DAILY_REFRESH_END_DATE: ${{ vars.DAILY_REFRESH_END_DATE || '' }}
@@ -80,12 +83,16 @@ jobs:
             fi
             echo "RUN_REFRESH=true" >> "$GITHUB_ENV"
             echo "ALLOW_MODEL=$DAILY_REFRESH_ALLOW_MODEL" >> "$GITHUB_ENV"
-            echo "MODEL_CALL_LIMIT=$DAILY_REFRESH_MAX_MODEL_CALLS" >> "$GITHUB_ENV"
+            echo "BASE_MODEL_CALL_LIMIT=$DAILY_REFRESH_MAX_MODEL_CALLS" >> "$GITHUB_ENV"
+            echo "MODEL_CALL_LIMIT=$DAILY_REFRESH_MAX_MODEL_CALLS_PER_RUN" >> "$GITHUB_ENV"
+            echo "USE_ROLLOVER=true" >> "$GITHUB_ENV"
             echo "OPEN_PULL_REQUEST=$DAILY_REFRESH_OPEN_PULL_REQUEST" >> "$GITHUB_ENV"
           else
             echo "RUN_REFRESH=true" >> "$GITHUB_ENV"
             echo "ALLOW_MODEL=${{ inputs.allow_model }}" >> "$GITHUB_ENV"
             echo "MODEL_CALL_LIMIT=${{ inputs.max_model_calls }}" >> "$GITHUB_ENV"
+            echo "BASE_MODEL_CALL_LIMIT=${{ inputs.max_model_calls }}" >> "$GITHUB_ENV"
+            echo "USE_ROLLOVER=false" >> "$GITHUB_ENV"
             echo "OPEN_PULL_REQUEST=${{ inputs.open_pull_request }}" >> "$GITHUB_ENV"
           fi
       - name: Retire stale content pull requests and avoid same-day overlap
@@ -165,10 +172,12 @@ jobs:
         if: env.RUN_REFRESH == 'true'
         uses: actions/cache@v5
         with:
-          path: data/runtime/ai-cache
-          key: ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'config/terminology.yaml') }}-${{ github.run_id }}
+          path: |
+            data/runtime/ai-cache
+            data/runtime/ai-budget
+          key: ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'pipeline/src/newseviday_pipeline/budget.py', 'config/terminology.yaml') }}-${{ github.run_id }}
           restore-keys: |
-            ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'config/terminology.yaml') }}-
+            ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'pipeline/src/newseviday_pipeline/budget.py', 'config/terminology.yaml') }}-
       - name: Restore cache from previous successful trial artifact
         if: env.RUN_REFRESH == 'true' && env.ALLOW_MODEL == 'true'
         env:
@@ -198,12 +207,15 @@ jobs:
             --json databaseId \
             --jq '.[].databaseId')
           if [ -n "$previous_run_id" ]; then
-            mkdir -p data/runtime/previous-artifact data/runtime/ai-cache
+            mkdir -p data/runtime/previous-artifact data/runtime/ai-cache data/runtime/ai-budget
             if gh run download "$previous_run_id" \
               --name "$previous_artifact_name" \
               --dir data/runtime/previous-artifact; then
               if [ -d data/runtime/previous-artifact/ai-cache ]; then
                 cp -R data/runtime/previous-artifact/ai-cache/. data/runtime/ai-cache/
+              fi
+              if [ -d data/runtime/previous-artifact/ai-budget ]; then
+                cp -R data/runtime/previous-artifact/ai-budget/. data/runtime/ai-budget/
               fi
             else
               echo "::warning::Previous AI cache artifact could not be downloaded; continuing with the Actions cache only."
@@ -229,14 +241,24 @@ jobs:
         run: |
           test -n "$DEEPSEEK_API_KEY"
           test -n "$DEEPSEEK_MODEL"
-          python -m uv run --project pipeline newseviday-pipeline enrich \
-            data/runtime/content-rolling/current.json \
-            --accepted-snapshot apps/web/public/data/current.json \
-            --output data/runtime/content-enriched \
-            --cache data/runtime/ai-cache \
-            --usage-report data/runtime/quality/ai-usage-latest.json \
-            --allow-model \
+          enrich_args=(
+            data/runtime/content-rolling/current.json
+            --accepted-snapshot apps/web/public/data/current.json
+            --output data/runtime/content-enriched
+            --cache data/runtime/ai-cache
+            --usage-report data/runtime/quality/ai-usage-latest.json
+            --allow-model
             --max-model-calls "$MODEL_CALL_LIMIT"
+          )
+          if [[ "$USE_ROLLOVER" == "true" ]]; then
+            enrich_args+=(
+              --base-model-calls "$BASE_MODEL_CALL_LIMIT"
+              --rollover-ledger data/runtime/ai-budget/translation-rollover.json
+              --rollover-cap "$DAILY_REFRESH_ROLLOVER_CAP"
+              --rollover-seed "$DAILY_REFRESH_ROLLOVER_SEED"
+            )
+          fi
+          python -m uv run --project pipeline newseviday-pipeline enrich "${enrich_args[@]}"
           echo "PUBLISH_SNAPSHOT=data/runtime/content-enriched/current.json" >> "$GITHUB_ENV"
       - name: Preserve the latest successful weekly brief
         if: env.RUN_REFRESH == 'true'
@@ -311,9 +333,12 @@ jobs:
                       f"| Contributing sources | {quality['contributingSourceCount']} |",
                       f"| Missing abstracts | {quality['missingAbstractCount']} |",
                       f"| Topic gaps | {len(quality['topicGaps'])} |",
+                      f"| Chinese-visible topic gaps | {len(quality.get('visibleTopicGaps', []))} |",
                       f"| Eligible Key Signals | {quality.get('keySignalEligibleCount', 0)} |",
                       f"| High-significance events | {quality.get('highSignificanceEventCount', 0)} |",
                       f"| High-significance Chinese gaps | {quality.get('highSignificanceChineseGapCount', 0)} |",
+                      f"| Visible in last 24h | {quality.get('visibleRecent24hCount', 0)} |",
+                      f"| Visible in last 48h | {quality.get('visibleRecent48hCount', 0)} |",
                       f"| Quality gate | {quality['gate']} |",
                   ]
               )
@@ -325,6 +350,8 @@ jobs:
                       f"| Recent Chinese-ready | {guard['candidateRecentChineseReadyCount']} / {guard['candidateRecentArticleCount']} |",
                       f"| Required Chinese-ready | {guard['requiredRecentChineseReadyCount']} |",
                       f"| Release issues | {'; '.join(guard['issues']) or 'none'} |",
+                      f"| Release warnings | {'; '.join(guard.get('warnings', [])) or 'none'} |",
+                      f"| New article IDs | {guard.get('newArticleCount', 0)} |",
                   ]
               )
           if signal_eval_path.exists():
@@ -342,6 +369,10 @@ jobs:
               lines.extend(
                   [
                       f"| Model calls | {usage['modelCalls']} / {usage['modelCallLimit']} |",
+                      f"| Base daily calls | {usage.get('baseModelCallLimit', 'n/a')} |",
+                      f"| Rollover balance | {usage.get('rolloverBefore', 'n/a')} → {usage.get('rolloverAfter', 'n/a')} |",
+                      f"| Supplemental translation calls | {usage.get('supplementalTranslationCalls', 0)} |",
+                      f"| Priority-topic translation calls | {usage.get('priorityTopicTranslationCalls', 0)} |",
                       f"| Published AI reused | {usage.get('acceptedEnrichmentReuses', 0)} |",
                       f"| Cache hits | {usage['cacheHits']} |",
                       f"| Skipped below quality floor | {usage.get('skippedBelowQualityFloor', 0)} |",
@@ -400,6 +431,7 @@ jobs:
             data/runtime/content-enriched/
             data/runtime/content-briefed/
             data/runtime/ai-cache/
+            data/runtime/ai-budget/
             data/runtime/rag/
             data/runtime/quality/
           if-no-files-found: warn

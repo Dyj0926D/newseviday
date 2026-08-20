@@ -4,8 +4,10 @@ import os
 import shutil
 import tempfile
 from collections.abc import Sequence
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import httpx
 
@@ -18,10 +20,22 @@ from newseviday_pipeline.ai import (
     update_weekly_brief,
 )
 from newseviday_pipeline.ai_models import AiUsageReport
+from newseviday_pipeline.budget import (
+    load_rollover_ledger,
+    plan_rollover_budget,
+    settle_rollover_budget,
+    write_rollover_ledger,
+)
 from newseviday_pipeline.dedup_eval import evaluate_dedup_dataset, write_dedup_report
 from newseviday_pipeline.editorial import apply_editorial_package, load_editorial_package
 from newseviday_pipeline.embeddings import HashingEmbedder, OpenAICompatibleEmbedder
-from newseviday_pipeline.evaluation import evaluate_rag, load_gold_dataset, write_eval_report
+from newseviday_pipeline.evaluation import (
+    build_rag_review_packet,
+    evaluate_rag,
+    load_gold_dataset,
+    write_eval_report,
+    write_rag_review_packet,
+)
 from newseviday_pipeline.inventory import merge_rolling_inventory
 from newseviday_pipeline.models import ContentSnapshot
 from newseviday_pipeline.quality import (
@@ -108,7 +122,30 @@ def build_parser() -> argparse.ArgumentParser:
         "--max-model-calls",
         type=int,
         default=5,
-        help="Hard cap for paid calls in one run (0-10, default: 5).",
+        help="Hard cap for paid calls in one run after rollover (0-10, default: 5).",
+    )
+    enrich_parser.add_argument(
+        "--base-model-calls",
+        type=int,
+        default=5,
+        help="Daily model-call credit before rollover (default: 5).",
+    )
+    enrich_parser.add_argument(
+        "--rollover-ledger",
+        type=Path,
+        help="Private persisted ledger for bounded unused daily translation credits.",
+    )
+    enrich_parser.add_argument(
+        "--rollover-cap",
+        type=int,
+        default=10,
+        help="Maximum unused credits retained between days (default: 10).",
+    )
+    enrich_parser.add_argument(
+        "--rollover-seed",
+        type=int,
+        default=0,
+        help="One-time bounded starting balance when no ledger exists.",
     )
     enrich_parser.add_argument(
         "--usage-report",
@@ -166,6 +203,11 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("snapshot", type=Path)
     eval_parser.add_argument("dataset", type=Path)
     eval_parser.add_argument("--report", type=Path, default=Path("data/runtime/eval/latest.json"))
+    eval_parser.add_argument(
+        "--review-packet",
+        type=Path,
+        help="Export per-question candidates and blank human-review fields.",
+    )
     eval_parser.add_argument("--minimum-score", type=float, default=0.08)
     signal_eval_parser = subparsers.add_parser(
         "eval-key-signal", help="Evaluate change-event detection and Key Signal eligibility"
@@ -310,6 +352,21 @@ def enrich(args: argparse.Namespace) -> int:
     if not 0 <= args.max_model_calls <= 10:
         print("--max-model-calls must be between 0 and 10.")
         return 2
+    if min(args.base_model_calls, args.rollover_cap, args.rollover_seed) < 0:
+        print("Rollover budget values must be nonnegative.")
+        return 2
+    budget_plan = None
+    effective_model_call_limit = args.max_model_calls
+    if args.rollover_ledger:
+        budget_plan = plan_rollover_budget(
+            load_rollover_ledger(args.rollover_ledger),
+            run_date=datetime.now(ZoneInfo("Asia/Shanghai")).date(),
+            base_limit=args.base_model_calls,
+            rollover_cap=args.rollover_cap,
+            max_per_run=args.max_model_calls,
+            seed_rollover=args.rollover_seed,
+        )
+        effective_model_call_limit = budget_plan.effective_limit
     _runtime, _sources, topics = load_project_config()
     snapshot = load_snapshot(args.snapshot)
     accepted_snapshot = load_snapshot(args.accepted_snapshot) if args.accepted_snapshot else None
@@ -323,7 +380,7 @@ def enrich(args: argparse.Namespace) -> int:
         topics=topics.topics,
         terminology=terminology,
         accepted_snapshot=accepted_snapshot,
-        max_model_calls=args.max_model_calls,
+        max_model_calls=effective_model_call_limit,
         telemetry=telemetry,
     )
     input_price, output_price = _token_prices_from_environment()
@@ -338,12 +395,26 @@ def enrich(args: argparse.Namespace) -> int:
         if usage_complete and input_price is not None and output_price is not None
         else None
     )
+    rollover_after = None
+    if budget_plan is not None:
+        settled_budget = settle_rollover_budget(
+            budget_plan,
+            model_calls=model_calls,
+            updated_at=result.generated_at,
+        )
+        write_rollover_ledger(settled_budget, args.rollover_ledger)
+        rollover_after = settled_budget.balance
     usage_report = AiUsageReport(
         snapshot_id=result.snapshot_id,
         generated_at=result.generated_at,
         model=client.model,
         model_calls=model_calls,
-        model_call_limit=args.max_model_calls,
+        model_call_limit=effective_model_call_limit,
+        base_model_call_limit=(budget_plan.base_limit if budget_plan else None),
+        rollover_daily_credit=(budget_plan.daily_credit if budget_plan else None),
+        rollover_before=(budget_plan.rollover_before if budget_plan else None),
+        rollover_after=rollover_after,
+        rollover_cap=(budget_plan.rollover_cap if budget_plan else None),
         usage_reported_calls=client.usage_reported_calls,
         usage_complete=usage_complete,
         cache_hits=telemetry.cache_hits,
@@ -354,6 +425,8 @@ def enrich(args: argparse.Namespace) -> int:
         skipped_stale=telemetry.skipped_stale,
         skipped_source_cap=telemetry.skipped_source_cap,
         skipped_after_call_limit=telemetry.skipped_after_call_limit,
+        supplemental_translation_calls=telemetry.supplemental_translation_calls,
+        priority_topic_translation_calls=telemetry.priority_topic_translation_calls,
         prompt_tokens=usage.prompt_tokens,
         completion_tokens=usage.completion_tokens,
         total_tokens=usage.total_tokens,
@@ -394,7 +467,7 @@ def enrich(args: argparse.Namespace) -> int:
                 "snapshotId": result.snapshot_id,
                 "articleCount": len(result.articles),
                 "modelCalls": model_calls,
-                "modelCallLimit": args.max_model_calls,
+                "modelCallLimit": effective_model_call_limit,
                 "terminologyConsistency": round(terminology_score, 4),
                 "usage": usage_report.model_dump(mode="json", by_alias=True),
                 "output": str(args.output / "current.json"),
@@ -564,6 +637,15 @@ def eval_rag(args: argparse.Namespace) -> int:
         minimum_score=args.minimum_score,
     )
     write_eval_report(report, args.report)
+    if args.review_packet:
+        packet = build_rag_review_packet(
+            snapshot,
+            index,
+            dataset,
+            provider,
+            minimum_score=args.minimum_score,
+        )
+        write_rag_review_packet(packet, args.review_packet)
     print(report.model_dump_json(by_alias=True, indent=2))
     return 0
 

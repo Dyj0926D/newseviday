@@ -6,6 +6,7 @@ import {
   isWithinPublishedWindow,
   selectKeySignal,
   sortLatestArticles,
+  summarizeVisibleFreshness,
 } from './feedRanking';
 
 function article(id: string, sourceId: string, score: number, eligible = false): Article {
@@ -55,6 +56,34 @@ describe('feed ranking', () => {
 
     expect(isWithinPublishedWindow(recent, '2026-08-10T00:00:00Z', 30)).toBe(true);
     expect(isWithinPublishedWindow(stale, '2026-08-10T00:00:00Z', 30)).toBe(false);
+  });
+
+  it('reports freshness from the same Chinese-ready inventory shown in the default feed', () => {
+    const untranslatedNewer = article('untranslated', 'mit', 0.8);
+    untranslatedNewer.publishedAt = '2026-08-19T10:00:00Z';
+    const translatedOlder = article('translated', 'github', 0.7);
+    translatedOlder.publishedAt = '2026-08-18T01:00:00Z';
+    translatedOlder.ai = {
+      titleZh: '已整理标题',
+      summaryZh: '这是一段已经完成中文整理并可在默认信息流展示的摘要内容。',
+      whyItMatters: '用于验证默认信息流的时效口径。',
+      keyPoints: ['口径一致', '只统计可见内容'],
+      provider: 'editorial',
+      model: 'editorial-v1',
+      promptVersion: 'editorial-v1',
+      generatedAt: '2026-08-19T10:00:00Z',
+    };
+
+    expect(
+      summarizeVisibleFreshness(
+        [untranslatedNewer, translatedOlder],
+        '2026-08-20T10:00:00Z',
+      ),
+    ).toEqual({
+      visibleCount: 1,
+      recent24HourCount: 0,
+      latestPublishedAt: translatedOlder.publishedAt,
+    });
   });
 
   it('selects the highest eligible Key Signal without forcing an ineligible item', () => {

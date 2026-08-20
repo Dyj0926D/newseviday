@@ -8,6 +8,13 @@ from newseviday_pipeline.stages import (
     chinese_display_ready,
 )
 
+FOCUS_TOPIC_IDS = {
+    "data-platform",
+    "data-agent",
+    "semantic-layer",
+    "intelligent-lakehouse",
+}
+
 
 def _article_time(article: Article) -> datetime:
     return article.published_at or article.collected_at
@@ -104,6 +111,36 @@ def merge_rolling_inventory(
         max_total,
         max(minimum_chinese_ready, len(accepted_ready_hashes) + new_ready_count),
     )
+    # Reserve the user's focus topics before the Chinese-ready pool can fill all
+    # inventory slots. Enrichment runs after this merge, so a selected foreign-
+    # language focus item can still receive its Chinese editorial package.
+    covered_topics: set[str] = set()
+    focus_cutoff = incoming.generated_at - timedelta(days=7)
+    focus_candidates = sorted(
+        (
+            article
+            for article in incoming.articles
+            if _article_time(article) >= focus_cutoff
+            and FOCUS_TOPIC_IDS.intersection(article.topic_scores)
+            and article.content_score_breakdown is not None
+            and article.content_score_breakdown.target_relevance >= 0.5
+        ),
+        key=lambda article: (
+            article.content_score_breakdown.target_relevance
+            if article.content_score_breakdown is not None
+            else 0.0,
+            _article_time(article),
+            article.content_score or 0.0,
+        ),
+        reverse=True,
+    )
+    for topic_id in sorted(FOCUS_TOPIC_IDS - covered_topics):
+        candidate = next(
+            (article for article in focus_candidates if topic_id in article.topic_scores),
+            None,
+        )
+        if candidate is not None and select(candidate):
+            covered_topics.update(candidate.topic_scores)
     for article in ranked_ready:
         if sum(chinese_display_ready(item) for item in selected) >= desired_ready:
             break

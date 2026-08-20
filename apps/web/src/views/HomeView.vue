@@ -12,9 +12,9 @@ import IntelligenceRow from '../components/home/IntelligenceRow.vue';
 import SignalOverview from '../components/home/SignalOverview.vue';
 import {
   diversifyBySource,
-  isWithinPublishedWindow,
   selectKeySignal,
   sortLatestArticles,
+  summarizeVisibleFreshness,
 } from '../lib/feedRanking';
 import { formatDateTime, isChineseDisplayReady, resolveSource } from '../lib/intelligence';
 import { useContentStore, type ArchiveArticleEntry } from '../stores/content';
@@ -150,21 +150,13 @@ const modelOrganizedArticleCount = computed(
   () =>
     (snapshot.value?.articles ?? []).filter((article) => article.ai?.provider === 'deepseek').length,
 );
-const recent24HourCount = computed(() => {
-  if (!snapshot.value) return 0;
-  const current = snapshot.value;
-  return current.articles.filter(
-    (article) =>
-      article.publishedAt && isWithinPublishedWindow(article, current.generatedAt, 1),
-  ).length;
-});
-const latestPublishedAt = computed(() => {
-  const timestamps = (snapshot.value?.articles ?? [])
-    .map((article) => article.publishedAt)
-    .filter((value): value is string => Boolean(value))
-    .sort((left, right) => new Date(right).getTime() - new Date(left).getTime());
-  return timestamps[0] ?? null;
-});
+const defaultFreshness = computed(() =>
+  snapshot.value
+    ? summarizeVisibleFreshness(snapshot.value.articles, snapshot.value.generatedAt)
+    : { visibleCount: 0, recent24HourCount: 0, latestPublishedAt: null },
+);
+const recent24HourCount = computed(() => defaultFreshness.value.recent24HourCount);
+const latestPublishedAt = computed(() => defaultFreshness.value.latestPublishedAt);
 const productionNoticeDescription = computed(() => {
   if (!snapshot.value) return '';
   return `数据整理于 ${formatDateTime(snapshot.value.generatedAt)}，来自 ${contributingSourceCount.value} 个实际贡献来源；${organizedArticleCount.value} 篇已完成中文结构化整理，其中 ${modelOrganizedArticleCount.value} 篇由 AI 生成，其余为编辑整理。重要判断请回到原文核验。`;

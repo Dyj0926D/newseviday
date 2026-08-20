@@ -32,6 +32,11 @@ class AiUsageReport(ContractModel):
     model: str
     model_calls: int = Field(ge=0)
     model_call_limit: int = Field(ge=0)
+    base_model_call_limit: int | None = Field(default=None, ge=0)
+    rollover_daily_credit: int | None = Field(default=None, ge=0)
+    rollover_before: int | None = Field(default=None, ge=0)
+    rollover_after: int | None = Field(default=None, ge=0)
+    rollover_cap: int | None = Field(default=None, ge=0)
     usage_reported_calls: int = Field(ge=0)
     usage_complete: bool
     cache_hits: int = Field(ge=0)
@@ -42,6 +47,8 @@ class AiUsageReport(ContractModel):
     skipped_stale: int = Field(ge=0)
     skipped_source_cap: int = Field(ge=0)
     skipped_after_call_limit: int = Field(ge=0)
+    supplemental_translation_calls: int = Field(default=0, ge=0)
+    priority_topic_translation_calls: int = Field(default=0, ge=0)
     prompt_tokens: int = Field(ge=0)
     completion_tokens: int = Field(ge=0)
     total_tokens: int = Field(ge=0)

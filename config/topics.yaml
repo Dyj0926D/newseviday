@@ -12,6 +12,13 @@ topics:
       - data warehouse
       - modern data stack
       - data infrastructure
+      - data and ai platform
+      - enterprise data platform
+      - feature store
+      - unity catalog
+      - data control plane
+      - data observability
+      - data mesh
   - id: data-agent
     label: Data Agent
     weight: 1.3
@@ -23,6 +30,15 @@ topics:
       - text-to-sql
       - text to sql
       - natural language to sql
+      - genie agent
+      - genie agents
+      - databricks genie
+      - data assistant
+      - data analyst agent
+      - business intelligence agent
+      - conversational analytics
+      - conversational data
+      - governed data agent
   - id: semantic-layer
     label: 统一语义与语义层
     weight: 1.2
@@ -32,6 +48,13 @@ topics:
       - semantic model
       - semantic modeling
       - metricflow
+      - business semantics
+      - governed metrics
+      - metric definitions
+      - metrics store
+      - metric store
+      - semantic metadata
+      - ontology
       - 统一语义
   - id: intelligent-lakehouse
     label: 智能数据湖与湖仓
@@ -42,6 +65,11 @@ topics:
       - lakehouse
       - lakehouse architecture
       - data intelligence platform
+      - delta lake
+      - apache iceberg
+      - open table format
+      - medallion architecture
+      - lakeflow
       - 智能数据湖
   - id: rag-eval
     label: RAG、检索与评测
