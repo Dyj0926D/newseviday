@@ -214,7 +214,8 @@ jobs:
               if [ -d data/runtime/previous-artifact/ai-cache ]; then
                 cp -R data/runtime/previous-artifact/ai-cache/. data/runtime/ai-cache/
               fi
-              if [ -d data/runtime/previous-artifact/ai-budget ]; then
+              if [ -d data/runtime/previous-artifact/ai-budget ] && \
+                [ ! -f data/runtime/ai-budget/translation-rollover.json ]; then
                 cp -R data/runtime/previous-artifact/ai-budget/. data/runtime/ai-budget/
               fi
             else

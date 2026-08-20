@@ -38,6 +38,10 @@ jobs:
       WEEKLY_BRIEF_ENABLED: ${{ vars.WEEKLY_BRIEF_ENABLED || 'true' }}
       WEEKLY_REFRESH_MAX_MODEL_CALLS: ${{ vars.WEEKLY_REFRESH_MAX_MODEL_CALLS || '5' }}
       WEEKLY_REFRESH_AUTO_MERGE: ${{ vars.WEEKLY_REFRESH_AUTO_MERGE || 'false' }}
+      DAILY_REFRESH_MAX_MODEL_CALLS: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS || '5' }}
+      DAILY_REFRESH_MAX_MODEL_CALLS_PER_RUN: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS_PER_RUN || '10' }}
+      DAILY_REFRESH_ROLLOVER_CAP: ${{ vars.DAILY_REFRESH_ROLLOVER_CAP || '10' }}
+      DAILY_REFRESH_ROLLOVER_SEED: ${{ vars.DAILY_REFRESH_ROLLOVER_SEED || '0' }}
     steps:
       - name: Resolve weekly policy
         shell: bash
@@ -45,9 +49,15 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "schedule" ]]; then
             echo "RUN_BRIEF=$WEEKLY_BRIEF_ENABLED" >> "$GITHUB_ENV"
             echo "ALLOW_MODEL=$WEEKLY_BRIEF_ENABLED" >> "$GITHUB_ENV"
+            echo "BASE_MODEL_CALL_LIMIT=$DAILY_REFRESH_MAX_MODEL_CALLS" >> "$GITHUB_ENV"
+            echo "MODEL_CALL_LIMIT=$DAILY_REFRESH_MAX_MODEL_CALLS_PER_RUN" >> "$GITHUB_ENV"
+            echo "USE_ROLLOVER=true" >> "$GITHUB_ENV"
           else
             echo "RUN_BRIEF=true" >> "$GITHUB_ENV"
             echo "ALLOW_MODEL=${{ inputs.allow_model }}" >> "$GITHUB_ENV"
+            echo "BASE_MODEL_CALL_LIMIT=$WEEKLY_REFRESH_MAX_MODEL_CALLS" >> "$GITHUB_ENV"
+            echo "MODEL_CALL_LIMIT=$WEEKLY_REFRESH_MAX_MODEL_CALLS" >> "$GITHUB_ENV"
+            echo "USE_ROLLOVER=false" >> "$GITHUB_ENV"
           fi
       - uses: actions/checkout@v7
         if: env.RUN_BRIEF == 'true'
@@ -68,10 +78,12 @@ jobs:
         if: env.RUN_BRIEF == 'true'
         uses: actions/cache@v5
         with:
-          path: data/runtime/ai-cache
-          key: ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'config/terminology.yaml') }}-${{ github.run_id }}
+          path: |
+            data/runtime/ai-cache
+            data/runtime/ai-budget
+          key: ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'pipeline/src/newseviday_pipeline/budget.py', 'config/terminology.yaml') }}-${{ github.run_id }}
           restore-keys: |
-            ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'config/terminology.yaml') }}-
+            ai-cache-${{ runner.os }}-${{ env.DEEPSEEK_MODEL }}-${{ hashFiles('pipeline/src/newseviday_pipeline/ai.py', 'pipeline/src/newseviday_pipeline/ai_models.py', 'pipeline/src/newseviday_pipeline/budget.py', 'config/terminology.yaml') }}-
       - name: Collect a fresh cutoff corpus
         if: env.RUN_BRIEF == 'true'
         run: >-
@@ -90,14 +102,24 @@ jobs:
         run: |
           test -n "$DEEPSEEK_API_KEY"
           test -n "$DEEPSEEK_MODEL"
-          python -m uv run --project pipeline newseviday-pipeline enrich \
-            data/runtime/weekly-rolling/current.json \
-            --accepted-snapshot apps/web/public/data/current.json \
-            --output data/runtime/weekly-enriched \
-            --cache data/runtime/ai-cache \
-            --usage-report data/runtime/quality/weekly-ai-usage.json \
-            --allow-model \
-            --max-model-calls "$WEEKLY_REFRESH_MAX_MODEL_CALLS"
+          enrich_args=(
+            data/runtime/weekly-rolling/current.json
+            --accepted-snapshot apps/web/public/data/current.json
+            --output data/runtime/weekly-enriched
+            --cache data/runtime/ai-cache
+            --usage-report data/runtime/quality/weekly-ai-usage.json
+            --allow-model
+            --max-model-calls "$MODEL_CALL_LIMIT"
+          )
+          if [[ "$USE_ROLLOVER" == "true" ]]; then
+            enrich_args+=(
+              --base-model-calls "$BASE_MODEL_CALL_LIMIT"
+              --rollover-ledger data/runtime/ai-budget/translation-rollover.json
+              --rollover-cap "$DAILY_REFRESH_ROLLOVER_CAP"
+              --rollover-seed "$DAILY_REFRESH_ROLLOVER_SEED"
+            )
+          fi
+          python -m uv run --project pipeline newseviday-pipeline enrich "${enrich_args[@]}"
           echo "WEEKLY_INPUT=data/runtime/weekly-enriched/current.json" >> "$GITHUB_ENV"
       - name: Build weekly brief candidate from the fresh corpus
         if: env.RUN_BRIEF == 'true'
@@ -163,6 +185,8 @@ jobs:
             data/runtime/weekly-rolling/
             data/runtime/weekly-enriched/
             data/runtime/weekly-brief/
+            data/runtime/ai-cache/
+            data/runtime/ai-budget/
             data/runtime/quality/
             data/runtime/rag/
           if-no-files-found: warn
