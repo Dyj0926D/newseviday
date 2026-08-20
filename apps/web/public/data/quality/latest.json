@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260819T023223Z-8d5efc81-rolling-7d584e2d-ai-04b660d1",
-  "generatedAt": "2026-08-19T02:32:30.551666Z",
+  "snapshotId": "snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225",
+  "generatedAt": "2026-08-20T02:31:08.021760Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -47,8 +47,8 @@
     "intelligent-lakehouse",
     "semantic-layer"
   ],
-  "keySignalEligibleCount": 1,
-  "highSignificanceEventCount": 1,
+  "keySignalEligibleCount": 0,
+  "highSignificanceEventCount": 0,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
