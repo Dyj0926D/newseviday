@@ -1,7 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "updatedAt": "2026-08-20T02:31:06.661353Z",
+  "updatedAt": "2026-08-21T02:37:40.195258Z",
   "snapshots": [
+    {
+      "snapshotId": "snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2",
+      "generatedAt": "2026-08-21T02:37:40.195258Z",
+      "path": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json",
+      "articleCount": 40
+    },
     {
       "snapshotId": "snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225",
       "generatedAt": "2026-08-20T02:31:06.661353Z",
@@ -77,12 +83,36 @@
   ],
   "articles": [
     {
+      "id": "article-6dc5eea682c8e3cbe882",
+      "title": "Busting SQL Migration Myths: How New SQL Features Make Lift-and-Shift to Lakehouse Easier",
+      "originalTitle": "Busting SQL Migration Myths: How New SQL Features Make Lift-and-Shift to Lakehouse Easier",
+      "sourceId": "databricks-blog",
+      "publishedAt": "2026-08-20T19:00:00Z",
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
+    },
+    {
+      "id": "article-d46c6ecb7b830aa48b8b",
+      "title": "从单一提示设计有效的Genie代理",
+      "originalTitle": "Designing effective Genie Agents from a single prompt",
+      "sourceId": "databricks-blog",
+      "publishedAt": "2026-08-19T16:00:00Z",
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
+    },
+    {
       "id": "article-7952cfe3bb5b1d2c1cf6",
-      "title": "We still don’t know how people are really using AI",
+      "title": "我们仍不知道人们真正如何使用AI",
       "originalTitle": "We still don’t know how people are really using AI",
       "sourceId": "mit-technology-review-ai",
       "publishedAt": "2026-08-18T10:06:43Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
+    },
+    {
+      "id": "article-fb683174ce4352be0325",
+      "title": "How Databricks Feature Store serves features with sub-second freshness",
+      "originalTitle": "How Databricks Feature Store serves features with sub-second freshness",
+      "sourceId": "databricks-blog",
+      "publishedAt": "2026-08-17T23:10:00Z",
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-0b84d0fa9fed84565f55",
@@ -90,7 +120,7 @@
       "originalTitle": "HAF: Adapting Generalist VLAs to Humanoid Whole-Body Loco-manipulation via Hierarchical Action Flow and Spectral Latent RL",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-17T17:22:33Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-1f08b431314013b7175a",
@@ -98,7 +128,7 @@
       "originalTitle": "How canvases make agentic workflows visible, steerable, and cost-efficient",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-17T16:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-ed532247d82463b31d1b",
@@ -106,7 +136,7 @@
       "originalTitle": "DeepSeek-V4-Pro Update",
       "sourceId": "deepseek-updates",
       "publishedAt": "2026-08-13T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-af87c1f98b4ce7bda274",
@@ -114,7 +144,7 @@
       "originalTitle": "DeepSeek V4 Pro 0813 (on OpenRouter)",
       "sourceId": "simon-willison-llms",
       "publishedAt": "2026-08-12T23:59:23Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-3b94d67ca1b43079540d",
@@ -122,7 +152,7 @@
       "originalTitle": "Scaling AI agents with trustworthy data",
       "sourceId": "mit-technology-review-ai",
       "publishedAt": "2026-08-12T16:51:57Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-3b9cbd777edf9cb0ebe1",
@@ -130,7 +160,7 @@
       "originalTitle": "An Agentic Workflow for Legacy HPC Modernization: Converting the Two-Electron-Integral Core of GAMESS",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-12T16:48:47Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-8ab7c1f7475b1108f125",
@@ -162,7 +192,7 @@
       "originalTitle": "From assistance to execution: How enterprises put AI to work",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-12T06:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-9bafa93fe08b847d5d92",
@@ -170,7 +200,7 @@
       "originalTitle": "How RingCentral builds AI-native work from engineering to ops",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-12T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-b19ec562c455e753267b",
@@ -178,7 +208,7 @@
       "originalTitle": "Testing ads in ChatGPT",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-11T10:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-c60b75d4c49e5375c4e0",
@@ -186,7 +216,7 @@
       "originalTitle": "Introducing Muse Glimmer",
       "sourceId": "simon-willison-llms",
       "publishedAt": "2026-08-10T23:56:03Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-65c11cd6697d24998d9d",
@@ -218,7 +248,7 @@
       "originalTitle": "CoinRAG: Contextualized Information Nugget KV Cache Reuse for Long-Context RAG",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-07T17:51:49Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-cb908ccea1c039281a93",
@@ -226,7 +256,7 @@
       "originalTitle": "Taxonomy-Driven Analysis of Open-Source AI Risk Mitigation Tools",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-07T17:33:09Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-9661d4713bc53b5f576c",
@@ -234,7 +264,7 @@
       "originalTitle": "PsychoAgent: An Affect-Sensitive Cognitive Architecture for Conflict-Aware Memory in LLM Agents",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-07T17:22:29Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-32b07cef96ff1a4a3a5f",
@@ -242,7 +272,7 @@
       "originalTitle": "FinRank: An Evidence-Grounded Benchmark for Financial Question Answering and Retrieval over SEC Filings",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-07T16:45:39Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-d30bef288e2bc7b06868",
@@ -250,7 +280,7 @@
       "originalTitle": "Managing AI Coding Costs at Scale",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-08-07T11:50:39Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-6f0c59a4d2aabd7bb5bc",
@@ -258,7 +288,7 @@
       "originalTitle": "What is an AI Assistant?",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-08-07T11:44:24Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-7347f06e7c916544f6e9",
@@ -266,7 +296,7 @@
       "originalTitle": "How HSP GRUPPE builds AI capabilities for tax advisory",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-07T09:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-13844026d0b31ab87e4a",
@@ -274,7 +304,7 @@
       "originalTitle": "What are Agentic Workflows?",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-08-06T21:36:15Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-1441b6270a33709513b4",
@@ -282,7 +312,7 @@
       "originalTitle": "A guide to slash commands in the GitHub Copilot app",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-06T19:49:34Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-f73d3a1c30182798f362",
@@ -290,7 +320,7 @@
       "originalTitle": "AI Safety Regulations in the U.S. Could Give Hackers an Edge",
       "sourceId": "ieee-spectrum-ai",
       "publishedAt": "2026-08-06T19:25:39Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-7b16ffe70ac1c0968e4b",
@@ -346,7 +376,7 @@
       "originalTitle": "Improving GPT‑5.6 Sol in ChatGPT—and expanding access to GPT-5.6 Luna for free users",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-06T10:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-3763c3e63f841c3b3b74",
@@ -354,7 +384,7 @@
       "originalTitle": "From asking to doing: How the world is putting ChatGPT to work",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-06T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-410456543f831dcbef23",
@@ -410,7 +440,7 @@
       "originalTitle": "How the GitHub legal team used Copilot CLI to streamline their workflows",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-04T19:02:34Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-c99ec862b4e71599bc42",
@@ -498,7 +528,7 @@
       "originalTitle": "New ways to learn and teach with ChatGPT Work and Codex",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-04T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-02ee117c8673acd4af7d",
@@ -506,7 +536,7 @@
       "originalTitle": "Introducing our Artifacts Hub and Adoption Dashboard",
       "sourceId": "interconnects",
       "publishedAt": "2026-08-03T14:03:08Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-a50fcff3a21f9aca662b",
@@ -522,7 +552,7 @@
       "originalTitle": "How we built a realtime system for responsive voice AI in six months",
       "sourceId": "openai-news",
       "publishedAt": "2026-08-03T07:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-cd88270c00622dafecb0",
@@ -546,7 +576,7 @@
       "originalTitle": "DeepSeek-V4-Flash Update",
       "sourceId": "deepseek-updates",
       "publishedAt": "2026-07-31T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-994add5868193c37f04d",
@@ -594,7 +624,7 @@
       "originalTitle": "The harness is all you need (mostly)",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-27T18:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-3bbd8b07cb5a7e5a4148",
@@ -602,7 +632,7 @@
       "originalTitle": "GitHub Copilot app for Beginners: Getting started",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-27T16:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-c34a327604b5be4a7c98",
@@ -610,7 +640,7 @@
       "originalTitle": "Introducing Claude Opus 5",
       "sourceId": "anthropic-news",
       "publishedAt": "2026-07-24T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-98b061f178880396da02",
@@ -618,7 +648,7 @@
       "originalTitle": "Copilot vs. raw API access: What are you actually paying for?",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-07-22T19:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-24abb84d61b2e52549cc",
@@ -634,7 +664,7 @@
       "originalTitle": "6 months to live for open models",
       "sourceId": "interconnects",
       "publishedAt": "2026-07-12T16:47:42Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-c8dc1df614610019c8cf",
@@ -658,7 +688,7 @@
       "originalTitle": "Agentic Inference for MLPerf Inference",
       "sourceId": "mlcommons-news",
       "publishedAt": "2026-07-08T14:40:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-5b150c21cc84194b8733",
@@ -706,7 +736,7 @@
       "originalTitle": "MLCommons Releases MLPerf Mobile v6.0 with New Generative AI Benchmarks for On-Device LLMs",
       "sourceId": "mlcommons-news",
       "publishedAt": "2026-06-15T14:40:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-0b66c798d1b0ba7f5835",
@@ -714,7 +744,7 @@
       "originalTitle": "GPT-OSS 20B: A Sparse MoE Pretraining Benchmark for MLPerf Training v6.0",
       "sourceId": "mlcommons-news",
       "publishedAt": "2026-05-07T13:23:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-9cb994c900dd494fae54",
@@ -786,7 +816,7 @@
       "originalTitle": "Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models",
       "sourceId": "qwen-blog",
       "publishedAt": "2025-06-05T13:00:00Z",
-      "snapshotPath": "versions/snapshot-20260820T023100Z-c2df626c-rolling-7d584e2d-ai-54f73225.json"
+      "snapshotPath": "versions/snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2.json"
     },
     {
       "id": "article-3d7b702ae4535a131393",
