@@ -1,13 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260821T023733Z-c1a7a001-rolling-96a24017-ai-2da96dc2",
-  "generatedAt": "2026-08-21T02:37:46.546078Z",
+  "snapshotId": "snapshot-20260822T025247Z-96c1f5f6-rolling-0393676e-ai-9075b3e2-brief-10826d3e",
+  "generatedAt": "2026-08-22T02:53:01.578222Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
   "contributingSourceCount": 12,
-  "structuredArticleCount": 31,
-  "aiArticleCount": 13,
+  "structuredArticleCount": 32,
+  "aiArticleCount": 14,
   "editorialArticleCount": 18,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
@@ -15,10 +15,10 @@
   "sourceCounts": {
     "anthropic-news": 1,
     "arxiv-cs-ai": 6,
-    "databricks-blog": 6,
-    "deepseek-updates": 2,
-    "github-ai-ml": 6,
-    "ieee-spectrum-ai": 1,
+    "databricks-blog": 5,
+    "deepseek-updates": 3,
+    "github-ai-ml": 5,
+    "ieee-spectrum-ai": 2,
     "interconnects": 2,
     "mit-technology-review-ai": 2,
     "mlcommons-news": 3,
@@ -38,46 +38,45 @@
     "intelligent-lakehouse": 1,
     "rag-eval": 14,
     "metadata-governance": 1,
-    "foundation-models": 24,
+    "foundation-models": 25,
     "ai-products-agents": 23
   },
   "topicGaps": [
     "semantic-layer"
   ],
   "visibleTopicCounts": {
-    "data-platform": 0,
+    "data-platform": 1,
     "data-agent": 1,
     "semantic-layer": 0,
     "intelligent-lakehouse": 0,
     "rag-eval": 9,
     "metadata-governance": 1,
-    "foundation-models": 17,
+    "foundation-models": 18,
     "ai-products-agents": 20
   },
   "visibleTopicGaps": [
-    "data-platform",
     "intelligent-lakehouse",
     "semantic-layer"
   ],
-  "keySignalEligibleCount": 0,
-  "highSignificanceEventCount": 0,
+  "keySignalEligibleCount": 1,
+  "highSignificanceEventCount": 1,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
     "capability_update": 2,
     "policy_regulation": 1,
-    "product_launch": 6,
+    "product_launch": 7,
     "security_risk": 1,
     "technical_breakthrough": 1
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
   "recentArticleCount": 35,
-  "recentChineseReadyCount": 30,
-  "recentChineseGapCount": 5,
-  "visibleRecent24hCount": 0,
-  "visibleRecent48hCount": 1,
-  "latestVisiblePublishedAt": "2026-08-19T16:00:00Z",
+  "recentChineseReadyCount": 31,
+  "recentChineseGapCount": 4,
+  "visibleRecent24hCount": 1,
+  "visibleRecent48hCount": 2,
+  "latestVisiblePublishedAt": "2026-08-21T14:32:37Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [
     {
@@ -107,8 +106,7 @@
   ],
   "issues": [
     "1 个配置主题暂时没有入选内容",
-    "3 个配置主题暂时没有中文可见内容",
-    "近 30 天有 5 条外文内容待中文整理",
-    "近 24 小时没有中文可见新内容"
+    "2 个配置主题暂时没有中文可见内容",
+    "近 30 天有 4 条外文内容待中文整理"
   ]
 }
