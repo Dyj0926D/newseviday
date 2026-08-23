@@ -1,32 +1,32 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260822T025247Z-96c1f5f6-rolling-0393676e-ai-9075b3e2-brief-10826d3e",
-  "generatedAt": "2026-08-22T02:53:01.578222Z",
+  "snapshotId": "snapshot-20260823T023739Z-cfa5a399-rolling-a8dcd738-ai-085d5b7c",
+  "generatedAt": "2026-08-23T02:37:47.349441Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
-  "contributingSourceCount": 12,
-  "structuredArticleCount": 32,
+  "contributingSourceCount": 11,
+  "structuredArticleCount": 31,
   "aiArticleCount": 14,
-  "editorialArticleCount": 18,
+  "editorialArticleCount": 17,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
   "sourceCounts": {
-    "anthropic-news": 1,
     "arxiv-cs-ai": 6,
     "databricks-blog": 5,
-    "deepseek-updates": 3,
+    "deepseek-updates": 4,
     "github-ai-ml": 5,
     "ieee-spectrum-ai": 2,
     "interconnects": 2,
     "mit-technology-review-ai": 2,
     "mlcommons-news": 3,
     "openai-news": 8,
-    "qwen-blog": 1,
-    "simon-willison-llms": 2
+    "qwen-blog": 2,
+    "simon-willison-llms": 1
   },
   "zeroContributionSourceIds": [
+    "anthropic-news",
     "dbt-labs-blog",
     "huggingface-blog",
     "metr-blog"
@@ -51,7 +51,7 @@
     "intelligent-lakehouse": 0,
     "rag-eval": 9,
     "metadata-governance": 1,
-    "foundation-models": 18,
+    "foundation-models": 17,
     "ai-products-agents": 20
   },
   "visibleTopicGaps": [
@@ -63,7 +63,7 @@
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
-    "capability_update": 2,
+    "capability_update": 3,
     "policy_regulation": 1,
     "product_launch": 7,
     "security_risk": 1,
@@ -71,11 +71,11 @@
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
-  "recentArticleCount": 35,
-  "recentChineseReadyCount": 31,
-  "recentChineseGapCount": 4,
-  "visibleRecent24hCount": 1,
-  "visibleRecent48hCount": 2,
+  "recentArticleCount": 33,
+  "recentChineseReadyCount": 30,
+  "recentChineseGapCount": 3,
+  "visibleRecent24hCount": 0,
+  "visibleRecent48hCount": 1,
   "latestVisiblePublishedAt": "2026-08-21T14:32:37Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [
@@ -90,23 +90,12 @@
         "agentic",
         "workflows"
       ]
-    },
-    {
-      "id": "story-002",
-      "articleIds": [
-        "article-af87c1f98b4ce7bda274",
-        "article-ed532247d82463b31d1b"
-      ],
-      "sourceCount": 2,
-      "sharedTerms": [
-        "deepseek",
-        "pro"
-      ]
     }
   ],
   "issues": [
     "1 个配置主题暂时没有入选内容",
     "2 个配置主题暂时没有中文可见内容",
-    "近 30 天有 4 条外文内容待中文整理"
+    "近 30 天有 3 条外文内容待中文整理",
+    "近 24 小时没有中文可见新内容"
   ]
 }
