@@ -123,7 +123,15 @@ test('product narrative connects architecture, evaluation and status pages', asy
     page.getByRole('heading', { level: 1, name: '用可复现评测约束检索质量' }),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: '生产试运行集实测结果' })).toBeVisible();
-  await expect(page.getByText('91.67%').first()).toBeVisible();
+  const evalResponse = await page.request.get('/data/eval/latest.json');
+  const evalReport = (await evalResponse.json()) as {
+    run: { metrics: { recallAt5: number } };
+  };
+  const recallLabel = new Intl.NumberFormat('zh-CN', {
+    style: 'percent',
+    maximumFractionDigits: 2,
+  }).format(evalReport.run.metrics.recallAt5);
+  await expect(page.getByText(recallLabel).first()).toBeVisible();
 
   await page.goto('/status');
   await expect(
