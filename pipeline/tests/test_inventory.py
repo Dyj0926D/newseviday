@@ -81,6 +81,25 @@ def test_rolling_inventory_reserves_a_fresh_focus_topic_candidate() -> None:
     assert any(article.id == candidate.id for article in result.articles)
 
 
+def test_rolling_inventory_never_backfills_with_stale_incoming_content() -> None:
+    accepted, incoming = _fresh_candidate(chinese_ready_count=0)
+    accepted.articles = []
+    accepted.evidence = []
+    stale = incoming.articles[0]
+    stale.published_at = incoming.generated_at - timedelta(days=31)
+    stale.content_score = 1.0
+    incoming.articles = [stale]
+
+    result = merge_rolling_inventory(
+        incoming,
+        accepted,
+        max_total=1,
+        minimum_chinese_ready=1,
+    )
+
+    assert result.articles == []
+
+
 def test_release_guard_passes_after_five_new_chinese_items() -> None:
     accepted, incoming = _fresh_candidate(chinese_ready_count=5)
     candidate = merge_rolling_inventory(incoming, accepted)

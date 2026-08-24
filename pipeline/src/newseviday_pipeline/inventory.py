@@ -82,7 +82,11 @@ def merge_rolling_inventory(
         reverse=True,
     )
     ranked_all = sorted(
-        candidates.values(),
+        (
+            article
+            for article in candidates.values()
+            if _article_time(article) >= cutoff
+        ),
         key=lambda article: (article.content_score or 0.0, _article_time(article)),
         reverse=True,
     )

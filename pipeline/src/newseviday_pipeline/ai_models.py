@@ -57,6 +57,27 @@ class AiUsageReport(ContractModel):
     estimated_cost_cny: float | None = Field(default=None, ge=0)
 
 
+class WeeklyBriefUsageReport(ContractModel):
+    schema_version: str = "1.0.0"
+    snapshot_id: str
+    generated_at: datetime
+    provider: str = "deepseek"
+    model: str
+    status: str
+    model_requests: int = Field(ge=0)
+    successful_brief_model_calls: int = Field(ge=0)
+    usage_reported_calls: int = Field(ge=0)
+    usage_complete: bool
+    cache_hit: bool
+    prompt_tokens: int = Field(ge=0)
+    completion_tokens: int = Field(ge=0)
+    total_tokens: int = Field(ge=0)
+    input_cny_per_million: float | None = Field(default=None, ge=0)
+    output_cny_per_million: float | None = Field(default=None, ge=0)
+    estimated_cost_cny: float | None = Field(default=None, ge=0)
+    fallback_error_type: str | None = None
+
+
 class ProfileInterest(ContractModel):
     topic_id: str = Field(min_length=2, max_length=80)
     weight: int = Field(ge=1, le=5)
