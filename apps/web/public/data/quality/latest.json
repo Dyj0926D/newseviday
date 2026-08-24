@@ -1,13 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260824T023750Z-2f8c1732-rolling-fb54f0bb-ai-308640c6",
-  "generatedAt": "2026-08-24T02:38:01.416264Z",
+  "snapshotId": "snapshot-20260824T042858Z-e0064210-rolling-ef55d900",
+  "generatedAt": "2026-08-24T04:29:04.894476Z",
   "gate": "observe",
-  "articleCount": 40,
+  "articleCount": 38,
   "configuredSourceCount": 15,
-  "contributingSourceCount": 11,
-  "structuredArticleCount": 31,
-  "aiArticleCount": 15,
+  "contributingSourceCount": 9,
+  "structuredArticleCount": 30,
+  "aiArticleCount": 14,
   "editorialArticleCount": 16,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
@@ -15,31 +15,31 @@
   "sourceCounts": {
     "arxiv-cs-ai": 6,
     "databricks-blog": 4,
-    "deepseek-updates": 4,
-    "github-ai-ml": 5,
-    "ieee-spectrum-ai": 2,
-    "interconnects": 2,
-    "mit-technology-review-ai": 2,
-    "mlcommons-news": 3,
+    "deepseek-updates": 3,
+    "github-ai-ml": 7,
+    "ieee-spectrum-ai": 3,
+    "interconnects": 1,
+    "mit-technology-review-ai": 3,
     "openai-news": 8,
-    "qwen-blog": 2,
-    "simon-willison-llms": 2
+    "simon-willison-llms": 3
   },
   "zeroContributionSourceIds": [
     "anthropic-news",
     "dbt-labs-blog",
     "huggingface-blog",
-    "metr-blog"
+    "metr-blog",
+    "mlcommons-news",
+    "qwen-blog"
   ],
   "topicCounts": {
     "data-platform": 1,
     "data-agent": 1,
     "semantic-layer": 1,
     "intelligent-lakehouse": 0,
-    "rag-eval": 13,
+    "rag-eval": 10,
     "metadata-governance": 1,
-    "foundation-models": 26,
-    "ai-products-agents": 23
+    "foundation-models": 21,
+    "ai-products-agents": 26
   },
   "topicGaps": [
     "intelligent-lakehouse"
@@ -62,18 +62,16 @@
   "highSignificanceEventCount": 2,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
-    "adoption_momentum": 2,
-    "capability_update": 3,
-    "policy_regulation": 1,
-    "product_launch": 7,
-    "security_risk": 1,
-    "technical_breakthrough": 1
+    "adoption_momentum": 1,
+    "capability_update": 2,
+    "product_launch": 5,
+    "security_risk": 1
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
-  "recentArticleCount": 33,
+  "recentArticleCount": 38,
   "recentChineseReadyCount": 30,
-  "recentChineseGapCount": 3,
+  "recentChineseGapCount": 8,
   "visibleRecent24hCount": 1,
   "visibleRecent48hCount": 1,
   "latestVisiblePublishedAt": "2026-08-23T20:24:52Z",
@@ -95,6 +93,6 @@
   "issues": [
     "1 个配置主题暂时没有入选内容",
     "2 个配置主题暂时没有中文可见内容",
-    "近 30 天有 3 条外文内容待中文整理"
+    "近 30 天有 8 条外文内容待中文整理"
   ]
 }
