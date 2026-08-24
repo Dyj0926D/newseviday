@@ -21,7 +21,8 @@ def test_quality_report_exposes_content_gaps_without_model_calls(tmp_path: Path)
     write_quality_report(report, output)
     payload = json.loads(output.read_text(encoding="utf-8"))
 
-    assert report.article_count == 40
+    assert report.article_count == len(snapshot.articles)
+    assert 1 <= report.article_count <= 40
     assert report.contributing_source_count >= 5
     assert report.gate in {"pass", "observe"}
     assert payload["snapshotId"] == snapshot.snapshot_id

@@ -5,7 +5,7 @@ from pathlib import Path
 from newseviday_pipeline.inventory import merge_rolling_inventory
 from newseviday_pipeline.quality import evaluate_release_guard
 from newseviday_pipeline.snapshot import load_snapshot
-from newseviday_pipeline.stages import chinese_display_ready
+from newseviday_pipeline.stages import apply_article_scoring, chinese_display_ready
 
 ROOT = Path(__file__).resolve().parents[2]
 SNAPSHOT = ROOT / "apps" / "web" / "public" / "data" / "current.json"
@@ -73,8 +73,12 @@ def test_rolling_inventory_reserves_a_fresh_focus_topic_candidate() -> None:
     candidate.content_score_breakdown.target_relevance = 0.65
     candidate.facts.title = "Designing effective Genie Agents from a single prompt"
     candidate.facts.abstract = (
-        "Ask a governed data agent about revenue and route it to the approved metric."
+        "A governed data agent uses a semantic layer, shared metrics, metadata governance, "
+        "and a lakehouse data platform to answer enterprise analytics questions. " * 3
     )
+    apply_article_scoring(candidate, anchor=incoming.generated_at)
+    assert candidate.content_score_breakdown is not None
+    assert candidate.content_score_breakdown.target_relevance >= 0.5
 
     result = merge_rolling_inventory(incoming, accepted)
 
