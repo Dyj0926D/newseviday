@@ -1,13 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260824T042858Z-e0064210-rolling-ef55d900",
-  "generatedAt": "2026-08-24T04:29:04.894476Z",
+  "snapshotId": "snapshot-20260824T044455Z-f2acaae2-rolling-ef55d900-ai-6c21c2c3",
+  "generatedAt": "2026-08-24T04:45:05.538568Z",
   "gate": "observe",
   "articleCount": 38,
   "configuredSourceCount": 15,
   "contributingSourceCount": 9,
-  "structuredArticleCount": 30,
-  "aiArticleCount": 14,
+  "structuredArticleCount": 31,
+  "aiArticleCount": 15,
   "editorialArticleCount": 16,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
@@ -47,7 +47,7 @@
   "visibleTopicCounts": {
     "data-platform": 1,
     "data-agent": 1,
-    "semantic-layer": 0,
+    "semantic-layer": 1,
     "intelligent-lakehouse": 0,
     "rag-eval": 8,
     "metadata-governance": 1,
@@ -55,8 +55,7 @@
     "ai-products-agents": 20
   },
   "visibleTopicGaps": [
-    "intelligent-lakehouse",
-    "semantic-layer"
+    "intelligent-lakehouse"
   ],
   "keySignalEligibleCount": 1,
   "highSignificanceEventCount": 2,
@@ -70,8 +69,8 @@
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
   "recentArticleCount": 38,
-  "recentChineseReadyCount": 30,
-  "recentChineseGapCount": 8,
+  "recentChineseReadyCount": 31,
+  "recentChineseGapCount": 7,
   "visibleRecent24hCount": 1,
   "visibleRecent48hCount": 1,
   "latestVisiblePublishedAt": "2026-08-23T20:24:52Z",
@@ -92,7 +91,7 @@
   ],
   "issues": [
     "1 个配置主题暂时没有入选内容",
-    "2 个配置主题暂时没有中文可见内容",
-    "近 30 天有 8 条外文内容待中文整理"
+    "1 个配置主题暂时没有中文可见内容",
+    "近 30 天有 7 条外文内容待中文整理"
   ]
 }
