@@ -100,6 +100,31 @@ def test_rolling_inventory_never_backfills_with_stale_incoming_content() -> None
     assert result.articles == []
 
 
+def test_rolling_inventory_preserves_ai_on_a_reserved_focus_candidate() -> None:
+    accepted = load_snapshot(SNAPSHOT)
+    target = next(
+        article
+        for article in accepted.articles
+        if article.facts.title == "Designing effective Genie Agents from a single prompt"
+    )
+    assert target.ai is not None
+    incoming = accepted.model_copy(deep=True)
+    incoming.snapshot_id = "snapshot-focus-ai-restore"
+    incoming.articles = [target.model_copy(deep=True)]
+    incoming.articles[0].ai = None
+    incoming.briefs = []
+
+    result = merge_rolling_inventory(
+        incoming,
+        accepted,
+        max_total=1,
+        minimum_chinese_ready=1,
+    )
+
+    assert result.articles[0].id == target.id
+    assert result.articles[0].ai == target.ai
+
+
 def test_release_guard_passes_after_five_new_chinese_items() -> None:
     accepted, incoming = _fresh_candidate(chinese_ready_count=5)
     candidate = merge_rolling_inventory(incoming, accepted)
@@ -125,6 +150,24 @@ def test_release_guard_blocks_an_untranslated_inventory_regression() -> None:
 
     assert report.gate == "fail"
     assert "近 30 天中文可读内容占比下降过多" in report.issues
+
+
+def test_release_guard_blocks_loss_of_published_chinese_fields() -> None:
+    baseline = load_snapshot(SNAPSHOT)
+    candidate = baseline.model_copy(deep=True)
+    target = next(article for article in candidate.articles if article.ai is not None)
+    target.ai = None
+
+    report = evaluate_release_guard(
+        candidate,
+        baseline,
+        now=baseline.generated_at,
+    )
+
+    assert report.gate == "fail"
+    assert report.lost_published_chinese_count == 1
+    assert report.lost_published_chinese_article_ids == [target.id]
+    assert "候选丢失了已发布文章的中文整理字段" in report.issues
 
 
 def test_release_guard_warns_without_blocking_when_inventory_has_no_fresh_change() -> None:
