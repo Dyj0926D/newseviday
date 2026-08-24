@@ -11,7 +11,7 @@ from newseviday_pipeline.rag import build_dense_index
 from newseviday_pipeline.snapshot import load_snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
-DATASET = ROOT / "pipeline" / "eval" / "rag-gold-trial-v2.json"
+DATASET = ROOT / "pipeline" / "eval" / "rag-gold-trial-v3.json"
 
 
 def test_unreviewed_trial_eval_cannot_pass_production_gate() -> None:
@@ -43,7 +43,8 @@ def test_unreviewed_trial_eval_cannot_pass_production_gate() -> None:
     assert report.dataset_kind == "production"
     assert report.review_status == "trial_draft_pending_human_review"
     assert report.corpus_health.passed
-    assert report.run.metrics.recall_at5 >= 0.75
+    assert report.run.metrics.recall_at5 == 1.0
+    assert report.run.metrics.hit_at5 == 1.0
     assert report.answer_quality.citation_coverage is None
     assert report.answer_quality.no_answer_accuracy >= 0.8
     assert (

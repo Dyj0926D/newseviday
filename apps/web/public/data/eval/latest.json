@@ -2,19 +2,19 @@
   "schemaVersion": "1.0.0",
   "run": {
     "schemaVersion": "1.0.0",
-    "id": "eval-20260806022437",
-    "createdAt": "2026-08-06T02:24:37.195132Z",
-    "datasetVersion": "rag-gold-trial-v2",
+    "id": "eval-20260824094222",
+    "createdAt": "2026-08-24T09:42:22.904812Z",
+    "datasetVersion": "rag-gold-trial-v3",
     "retrievalMode": "chunk_dense",
     "sampleCount": 24,
     "metrics": {
-      "recallAt5": 0.9167,
-      "recallAt10": 0.9167,
-      "mrr": 0.7625,
-      "ndcgAt10": 0.7735,
+      "recallAt5": 1.0,
+      "recallAt10": 1.0,
+      "mrr": 0.9167,
+      "ndcgAt10": 0.9385,
       "hitAt5": 1.0,
-      "p50LatencyMs": 13,
-      "p95LatencyMs": 26
+      "p50LatencyMs": 35,
+      "p95LatencyMs": 46
     },
     "gate": "fail",
     "datasetKind": "production",
@@ -36,8 +36,8 @@
     "lowScoreRefusalAccuracy": 0.25,
     "answerablePassRate": 1.0,
     "agentMode": "bounded_v1",
-    "averageRetrievalRounds": 1.04,
+    "averageRetrievalRounds": 1.21,
     "status": "pending_generated_answer_review"
   },
-  "note": "当前结果来自小规模验证集。无答案识别已由单一阈值升级为有限步骤的证据充分性门禁；黄金题和生成回答仍待人工复核，因此暂不作为正式发布结论。"
+  "note": "v3 修复了 q10 证据口径以及 q11–q12 多来源查询拆分与融合；q10–q12 仍待人工复核，生成回答引用尚未评测，因此暂不作为正式发布结论。"
 }

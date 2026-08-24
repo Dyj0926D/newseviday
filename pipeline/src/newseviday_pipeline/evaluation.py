@@ -187,7 +187,7 @@ def evaluate_rag(
         )
         retrieval_rounds.append(agentic.retrieval_rounds)
         latencies.append((time.perf_counter() - started) * 1_000)
-        ranked_articles = list(dict.fromkeys(item.chunk.article_id for item in result.candidates))
+        ranked_articles = list(dict.fromkeys(item.chunk.article_id for item in agentic.candidates))
         if not question.answerable:
             top_score = result.candidates[0].score if result.candidates else -1.0
             low_score_no_answer_results.append(float(top_score < minimum_score))

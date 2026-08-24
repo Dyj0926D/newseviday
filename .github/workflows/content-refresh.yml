@@ -393,7 +393,7 @@ jobs:
       - name: Run compatible RAG evaluation
         if: env.RUN_REFRESH == 'true'
         run: |
-          dataset="pipeline/eval/rag-gold-trial-v2.json"
+          dataset="pipeline/eval/rag-gold-trial-v3.json"
           if [[ -f "$dataset" ]]; then
             expected_snapshot="$(jq -r '.corpusSnapshotId' "$dataset")"
             current_snapshot="$(jq -r '.snapshotId' "$PUBLISH_SNAPSHOT")"
