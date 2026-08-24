@@ -120,10 +120,12 @@ def merge_rolling_inventory(
     # language focus item can still receive its Chinese editorial package.
     covered_topics: set[str] = set()
     focus_cutoff = incoming.generated_at - timedelta(days=7)
+    incoming_hashes = {article.content_hash for article in incoming.articles}
     focus_candidates = sorted(
         (
             article
-            for article in incoming.articles
+            for article in candidates.values()
+            if article.content_hash in incoming_hashes
             if _article_time(article) >= focus_cutoff
             and FOCUS_TOPIC_IDS.intersection(article.topic_scores)
             and article.content_score_breakdown is not None

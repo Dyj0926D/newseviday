@@ -81,6 +81,8 @@ class ReleaseGuardReport(ContractModel):
     candidate_visible_recent_48h_count: int
     baseline_visible_recent_24h_count: int
     new_article_count: int
+    lost_published_chinese_count: int
+    lost_published_chinese_article_ids: list[str]
     issues: list[str]
     warnings: list[str]
 
@@ -340,7 +342,17 @@ def evaluate_release_guard(
         issues.append("近 30 天中文可读内容占比下降过多")
     if candidate_quality.missing_abstract_rate > maximum_missing_rate:
         issues.append("来源摘要缺失率相对已发布版本上升过多")
-    candidate_hashes = {article.content_hash for article in candidate.articles}
+    candidate_by_hash = {article.content_hash: article for article in candidate.articles}
+    lost_published_chinese = [
+        article
+        for article in baseline.articles
+        if chinese_display_ready(article)
+        and article.content_hash in candidate_by_hash
+        and not chinese_display_ready(candidate_by_hash[article.content_hash])
+    ]
+    if lost_published_chinese:
+        issues.append("候选丢失了已发布文章的中文整理字段")
+    candidate_hashes = set(candidate_by_hash)
     baseline_hashes = {article.content_hash for article in baseline.articles}
     new_article_count = len(candidate_hashes - baseline_hashes)
     if candidate_quality.visible_recent_24h_count == 0:
@@ -374,6 +386,10 @@ def evaluate_release_guard(
         candidate_visible_recent_48h_count=candidate_quality.visible_recent_48h_count,
         baseline_visible_recent_24h_count=baseline_quality.visible_recent_24h_count,
         new_article_count=new_article_count,
+        lost_published_chinese_count=len(lost_published_chinese),
+        lost_published_chinese_article_ids=[
+            article.id for article in lost_published_chinese
+        ],
         issues=issues,
         warnings=warnings,
     )
