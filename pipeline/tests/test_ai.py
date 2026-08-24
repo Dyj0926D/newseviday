@@ -212,17 +212,13 @@ def test_article_enrichment_rotates_across_sources(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:4]
+    now = datetime(2026, 8, 24, 3, tzinfo=UTC)
+    for index, article in enumerate(snapshot.articles):
+        prepare_enrichable_article(article, now=now, suffix=f"rotation-{index}")
     snapshot.articles[0].source_id = "source-a"
     snapshot.articles[1].source_id = "source-a"
     snapshot.articles[2].source_id = "source-b"
     snapshot.articles[3].source_id = "source-c"
-    for article in snapshot.articles:
-        article.ai = None
-        article.key_signal = None
-        article.content_score = 0.8
-        article.published_at = datetime(2026, 8, 5, tzinfo=UTC)
-        assert article.content_score_breakdown is not None
-        article.content_score_breakdown.target_relevance = 0.8
 
     result, model_calls = enrich_snapshot(
         snapshot,
@@ -230,16 +226,18 @@ def test_article_enrichment_rotates_across_sources(tmp_path: Path) -> None:
         cache=FileAiCache(tmp_path),
         topics=[topic()],
         max_model_calls=3,
+        now=now,
     )
 
     assert model_calls == 3
-    assert result.articles[0].ai is not None
-    assert result.articles[0].ai.model == "deepseek-test"
-    assert result.articles[1].ai is None
-    assert result.articles[2].ai is not None
-    assert result.articles[2].ai.model == "deepseek-test"
-    assert result.articles[3].ai is not None
-    assert result.articles[3].ai.model == "deepseek-test"
+    selected_sources = {
+        article.source_id for article in result.articles if article.ai is not None
+    }
+    assert selected_sources == {"source-a", "source-b", "source-c"}
+    assert all(
+        article.ai is None or article.ai.model == "deepseek-test"
+        for article in result.articles
+    )
 
 
 def test_article_enrichment_translates_key_candidate_before_a_higher_raw_score(

@@ -419,6 +419,7 @@ jobs:
         run: |
           npm ci
           npm run security:scan
+          python -m uv run --project pipeline pytest pipeline/tests
           npm run test --workspace @newseviday/web
           npm run build --workspace @newseviday/web
       - name: Upload review artifacts

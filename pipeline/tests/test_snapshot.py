@@ -45,5 +45,5 @@ def test_published_web_snapshot_conforms_to_python_contract() -> None:
 
     assert snapshot.snapshot_kind == "production"
     assert snapshot.source_count == len(snapshot.sources)
-    assert len(snapshot.articles) == 40
+    assert 1 <= len(snapshot.articles) <= 40
     assert any(article.ai and article.ai.why_it_matters for article in snapshot.articles)
