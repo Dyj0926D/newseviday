@@ -93,6 +93,41 @@ def test_token_prices_are_optional_but_must_be_configured_together(
         _token_prices_from_environment()
 
 
+def test_update_brief_writes_a_separate_usage_report_without_model_calls(
+    tmp_path: Path,
+    capsys: CaptureFixture[str],
+    monkeypatch: MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("DEEPSEEK_INPUT_CNY_PER_MILLION", raising=False)
+    monkeypatch.delenv("DEEPSEEK_OUTPUT_CNY_PER_MILLION", raising=False)
+    root = Path(__file__).resolve().parents[2]
+    snapshot = root / "apps" / "web" / "public" / "data" / "current.json"
+    report = tmp_path / "weekly-brief-ai-usage.json"
+
+    assert (
+        main(
+            [
+                "update-brief",
+                str(snapshot),
+                "--accepted-snapshot",
+                str(snapshot),
+                "--output",
+                str(tmp_path / "brief"),
+                "--usage-report",
+                str(report),
+            ]
+        )
+        == 0
+    )
+    payload = json.loads(capsys.readouterr().out)
+    usage = json.loads(report.read_text(encoding="utf-8"))
+
+    assert payload["usage"]["modelRequests"] == 0
+    assert usage["modelRequests"] == 0
+    assert usage["usageComplete"] is True
+    assert usage["estimatedCostCny"] is None
+
+
 def test_publish_web_keeps_an_immutable_snapshot_version(
     tmp_path: Path, capsys: CaptureFixture[str]
 ) -> None:

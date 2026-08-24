@@ -35,6 +35,8 @@ jobs:
       DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
       DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' }}
       DEEPSEEK_THINKING_ENABLED: ${{ vars.DEEPSEEK_THINKING_ENABLED || 'false' }}
+      DEEPSEEK_INPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_INPUT_CNY_PER_MILLION || '2' }}
+      DEEPSEEK_OUTPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_OUTPUT_CNY_PER_MILLION || '4' }}
       WEEKLY_BRIEF_ENABLED: ${{ vars.WEEKLY_BRIEF_ENABLED || 'true' }}
       WEEKLY_REFRESH_MAX_MODEL_CALLS: ${{ vars.WEEKLY_REFRESH_MAX_MODEL_CALLS || '5' }}
       WEEKLY_REFRESH_AUTO_MERGE: ${{ vars.WEEKLY_REFRESH_AUTO_MERGE || 'false' }}
@@ -130,6 +132,7 @@ jobs:
             --accepted-snapshot apps/web/public/data/current.json
             --output data/runtime/weekly-brief
             --cache data/runtime/ai-cache
+            --usage-report data/runtime/quality/weekly-brief-ai-usage.json
           )
           if [[ "$ALLOW_MODEL" == "true" ]]; then
             test -n "$DEEPSEEK_API_KEY"
@@ -161,6 +164,45 @@ jobs:
             echo "RELEASE_ELIGIBLE=false" >> "$GITHUB_ENV"
             echo "::warning::Weekly candidate failed the comparative release guard; artifacts are retained and no pull request will be opened."
           fi
+      - name: Summarize weekly AI usage
+        if: always() && env.RUN_BRIEF == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          def read_report(path: str) -> dict[str, object]:
+              report = Path(path)
+              if not report.exists():
+                  return {}
+              value = json.loads(report.read_text(encoding="utf-8"))
+              return value if isinstance(value, dict) else {}
+
+          article = read_report("data/runtime/quality/weekly-ai-usage.json")
+          brief = read_report("data/runtime/quality/weekly-brief-ai-usage.json")
+          lines = [
+              "## Weekly AI usage",
+              "",
+              "| Capability | Requests | Tokens | Estimated cost (CNY) |",
+              "| --- | ---: | ---: | ---: |",
+              (
+                  f"| Article enrichment | {article.get('modelCalls', 0)} | "
+                  f"{article.get('totalTokens', 0)} | "
+                  f"{article.get('estimatedCostCny', 'unavailable')} |"
+              ),
+              (
+                  f"| Weekly brief | {brief.get('modelRequests', 0)} | "
+                  f"{brief.get('totalTokens', 0)} | "
+                  f"{brief.get('estimatedCostCny', 'unavailable')} |"
+              ),
+              "",
+              f"Weekly brief status: `{brief.get('status', 'unavailable')}`.",
+          ]
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as stream:
+              stream.write("\n".join(lines) + "\n")
+          PY
       - name: Publish verified weekly snapshot into the web workspace
         if: env.RUN_BRIEF == 'true' && env.RELEASE_ELIGIBLE == 'true'
         run: |

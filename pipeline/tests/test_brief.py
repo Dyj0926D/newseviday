@@ -13,7 +13,15 @@ from newseviday_pipeline.editorial import apply_editorial_package, load_editoria
 from newseviday_pipeline.snapshot import load_snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
-SNAPSHOT = ROOT / "apps" / "web" / "public" / "data" / "current.json"
+SNAPSHOT = (
+    ROOT
+    / "apps"
+    / "web"
+    / "public"
+    / "data"
+    / "versions"
+    / "snapshot-20260810T031024Z-e3340841-ai-12c83ca0.json"
+)
 PACKAGE = ROOT / "data" / "editorial" / "近期中文与首期周报-2026-08-10.json"
 
 

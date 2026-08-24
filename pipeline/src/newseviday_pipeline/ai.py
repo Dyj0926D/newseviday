@@ -48,6 +48,8 @@ MIN_PAID_TARGET_RELEVANCE = 0.60
 SUPPLEMENTAL_TRANSLATION_SCORE = 0.45
 SUPPLEMENTAL_TRANSLATION_TARGET_RELEVANCE = 0.50
 SUPPLEMENTAL_TRANSLATION_MIN_PRODUCT_OR_ENGINEERING_VALUE = 0.70
+ACADEMIC_FOCUS_TRANSLATION_SCORE = 0.35
+ACADEMIC_FOCUS_TRANSLATION_MIN_TECHNICAL_VALUE = 0.65
 MAX_PAID_ENRICHMENT_AGE_DAYS = 45
 MAX_NEW_ENRICHMENTS_PER_SOURCE = 3
 FOCUS_TRANSLATION_TOPICS = {
@@ -118,6 +120,7 @@ class DeepSeekStructuredClient:
         self.timeout_seconds = timeout_seconds
         self.thinking_enabled = thinking_enabled
         self._usage: list[CompletionUsage] = []
+        self._request_count = 0
 
     @property
     def model(self) -> str:
@@ -128,6 +131,10 @@ class DeepSeekStructuredClient:
         return len(self._usage)
 
     @property
+    def request_count(self) -> int:
+        return self._request_count
+
+    @property
     def usage_totals(self) -> CompletionUsage:
         return CompletionUsage(
             prompt_tokens=sum(item.prompt_tokens for item in self._usage),
@@ -136,6 +143,7 @@ class DeepSeekStructuredClient:
         )
 
     def complete_json(self, *, system: str, user: str) -> Mapping[str, Any]:
+        self._request_count += 1
         response = httpx.post(
             f"{self.base_url}/chat/completions",
             headers={
@@ -351,9 +359,19 @@ def _priority_topic_translation_candidate(
 ) -> bool:
     values = article.content_score_breakdown
     published_at = article.published_at or article.collected_at
+    trusted_source = article.source_type in {"official", "research_institute"}
+    qualified_academic_source = bool(
+        article.source_type == "academic"
+        and article.evidence_tier == "primary"
+        and (article.content_score or 0.0) >= ACADEMIC_FOCUS_TRANSLATION_SCORE
+        and values is not None
+        and values.target_relevance >= MIN_PAID_TARGET_RELEVANCE
+        and max(values.technical_advancement, values.engineering_applicability)
+        >= ACADEMIC_FOCUS_TRANSLATION_MIN_TECHNICAL_VALUE
+    )
     return bool(
         generated_at - published_at <= RECENT_TRANSLATION_MAX_AGE
-        and article.source_type in {"official", "research_institute"}
+        and (trusted_source or qualified_academic_source)
         and FOCUS_TRANSLATION_TOPICS.intersection(article.topic_scores)
         and (article.content_score or 0.0) >= 0.22
         and values is not None

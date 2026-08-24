@@ -19,7 +19,7 @@ from newseviday_pipeline.ai import (
     enrich_snapshot,
     update_weekly_brief,
 )
-from newseviday_pipeline.ai_models import AiUsageReport
+from newseviday_pipeline.ai_models import AiUsageReport, WeeklyBriefUsageReport
 from newseviday_pipeline.budget import (
     load_rollover_ledger,
     plan_rollover_budget,
@@ -169,6 +169,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--force-generate",
         action="store_true",
         help="Generate the last complete weekly window outside the normal Saturday schedule.",
+    )
+    brief_parser.add_argument(
+        "--usage-report",
+        type=Path,
+        help="Write a private weekly-brief token and estimated-cost report.",
     )
     editorial_parser = subparsers.add_parser(
         "apply-editorial",
@@ -483,6 +488,7 @@ def update_brief(args: argparse.Namespace) -> int:
     snapshot = load_snapshot(args.snapshot)
     accepted_snapshot = load_snapshot(args.accepted_snapshot) if args.accepted_snapshot else None
     client = DeepSeekStructuredClient.from_environment() if args.allow_model else None
+    fallback_error_type = None
     try:
         update = update_weekly_brief(
             snapshot,
@@ -492,6 +498,7 @@ def update_brief(args: argparse.Namespace) -> int:
             force_generate=args.force_generate,
         )
     except (httpx.HTTPError, ValueError) as error:
+        fallback_error_type = type(error).__name__
         update = update_weekly_brief(
             snapshot,
             accepted_snapshot=accepted_snapshot,
@@ -500,6 +507,49 @@ def update_brief(args: argparse.Namespace) -> int:
             generate_if_due=False,
         )
         print(f"Weekly brief generation fell back to the last successful brief: {error}")
+    input_price, output_price = _token_prices_from_environment()
+    model_requests = client.request_count if client is not None else 0
+    usage_reported_calls = client.usage_reported_calls if client is not None else 0
+    usage = client.usage_totals if client is not None else None
+    prompt_tokens = usage.prompt_tokens if usage is not None else 0
+    completion_tokens = usage.completion_tokens if usage is not None else 0
+    total_tokens = usage.total_tokens if usage is not None else 0
+    usage_complete = usage_reported_calls == model_requests
+    estimated_cost = (
+        round(
+            (prompt_tokens * input_price + completion_tokens * output_price) / 1_000_000,
+            6,
+        )
+        if usage_complete and input_price is not None and output_price is not None
+        else None
+    )
+    usage_report = WeeklyBriefUsageReport(
+        snapshot_id=update.snapshot.snapshot_id,
+        generated_at=update.snapshot.generated_at,
+        model=(
+            client.model
+            if client is not None
+            else os.environ.get("DEEPSEEK_MODEL", "disabled")
+        ),
+        status=update.status,
+        model_requests=model_requests,
+        successful_brief_model_calls=update.model_calls,
+        usage_reported_calls=usage_reported_calls,
+        usage_complete=usage_complete,
+        cache_hit=update.status == "generated" and model_requests == 0,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        total_tokens=total_tokens,
+        input_cny_per_million=input_price,
+        output_cny_per_million=output_price,
+        estimated_cost_cny=estimated_cost,
+        fallback_error_type=fallback_error_type,
+    )
+    if args.usage_report:
+        _atomic_json(
+            usage_report.model_dump(mode="json", by_alias=True),
+            args.usage_report,
+        )
     SnapshotPublisher(args.output).publish(update.snapshot)
     print(
         json.dumps(
@@ -509,6 +559,7 @@ def update_brief(args: argparse.Namespace) -> int:
                 "status": update.status,
                 "briefCount": len(update.snapshot.briefs),
                 "modelCalls": update.model_calls,
+                "usage": usage_report.model_dump(mode="json", by_alias=True),
                 "periodStart": update.period_start.isoformat(),
                 "periodEndExclusive": update.period_end.isoformat(),
                 "output": str(args.output / "current.json"),

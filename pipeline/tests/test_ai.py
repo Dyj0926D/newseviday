@@ -100,6 +100,7 @@ def test_deepseek_v4_request_explicitly_disables_thinking(monkeypatch: Any) -> N
     assert captured["thinking"] == {"type": "disabled"}
     assert captured["temperature"] == 0.1
     assert client.usage_reported_calls == 1
+    assert client.request_count == 1
     assert client.usage_totals.prompt_tokens == 120
     assert client.usage_totals.completion_tokens == 30
     assert client.usage_totals.total_tokens == 150
@@ -180,6 +181,9 @@ def test_article_enrichment_skips_thin_source_evidence(tmp_path: Path) -> None:
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:2]
     thin, supported = snapshot.articles
+    now = datetime(2026, 8, 24, 3, tzinfo=UTC)
+    prepare_enrichable_article(thin, now=now, suffix="thin")
+    prepare_enrichable_article(supported, now=now, suffix="supported")
     thin.source_id = "source-thin"
     thin.content_score = 1.0
     thin.facts.abstract = "Only a short announcement is available."
@@ -196,6 +200,7 @@ def test_article_enrichment_skips_thin_source_evidence(tmp_path: Path) -> None:
         cache=FileAiCache(tmp_path),
         topics=[topic()],
         max_model_calls=1,
+        now=now,
     )
 
     assert model_calls == 1
@@ -391,6 +396,8 @@ def test_article_enrichment_does_not_pay_for_low_value_backlog(tmp_path: Path) -
     article.content_score = 0.59
     article.published_at = datetime(2026, 8, 1, tzinfo=UTC)
     article.facts.abstract = "Detailed but low-priority source evidence. " * 8
+    assert article.content_score_breakdown is not None
+    article.content_score_breakdown.event_significance = 0.0
     telemetry = EnrichmentTelemetry()
     client = FakeStructuredClient()
 
@@ -456,6 +463,7 @@ def test_article_enrichment_uses_supplemental_lane_for_trusted_product_news(
     article.content_score = 0.465
     assert article.content_score_breakdown is not None
     article.content_score_breakdown.target_relevance = 0.555
+    article.content_score_breakdown.event_significance = 0.0
     article.content_score_breakdown.technical_advancement = 0.49
     article.content_score_breakdown.engineering_applicability = 0.52
     article.content_score_breakdown.product_industry_impact = 0.75
@@ -490,6 +498,7 @@ def test_article_enrichment_does_not_open_supplemental_lane_for_opinion_only_sou
     article.content_score = 0.465
     assert article.content_score_breakdown is not None
     article.content_score_breakdown.target_relevance = 0.555
+    article.content_score_breakdown.event_significance = 0.0
     article.content_score_breakdown.product_industry_impact = 0.75
     article.facts.abstract = "A personal opinion about enterprise AI product adoption. " * 5
     telemetry = EnrichmentTelemetry()
@@ -544,6 +553,79 @@ def test_article_enrichment_uses_short_safe_lane_for_fresh_official_focus_topic(
     assert "来源只提供了标题和短摘录" in client.users[0]
 
 
+def test_article_enrichment_accepts_recent_high_value_academic_focus_topic(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    article = snapshot.articles[0]
+    now = datetime(2026, 8, 24, 3, tzinfo=UTC)
+    article.ai = None
+    article.source_type = "academic"
+    article.evidence_tier = "primary"
+    article.published_at = now - timedelta(days=2)
+    article.topic_scores = {"semantic-layer": 0.72}
+    article.content_score = 0.393
+    assert article.content_score_breakdown is not None
+    article.content_score_breakdown.target_relevance = 0.60
+    article.content_score_breakdown.technical_advancement = 0.68
+    article.content_score_breakdown.engineering_applicability = 0.58
+    article.facts.abstract = (
+        "The paper describes an ontology-supported method for managing AI models "
+        "and datasets across a governed semantic layer."
+    )
+    telemetry = EnrichmentTelemetry()
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        telemetry=telemetry,
+        now=now,
+    )
+
+    assert model_calls == 1
+    assert result.articles[0].ai is not None
+    assert telemetry.priority_topic_translation_calls == 1
+
+
+def test_article_enrichment_rejects_low_value_academic_focus_topic(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
+    snapshot.articles = snapshot.articles[:1]
+    article = snapshot.articles[0]
+    now = datetime(2026, 8, 24, 3, tzinfo=UTC)
+    article.ai = None
+    article.source_type = "academic"
+    article.evidence_tier = "primary"
+    article.published_at = now - timedelta(days=2)
+    article.topic_scores = {"semantic-layer": 0.61}
+    article.content_score = 0.36
+    assert article.content_score_breakdown is not None
+    article.content_score_breakdown.target_relevance = 0.60
+    article.content_score_breakdown.technical_advancement = 0.50
+    article.content_score_breakdown.engineering_applicability = 0.50
+    article.content_score_breakdown.product_industry_impact = 0.50
+    article.facts.abstract = "A weakly differentiated semantic-layer paper abstract. " * 4
+    telemetry = EnrichmentTelemetry()
+
+    result, model_calls = enrich_snapshot(
+        snapshot,
+        client=FakeStructuredClient(),
+        cache=FileAiCache(tmp_path),
+        topics=[topic()],
+        telemetry=telemetry,
+        now=now,
+    )
+
+    assert model_calls == 0
+    assert result.articles[0].ai is None
+
+
 def test_article_enrichment_does_not_pay_for_stale_backlog(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
@@ -579,6 +661,10 @@ def test_article_enrichment_requires_target_relevance_for_new_calls(tmp_path: Pa
     article.facts.abstract = "Complete but weakly relevant evidence. " * 8
     assert article.content_score_breakdown is not None
     article.content_score_breakdown.target_relevance = 0.59
+    article.content_score_breakdown.event_significance = 0.0
+    article.content_score_breakdown.technical_advancement = 0.50
+    article.content_score_breakdown.engineering_applicability = 0.50
+    article.content_score_breakdown.product_industry_impact = 0.50
     telemetry = EnrichmentTelemetry()
 
     _result, model_calls = enrich_snapshot(
