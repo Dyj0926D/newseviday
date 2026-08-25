@@ -1,9 +1,9 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260824T044455Z-f2acaae2-rolling-ef55d900-ai-6c21c2c3",
-  "generatedAt": "2026-08-24T04:45:05.538568Z",
+  "snapshotId": "snapshot-20260825T023141Z-8b2441f2-rolling-9b260f6c-ai-6491f96e",
+  "generatedAt": "2026-08-25T02:31:50.084121Z",
   "gate": "observe",
-  "articleCount": 38,
+  "articleCount": 39,
   "configuredSourceCount": 15,
   "contributingSourceCount": 9,
   "structuredArticleCount": 31,
@@ -19,7 +19,7 @@
     "github-ai-ml": 7,
     "ieee-spectrum-ai": 3,
     "interconnects": 1,
-    "mit-technology-review-ai": 3,
+    "mit-technology-review-ai": 4,
     "openai-news": 8,
     "simon-willison-llms": 3
   },
@@ -38,8 +38,8 @@
     "intelligent-lakehouse": 0,
     "rag-eval": 10,
     "metadata-governance": 1,
-    "foundation-models": 21,
-    "ai-products-agents": 26
+    "foundation-models": 23,
+    "ai-products-agents": 27
   },
   "topicGaps": [
     "intelligent-lakehouse"
@@ -68,10 +68,10 @@
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
-  "recentArticleCount": 38,
+  "recentArticleCount": 39,
   "recentChineseReadyCount": 31,
-  "recentChineseGapCount": 7,
-  "visibleRecent24hCount": 1,
+  "recentChineseGapCount": 8,
+  "visibleRecent24hCount": 0,
   "visibleRecent48hCount": 1,
   "latestVisiblePublishedAt": "2026-08-23T20:24:52Z",
   "trendBriefCount": 1,
@@ -92,6 +92,7 @@
   "issues": [
     "1 个配置主题暂时没有入选内容",
     "1 个配置主题暂时没有中文可见内容",
-    "近 30 天有 7 条外文内容待中文整理"
+    "近 30 天有 8 条外文内容待中文整理",
+    "近 24 小时没有中文可见新内容"
   ]
 }
