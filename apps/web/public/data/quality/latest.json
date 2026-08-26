@@ -1,27 +1,27 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260825T023141Z-8b2441f2-rolling-9b260f6c-ai-6491f96e",
-  "generatedAt": "2026-08-25T02:31:50.084121Z",
+  "snapshotId": "snapshot-20260826T023940Z-34f72c86-rolling-e1670369-ai-298c0dae",
+  "generatedAt": "2026-08-26T02:39:52.332047Z",
   "gate": "observe",
-  "articleCount": 39,
+  "articleCount": 40,
   "configuredSourceCount": 15,
   "contributingSourceCount": 9,
-  "structuredArticleCount": 31,
-  "aiArticleCount": 15,
-  "editorialArticleCount": 16,
+  "structuredArticleCount": 32,
+  "aiArticleCount": 17,
+  "editorialArticleCount": 15,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
   "sourceCounts": {
     "arxiv-cs-ai": 6,
-    "databricks-blog": 4,
+    "databricks-blog": 7,
     "deepseek-updates": 3,
     "github-ai-ml": 7,
-    "ieee-spectrum-ai": 3,
+    "ieee-spectrum-ai": 2,
     "interconnects": 1,
     "mit-technology-review-ai": 4,
     "openai-news": 8,
-    "simon-willison-llms": 3
+    "simon-willison-llms": 2
   },
   "zeroContributionSourceIds": [
     "anthropic-news",
@@ -32,31 +32,27 @@
     "qwen-blog"
   ],
   "topicCounts": {
-    "data-platform": 1,
+    "data-platform": 2,
     "data-agent": 1,
-    "semantic-layer": 1,
-    "intelligent-lakehouse": 0,
-    "rag-eval": 10,
-    "metadata-governance": 1,
-    "foundation-models": 23,
-    "ai-products-agents": 27
+    "semantic-layer": 2,
+    "intelligent-lakehouse": 2,
+    "rag-eval": 9,
+    "metadata-governance": 2,
+    "foundation-models": 22,
+    "ai-products-agents": 24
   },
-  "topicGaps": [
-    "intelligent-lakehouse"
-  ],
+  "topicGaps": [],
   "visibleTopicCounts": {
-    "data-platform": 1,
+    "data-platform": 2,
     "data-agent": 1,
-    "semantic-layer": 1,
-    "intelligent-lakehouse": 0,
-    "rag-eval": 8,
+    "semantic-layer": 2,
+    "intelligent-lakehouse": 1,
+    "rag-eval": 7,
     "metadata-governance": 1,
     "foundation-models": 18,
     "ai-products-agents": 20
   },
-  "visibleTopicGaps": [
-    "intelligent-lakehouse"
-  ],
+  "visibleTopicGaps": [],
   "keySignalEligibleCount": 1,
   "highSignificanceEventCount": 2,
   "highSignificanceChineseGapCount": 0,
@@ -68,12 +64,12 @@
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
-  "recentArticleCount": 39,
-  "recentChineseReadyCount": 31,
+  "recentArticleCount": 40,
+  "recentChineseReadyCount": 32,
   "recentChineseGapCount": 8,
-  "visibleRecent24hCount": 0,
-  "visibleRecent48hCount": 1,
-  "latestVisiblePublishedAt": "2026-08-23T20:24:52Z",
+  "visibleRecent24hCount": 2,
+  "visibleRecent48hCount": 2,
+  "latestVisiblePublishedAt": "2026-08-25T17:07:16Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [
     {
@@ -90,9 +86,6 @@
     }
   ],
   "issues": [
-    "1 个配置主题暂时没有入选内容",
-    "1 个配置主题暂时没有中文可见内容",
-    "近 30 天有 8 条外文内容待中文整理",
-    "近 24 小时没有中文可见新内容"
+    "近 30 天有 8 条外文内容待中文整理"
   ]
 }
