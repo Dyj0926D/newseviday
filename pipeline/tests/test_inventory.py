@@ -106,12 +106,14 @@ def test_rolling_inventory_never_backfills_with_stale_incoming_content() -> None
 
 def test_rolling_inventory_preserves_ai_on_a_reserved_focus_candidate() -> None:
     accepted = load_snapshot(SNAPSHOT)
-    target = next(
-        article
-        for article in accepted.articles
-        if article.facts.title == "Designing effective Genie Agents from a single prompt"
-    )
+    target = next(article.model_copy(deep=True) for article in accepted.articles if article.ai)
     assert target.ai is not None
+    target.topic_scores = {"data-agent": 0.65}
+    target.published_at = accepted.generated_at - timedelta(days=1)
+    apply_article_scoring(target, anchor=accepted.generated_at)
+    assert target.content_score_breakdown is not None
+    assert target.content_score_breakdown.target_relevance >= 0.5
+    accepted.articles = [target]
     incoming = accepted.model_copy(deep=True)
     incoming.snapshot_id = "snapshot-focus-ai-restore"
     incoming.articles = [target.model_copy(deep=True)]
