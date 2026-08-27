@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260827T084600Z-8c19bbc3-rolling-a7830050-ai-b5298703",
-  "generatedAt": "2026-08-27T08:46:17.279073Z",
+  "snapshotId": "snapshot-20260827T111242Z-de209d07-rolling-512b4924-ai-612943f0",
+  "generatedAt": "2026-08-27T11:12:50.202227Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -75,18 +75,6 @@
     {
       "id": "story-001",
       "articleIds": [
-        "article-13844026d0b31ab87e4a",
-        "article-1f08b431314013b7175a"
-      ],
-      "sourceCount": 2,
-      "sharedTerms": [
-        "agentic",
-        "workflows"
-      ]
-    },
-    {
-      "id": "story-002",
-      "articleIds": [
         "article-3b94d67ca1b43079540d",
         "article-74f0fb40a0bd4261845a"
       ],
@@ -94,6 +82,18 @@
       "sharedTerms": [
         "agents",
         "data"
+      ]
+    },
+    {
+      "id": "story-002",
+      "articleIds": [
+        "article-13844026d0b31ab87e4a",
+        "article-1f08b431314013b7175a"
+      ],
+      "sourceCount": 2,
+      "sharedTerms": [
+        "agentic",
+        "workflows"
       ]
     }
   ],
