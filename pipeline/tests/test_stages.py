@@ -288,7 +288,7 @@ def test_key_signal_uses_a_separate_editorial_gate() -> None:
     assert candidate.key_signal is not None and candidate.key_signal.eligible
 
 
-def test_key_signal_keeps_major_primary_event_during_seven_day_window() -> None:
+def test_key_signal_keeps_major_primary_event_during_five_day_window() -> None:
     candidate = normalize_item(
         RawFeedItem(
             source_id="official-release",
@@ -307,7 +307,7 @@ def test_key_signal_keeps_major_primary_event_during_seven_day_window() -> None:
         ),
         collected_at=NOW,
     )[0]
-    candidate.published_at = NOW - timedelta(days=6)
+    candidate.published_at = NOW - timedelta(days=4)
     candidate.topic_scores = {"foundation-models": 0.425, "rag-eval": 0.55}
     candidate.ai = GeneratedText(
         title_zh="生产级智能体平台正式发布并调整 API 定价",
@@ -325,7 +325,46 @@ def test_key_signal_keeps_major_primary_event_during_seven_day_window() -> None:
     assert candidate.key_signal.freshness > 0
     assert candidate.key_signal.score < 0.65
     assert candidate.key_signal.eligible
-    assert "重大一手事件仍在 7 日观察窗" in candidate.key_signal.reasons
+    assert "重大一手事件仍在 5 日观察窗" in candidate.key_signal.reasons
+
+
+def test_key_signal_expires_after_five_day_window() -> None:
+    candidate = normalize_item(
+        RawFeedItem(
+            source_id="official-release",
+            source_type="official",
+            evidence_tier="primary",
+            url="https://example.com/expired-major-release",
+            title="Model family general availability adds agent API support and new pricing",
+            summary=(
+                "The company officially launches the model family for general availability. "
+                "It is rolled out in app, web, and API for all customers. "
+                "The update adds agent capabilities, deployment controls and new pricing. "
+            )
+            * 4,
+            language="en",
+        ),
+        collected_at=NOW,
+    )[0]
+    candidate.published_at = NOW - timedelta(days=5, seconds=1)
+    candidate.topic_scores = {"foundation-models": 0.425, "rag-eval": 0.55}
+    candidate.ai = GeneratedText(
+        title_zh="生产级智能体平台正式发布并调整 API 定价",
+        summary_zh="官方正式发布生产级智能体平台，并同步调整部署能力、兼容方式与定价。",
+        why_it_matters="会影响产品接入、迁移和成本判断。",
+        key_points=["正式可用", "API 能力升级", "定价调整"],
+        model="deepseek-test",
+        prompt_version="test",
+        generated_at=NOW,
+    )
+
+    apply_article_scoring(candidate, anchor=NOW)
+
+    assert candidate.key_signal is not None
+    assert not candidate.key_signal.eligible
+    assert "发布时间超过 5 天，不进入首页实时 Key Signal" in (
+        candidate.key_signal.gate_failures
+    )
 
 
 def test_key_signal_rejects_a_narrow_low_relevance_paper() -> None:

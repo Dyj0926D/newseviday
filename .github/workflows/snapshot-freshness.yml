@@ -1,0 +1,97 @@
+name: Snapshot freshness monitor
+
+on:
+  schedule:
+    # Independent cadence from content refresh. A 26-hour threshold allows for
+    # normal GitHub schedule delay while still detecting a missed daily publish.
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: snapshot-freshness-monitor
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PUBLIC_SNAPSHOT_URL: https://newseviday.dyjnewseviday-worker.workers.dev/data/current.json
+      MAX_AGE_HOURS: '26'
+      ALERT_TITLE: '[Ops] NewsEviday public snapshot is stale'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check public snapshot age
+        id: freshness
+        shell: bash
+        run: |
+          snapshot_file="$(mktemp)"
+          curl --fail --silent --show-error --retry 2 --max-time 20 \
+            "$PUBLIC_SNAPSHOT_URL?monitor_run=${GITHUB_RUN_ID}" \
+            --output "$snapshot_file"
+          python - "$snapshot_file" <<'PY'
+          import json
+          import os
+          import sys
+          from datetime import UTC, datetime
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          generated_at = datetime.fromisoformat(payload["generatedAt"].replace("Z", "+00:00"))
+          age_hours = max(0.0, (datetime.now(UTC) - generated_at).total_seconds() / 3600)
+          max_age_hours = float(os.environ["MAX_AGE_HOURS"])
+          stale = age_hours > max_age_hours
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as stream:
+              stream.write(f"stale={'true' if stale else 'false'}\n")
+              stream.write(f"snapshot_id={payload['snapshotId']}\n")
+              stream.write(f"generated_at={payload['generatedAt']}\n")
+              stream.write(f"age_hours={age_hours:.2f}\n")
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as stream:
+              stream.write("## Public snapshot freshness\n\n")
+              stream.write(f"- Snapshot: `{payload['snapshotId']}`\n")
+              stream.write(f"- Generated at: `{payload['generatedAt']}`\n")
+              stream.write(f"- Age: `{age_hours:.2f}` hours\n")
+              stream.write(f"- Threshold: `{max_age_hours:.0f}` hours\n")
+              stream.write(f"- Status: `{'stale' if stale else 'fresh'}`\n")
+          PY
+
+      - name: Open one stale snapshot alert
+        if: steps.freshness.outputs.stale == 'true'
+        shell: bash
+        run: |
+          issue_number="$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --search "$ALERT_TITLE in:title" \
+            --json number,title \
+            --jq ".[] | select(.title == env.ALERT_TITLE) | .number" \
+            | head -n 1)"
+          if [[ -z "$issue_number" ]]; then
+            gh issue create \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$ALERT_TITLE" \
+              --body "The public snapshot is ${{ steps.freshness.outputs.age_hours }} hours old, exceeding the ${MAX_AGE_HOURS}-hour threshold. Snapshot: \`${{ steps.freshness.outputs.snapshot_id }}\`; generatedAt: \`${{ steps.freshness.outputs.generated_at }}\`. Check the Controlled content refresh workflow and public deployment."
+          else
+            echo "Stale snapshot alert #${issue_number} is already open."
+          fi
+
+      - name: Close recovered stale snapshot alert
+        if: steps.freshness.outputs.stale != 'true'
+        shell: bash
+        run: |
+          issue_number="$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --search "$ALERT_TITLE in:title" \
+            --json number,title \
+            --jq ".[] | select(.title == env.ALERT_TITLE) | .number" \
+            | head -n 1)"
+          if [[ -n "$issue_number" ]]; then
+            gh issue close "$issue_number" \
+              --repo "$GITHUB_REPOSITORY" \
+              --comment "Recovered: public snapshot \`${{ steps.freshness.outputs.snapshot_id }}\` is ${{ steps.freshness.outputs.age_hours }} hours old."
+          fi

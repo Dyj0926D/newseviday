@@ -75,7 +75,7 @@ def apply_editorial_package(
             generated_at=package.generated_at,
         )
         if article.content_score_breakdown is not None:
-            article.key_signal = key_signal_assessment(article)
+            article.key_signal = key_signal_assessment(article, anchor=package.generated_at)
 
     if package.brief is not None:
         evidence_by_id = {evidence.id: evidence for evidence in result.evidence}

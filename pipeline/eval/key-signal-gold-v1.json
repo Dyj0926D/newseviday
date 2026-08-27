@@ -162,7 +162,7 @@
       "sourceType": "official",
       "evidenceTier": "primary",
       "title": "Agent review capability update cuts average cost by 20%",
-      "abstract": "The engineering team published a capability update for its agent review product. Benchmarks show 20% lower average review cost while maintaining quality after changing the workflow and shared tools. The result is documented and useful, but the publication is more than seven days old and should not occupy the homepage real-time Key Signal position.",
+      "abstract": "The engineering team published a capability update for its agent review product. Benchmarks show 20% lower average review cost while maintaining quality after changing the workflow and shared tools. The result is documented and useful, but the publication is more than five days old and should not occupy the homepage real-time Key Signal position.",
       "publishedAt": "2026-07-10T00:00:00Z",
       "topicScores": { "ai-products-agents": 0.9, "rag-eval": 0.6 },
       "expectedEventTypes": ["capability_update"],

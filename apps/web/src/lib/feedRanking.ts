@@ -8,6 +8,8 @@ interface DiversityOptions {
   leadingSourceIds?: string[];
 }
 
+export const KEY_SIGNAL_WINDOW_DAYS = 5;
+
 function articleScore(article: Article): number {
   return article.contentScore ?? 0;
 }
@@ -46,9 +48,8 @@ export function summarizeVisibleFreshness(
   );
   return {
     visibleCount: visible.length,
-    recent24HourCount: visible.filter((article) =>
-      isWithinPublishedWindow(article, anchor, 1),
-    ).length,
+    recent24HourCount: visible.filter((article) => isWithinPublishedWindow(article, anchor, 1))
+      .length,
     latestPublishedAt: visible[0]?.publishedAt ?? visible[0]?.collectedAt ?? null,
   };
 }
@@ -97,12 +98,20 @@ function repairTrailingTriples(
   return repaired;
 }
 
-export function selectKeySignal(articles: Article[]): Article | null {
+export function selectKeySignal(
+  articles: Article[],
+  anchor = new Date().toISOString(),
+): Article | null {
   return (
     articles
-      .filter((article) => article.keySignal?.eligible)
+      .filter(
+        (article) =>
+          article.keySignal?.eligible &&
+          isWithinPublishedWindow(article, anchor, KEY_SIGNAL_WINDOW_DAYS),
+      )
       .sort(
         (left, right) =>
+          articleTimestamp(right) - articleTimestamp(left) ||
           (right.keySignal?.score ?? 0) - (left.keySignal?.score ?? 0) ||
           articleScore(right) - articleScore(left),
       )[0] ?? null
