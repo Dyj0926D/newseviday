@@ -1,14 +1,14 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260826T023940Z-34f72c86-rolling-e1670369-ai-298c0dae",
-  "generatedAt": "2026-08-26T02:39:52.332047Z",
+  "snapshotId": "snapshot-20260827T084600Z-8c19bbc3-rolling-a7830050-ai-b5298703",
+  "generatedAt": "2026-08-27T08:46:17.279073Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
-  "contributingSourceCount": 9,
-  "structuredArticleCount": 32,
-  "aiArticleCount": 17,
-  "editorialArticleCount": 15,
+  "contributingSourceCount": 10,
+  "structuredArticleCount": 33,
+  "aiArticleCount": 20,
+  "editorialArticleCount": 13,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
@@ -16,10 +16,11 @@
     "arxiv-cs-ai": 6,
     "databricks-blog": 7,
     "deepseek-updates": 3,
-    "github-ai-ml": 7,
-    "ieee-spectrum-ai": 2,
+    "github-ai-ml": 5,
+    "ieee-spectrum-ai": 3,
     "interconnects": 1,
     "mit-technology-review-ai": 4,
+    "mlcommons-news": 1,
     "openai-news": 8,
     "simon-willison-llms": 2
   },
@@ -28,48 +29,47 @@
     "dbt-labs-blog",
     "huggingface-blog",
     "metr-blog",
-    "mlcommons-news",
     "qwen-blog"
   ],
   "topicCounts": {
     "data-platform": 2,
-    "data-agent": 1,
+    "data-agent": 2,
     "semantic-layer": 2,
     "intelligent-lakehouse": 2,
-    "rag-eval": 9,
+    "rag-eval": 10,
     "metadata-governance": 2,
-    "foundation-models": 22,
-    "ai-products-agents": 24
+    "foundation-models": 23,
+    "ai-products-agents": 23
   },
   "topicGaps": [],
   "visibleTopicCounts": {
     "data-platform": 2,
-    "data-agent": 1,
+    "data-agent": 2,
     "semantic-layer": 2,
     "intelligent-lakehouse": 1,
     "rag-eval": 7,
     "metadata-governance": 1,
-    "foundation-models": 18,
+    "foundation-models": 20,
     "ai-products-agents": 20
   },
   "visibleTopicGaps": [],
   "keySignalEligibleCount": 1,
-  "highSignificanceEventCount": 2,
+  "highSignificanceEventCount": 4,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
-    "capability_update": 2,
-    "product_launch": 5,
-    "security_risk": 1
+    "capability_update": 3,
+    "product_launch": 6,
+    "security_risk": 2
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
   "recentArticleCount": 40,
-  "recentChineseReadyCount": 32,
-  "recentChineseGapCount": 8,
-  "visibleRecent24hCount": 2,
-  "visibleRecent48hCount": 2,
-  "latestVisiblePublishedAt": "2026-08-25T17:07:16Z",
+  "recentChineseReadyCount": 33,
+  "recentChineseGapCount": 7,
+  "visibleRecent24hCount": 3,
+  "visibleRecent48hCount": 6,
+  "latestVisiblePublishedAt": "2026-08-26T20:12:53Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [
     {
@@ -83,9 +83,21 @@
         "agentic",
         "workflows"
       ]
+    },
+    {
+      "id": "story-002",
+      "articleIds": [
+        "article-3b94d67ca1b43079540d",
+        "article-74f0fb40a0bd4261845a"
+      ],
+      "sourceCount": 2,
+      "sharedTerms": [
+        "agents",
+        "data"
+      ]
     }
   ],
   "issues": [
-    "近 30 天有 8 条外文内容待中文整理"
+    "近 30 天有 7 条外文内容待中文整理"
   ]
 }
