@@ -75,10 +75,7 @@ describe('feed ranking', () => {
     };
 
     expect(
-      summarizeVisibleFreshness(
-        [untranslatedNewer, translatedOlder],
-        '2026-08-20T10:00:00Z',
-      ),
+      summarizeVisibleFreshness([untranslatedNewer, translatedOlder], '2026-08-20T10:00:00Z'),
     ).toEqual({
       visibleCount: 1,
       recent24HourCount: 0,
@@ -88,8 +85,24 @@ describe('feed ranking', () => {
 
   it('selects the highest eligible Key Signal without forcing an ineligible item', () => {
     const items = [article('a', 'arxiv', 0.95), article('b', 'openai', 0.82, true)];
-    expect(selectKeySignal(items)?.id).toBe('b');
-    expect(selectKeySignal(items.slice(0, 1))).toBeNull();
+    expect(selectKeySignal(items, '2026-08-06T12:00:00Z')?.id).toBe('b');
+    expect(selectKeySignal(items.slice(0, 1), '2026-08-06T12:00:00Z')).toBeNull();
+  });
+
+  it('replaces an older Key Signal as soon as a newer article becomes eligible', () => {
+    const older = article('older-signal', 'openai', 0.95, true);
+    older.publishedAt = '2026-08-22T09:00:00Z';
+    const newer = article('newer-signal', 'github', 0.68, true);
+    newer.publishedAt = '2026-08-25T09:00:00Z';
+
+    expect(selectKeySignal([older, newer], '2026-08-25T12:00:00Z')?.id).toBe('newer-signal');
+  });
+
+  it('does not retain a Key Signal after the five-day observation window', () => {
+    const stale = article('stale-signal', 'openai', 0.95, true);
+    stale.publishedAt = '2026-08-20T08:59:59Z';
+
+    expect(selectKeySignal([stale], '2026-08-25T09:00:00Z')).toBeNull();
   });
 
   it('limits a source to three items on the first screen and avoids triples', () => {

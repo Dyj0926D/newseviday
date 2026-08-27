@@ -1,7 +1,7 @@
 import hashlib
 import re
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from difflib import SequenceMatcher
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
@@ -67,6 +67,7 @@ KEY_SIGNAL_CORROBORATION_REQUIRED_SOURCE_TYPES = {
     "professional_media",
     "independent_author",
 }
+KEY_SIGNAL_OBSERVATION_WINDOW = timedelta(days=5)
 
 ADVANCEMENT_PATTERNS = (
     "we introduce",
@@ -1052,7 +1053,11 @@ def content_selection_reasons(article: Article, *, anchor: datetime) -> list[str
     return reasons[:5]
 
 
-def key_signal_assessment(article: Article) -> KeySignalAssessment:
+def key_signal_assessment(
+    article: Article,
+    *,
+    anchor: datetime | None = None,
+) -> KeySignalAssessment:
     values = article.content_score_breakdown
     if values is None:
         raise ValueError("content_score_breakdown_required")
@@ -1083,10 +1088,21 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
         + 0.10 * values.evidence_maturity,
         4,
     )
+    if anchor is not None:
+        published = article.published_at or article.collected_at
+        key_signal_age = max(timedelta(0), anchor - published)
+        within_observation_window = key_signal_age <= KEY_SIGNAL_OBSERVATION_WINDOW
+    else:
+        # Content freshness is a seven-day linear score. This fallback keeps
+        # post-enrichment reassessment deterministic when only the scored article
+        # is available, while Key Signal itself uses the shorter five-day window.
+        five_day_freshness_floor = 1.0 - (KEY_SIGNAL_OBSERVATION_WINDOW.days / 7)
+        within_observation_window = values.freshness >= round(five_day_freshness_floor, 4)
+
     durable_major_event = (
         article.evidence_tier == "primary"
         and _effective_source_type(article) in {"official", "research_institute"}
-        and values.freshness > 0
+        and within_observation_window
         and values.event_significance >= 0.85
         and max(values.decision_impact, values.adoption_momentum) >= 0.75
         and score >= 0.55
@@ -1107,8 +1123,8 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
         gate_failures.append("缺少足以改变决策、采用或技术判断的证据")
     if values.target_relevance < 0.35 and values.product_industry_impact < 0.65:
         gate_failures.append("与 AI、产品或技术决策范围关联不足")
-    if values.freshness <= 0:
-        gate_failures.append("发布时间超过 7 天，不进入首页实时 Key Signal")
+    if not within_observation_window:
+        gate_failures.append("发布时间超过 5 天，不进入首页实时 Key Signal")
     if values.evidence_maturity < 0.5 or len((article.facts.abstract or "").strip()) < 120:
         gate_failures.append("证据成熟度不足")
     if _effective_source_type(article) == "academic" and (
@@ -1136,7 +1152,7 @@ def key_signal_assessment(article: Article) -> KeySignalAssessment:
     if values.freshness >= 0.85:
         reasons.append("24 小时内发布")
     elif durable_major_event:
-        reasons.append("重大一手事件仍在 7 日观察窗")
+        reasons.append("重大一手事件仍在 5 日观察窗")
 
     return KeySignalAssessment(
         eligible=not gate_failures,
@@ -1189,5 +1205,5 @@ def apply_article_scoring(article: Article, *, anchor: datetime) -> Article:
     article.content_score_breakdown = content_score_breakdown(article, anchor=anchor)
     article.content_score = content_value_score(article, anchor=anchor)
     article.selection_reasons = content_selection_reasons(article, anchor=anchor)
-    article.key_signal = key_signal_assessment(article)
+    article.key_signal = key_signal_assessment(article, anchor=anchor)
     return article

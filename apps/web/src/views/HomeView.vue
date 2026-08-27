@@ -89,7 +89,8 @@ const filteredArticles = computed(() => {
   if (view.value === 'recommended') {
     return items.sort(
       (left, right) =>
-        recommendationScore(right) - recommendationScore(left) || timestamp(right) - timestamp(left),
+        recommendationScore(right) - recommendationScore(left) ||
+        timestamp(right) - timestamp(left),
     );
   }
   return sortLatestArticles(items);
@@ -105,7 +106,7 @@ const isDefaultFeed = computed(
     !time.value,
 );
 const keySignalArticle = computed(() =>
-  isDefaultFeed.value ? selectKeySignal(filteredArticles.value) : null,
+  isDefaultFeed.value ? selectKeySignal(filteredArticles.value, new Date().toISOString()) : null,
 );
 const displayArticles = computed(() => {
   const keySignal = keySignalArticle.value;
@@ -148,7 +149,8 @@ const organizedArticleCount = computed(
 );
 const modelOrganizedArticleCount = computed(
   () =>
-    (snapshot.value?.articles ?? []).filter((article) => article.ai?.provider === 'deepseek').length,
+    (snapshot.value?.articles ?? []).filter((article) => article.ai?.provider === 'deepseek')
+      .length,
 );
 const defaultFreshness = computed(() =>
   snapshot.value

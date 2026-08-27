@@ -45,9 +45,12 @@ RECENT_TRANSLATION_SCORE = 0.42
 RECENT_TRANSLATION_MAX_AGE = timedelta(days=3)
 RECENT_TRANSLATION_MIN_TECHNICAL_VALUE = 0.55
 MIN_PAID_TARGET_RELEVANCE = 0.60
-SUPPLEMENTAL_TRANSLATION_SCORE = 0.45
+SUPPLEMENTAL_TRANSLATION_SCORE = 0.35
 SUPPLEMENTAL_TRANSLATION_TARGET_RELEVANCE = 0.50
 SUPPLEMENTAL_TRANSLATION_MIN_PRODUCT_OR_ENGINEERING_VALUE = 0.70
+SUPPLEMENTAL_TRANSLATION_ENGINEERING_VALUE = 0.65
+SUPPLEMENTAL_TRANSLATION_PRODUCT_VALUE = 0.55
+SUPPLEMENTAL_TRANSLATION_EVIDENCE_MATURITY = 0.60
 ACADEMIC_FOCUS_TRANSLATION_SCORE = 0.35
 ACADEMIC_FOCUS_TRANSLATION_MIN_TECHNICAL_VALUE = 0.65
 MAX_PAID_ENRICHMENT_AGE_DAYS = 45
@@ -337,11 +340,8 @@ def _enrichment_priority_order(articles: list[Article]) -> list[Article]:
 def _trusted_fresh_translation_candidate(article: Article, generated_at: datetime) -> bool:
     values = article.content_score_breakdown
     published_at = article.published_at or article.collected_at
-    return bool(
-        generated_at - published_at <= RECENT_TRANSLATION_MAX_AGE
-        and article.source_type in {"official", "research_institute", "professional_media"}
-        and (article.content_score or 0.0) >= SUPPLEMENTAL_TRANSLATION_SCORE
-        and values is not None
+    profile_relevant = bool(
+        values is not None
         and values.target_relevance >= SUPPLEMENTAL_TRANSLATION_TARGET_RELEVANCE
         and max(
             values.technical_advancement,
@@ -349,6 +349,18 @@ def _trusted_fresh_translation_candidate(article: Article, generated_at: datetim
             values.product_industry_impact,
         )
         >= SUPPLEMENTAL_TRANSLATION_MIN_PRODUCT_OR_ENGINEERING_VALUE
+    )
+    broadly_useful_engineering = bool(
+        values is not None
+        and values.engineering_applicability >= SUPPLEMENTAL_TRANSLATION_ENGINEERING_VALUE
+        and values.product_industry_impact >= SUPPLEMENTAL_TRANSLATION_PRODUCT_VALUE
+        and values.evidence_maturity >= SUPPLEMENTAL_TRANSLATION_EVIDENCE_MATURITY
+    )
+    return bool(
+        generated_at - published_at <= RECENT_TRANSLATION_MAX_AGE
+        and article.source_type in {"official", "research_institute", "professional_media"}
+        and (article.content_score or 0.0) >= SUPPLEMENTAL_TRANSLATION_SCORE
+        and (profile_relevant or broadly_useful_engineering)
     )
 
 
@@ -548,7 +560,7 @@ def enrich_snapshot(
     ).hexdigest()[:8]
     for article in result.articles:
         if article.content_score_breakdown is not None:
-            article.key_signal = key_signal_assessment(article)
+            article.key_signal = key_signal_assessment(article, anchor=generated_at)
     result.snapshot_id = f"{snapshot.snapshot_id}-ai-{suffix}"
     result.generated_at = generated_at
     return result, model_calls
