@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260826T023940Z-34f72c86-rolling-e1670369-ai-298c0dae",
-  "generatedAt": "2026-08-26T02:39:46.548611Z",
-  "pipelineRunId": "pipeline-42a2656dcbec40399963ab4e13a196b6",
+  "snapshotId": "snapshot-20260827T084600Z-8c19bbc3-rolling-a7830050-ai-b5298703",
+  "generatedAt": "2026-08-27T08:46:05.710853Z",
+  "pipelineRunId": "pipeline-2a2b82c1678d4d32be92ad5a0a7ef621",
   "state": "ready",
   "snapshotKind": "production",
   "sourceCount": 15,
@@ -255,6 +255,160 @@
   "articles": [
     {
       "schemaVersion": "1.0.0",
+      "id": "article-31306ee0ff96ccca4ab2",
+      "sourceId": "arxiv-cs-ai",
+      "sourceType": "academic",
+      "evidenceTier": "primary",
+      "canonicalUrl": "https://arxiv.org/abs/2608.24825v1",
+      "language": "en",
+      "publishedAt": "2026-08-25T17:07:16Z",
+      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "facts": {
+        "title": "A Dual-Dimensional LLM Framework for Automated Item Incidental Content Similarity Analysis in Large-Scale Assessments",
+        "authors": [
+          "Jing Huang",
+          "Jihong Zhang",
+          "Hua-Hua Chang"
+        ],
+        "abstract": "The rapid expansion of large-scale assessments and the growing adoption of automatic item generation have intensified concerns about incidental content redundancy, where construct-irrelevant elements such as wording or contextual framing become unintentionally repetitive across items. Traditional similarity metrics like BLEU or cosine similarity, often fail to capture the nuanced structural and semantic layers that drive perceived redundancy simultaneously. This study proposes a dual-dimensional framework for Automated Item Similarity Analysis (AISA) powered by Large Language Models (LLMs), operationalizing similarity through Structured Decomposition and Semantic Relatedness. Psychometric validation indicates that LLM-derived metrics align more closely with indicators of construct-irrelevant local dependence and yield more coherent item parameter groupings than traditional text-based measures. The framework is further evaluated through its application in Computerized Adaptive Testing (CAT). Simulations reveal that incorporating LLM-based similarity constraints into item selection improves estimation stability and reduces bias with minimal efficiency trade-offs, outperforming constraints based on conventional metrics. These findings highlight the potential of LLM-powered AISA to support scalable bank curation, content-aware test assembly, and experience-sensitive adaptive testing across diverse assessment contexts."
+      },
+      "ai": {
+        "titleZh": "面向大规模测评的自动化题目附带内容相似性分析的双维LLM框架",
+        "summaryZh": "提出双维LLM框架（AISA），通过结构化分解与语义相关度分析题目附带内容相似性，优于传统文本指标，并在CAT中提升估计稳定性、减少偏差。",
+        "whyItMatters": "提升题库质量与自适应测试精度，减少无关内容冗余。",
+        "keyPoints": [
+          "双维LLM框架分析题目相似性",
+          "优于BLEU和余弦相似度",
+          "CAT中提升稳定性并减少偏差"
+        ],
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "promptVersion": "article-enrichment-v3",
+        "generatedAt": "2026-08-26T02:39:46.548611Z"
+      },
+      "evidenceIds": [
+        "evidence-b0d94bf6901650bf0c17"
+      ],
+      "topicScores": {
+        "semantic-layer": 0.6,
+        "foundation-models": 0.85
+      },
+      "contentScore": 0.4612,
+      "contentScoreBreakdown": {
+        "targetRelevance": 0.63,
+        "eventSignificance": 0.0,
+        "decisionImpact": 0.0,
+        "adoptionMomentum": 0.0,
+        "technicalAdvancement": 0.45,
+        "engineeringApplicability": 0.74,
+        "technicalGenerality": 0.65,
+        "productIndustryImpact": 0.54,
+        "freshness": 0.764,
+        "evidenceMaturity": 0.58,
+        "completeness": 1.0
+      },
+      "selectionReasons": [
+        "目标主题相关",
+        "具备工程落地价值",
+        "适用范围较广",
+        "近期发布"
+      ],
+      "keySignal": {
+        "eligible": false,
+        "score": 0.3785,
+        "userValue": 0.4405,
+        "changeMagnitude": 0.09,
+        "actionability": 0.32,
+        "generality": 0.65,
+        "freshness": 0.764,
+        "eventTypes": [],
+        "reasons": [
+          "技术普适性较强"
+        ],
+        "gateFailures": [
+          "事件显著性低于 70",
+          "缺少足以改变决策、采用或技术判断的证据",
+          "学术内容缺少高相关、可泛化的突破证据",
+          "Key Signal 专用得分低于 65"
+        ]
+      },
+      "contentHash": "b0d94bf6901650bf0c177907df77362f95d01470b873c6de2e58f9dcdfad296c"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "article-684943d623893cf6855a",
+      "sourceId": "databricks-blog",
+      "sourceType": "official",
+      "evidenceTier": "primary",
+      "canonicalUrl": "https://www.databricks.com/blog/data-mesh-vs-data-fabric",
+      "language": "en",
+      "publishedAt": "2026-08-25T16:05:34Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
+      "facts": {
+        "title": "Data Mesh vs. Data Fabric: Key Differences and How the Lakehouse Resolves the Debate",
+        "authors": [],
+        "abstract": "Executive Verdict: Organization vs. TechnologyData mesh vs. data fabric hinges on..."
+      },
+      "ai": {
+        "titleZh": "数据网格与数据编织：关键差异及湖仓如何化解争论",
+        "summaryZh": "文章探讨数据网格与数据编织的差异，并指出湖仓架构可解决两者之争。",
+        "whyItMatters": "数据网格与数据编织是两种主流数据管理理念，理解其差异及湖仓的调和作用，有助于企业选择合适的数据架构。",
+        "keyPoints": [
+          "数据网格强调组织架构",
+          "数据编织侧重技术集成",
+          "湖仓融合两者优势"
+        ],
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "promptVersion": "article-enrichment-v3",
+        "generatedAt": "2026-08-26T02:39:46.548611Z"
+      },
+      "evidenceIds": [
+        "evidence-222399a1ace8b3f290b9"
+      ],
+      "topicScores": {
+        "data-platform": 0.65,
+        "intelligent-lakehouse": 0.6
+      },
+      "contentScore": 0.2993,
+      "contentScoreBreakdown": {
+        "targetRelevance": 0.68,
+        "eventSignificance": 0.0,
+        "decisionImpact": 0.0,
+        "adoptionMomentum": 0.0,
+        "technicalAdvancement": 0.12,
+        "engineeringApplicability": 0.08,
+        "technicalGenerality": 0.3,
+        "productIndustryImpact": 0.22,
+        "freshness": 0.7579,
+        "evidenceMaturity": 0.3,
+        "completeness": 0.35
+      },
+      "selectionReasons": [
+        "目标主题相关",
+        "近期发布"
+      ],
+      "keySignal": {
+        "eligible": false,
+        "score": 0.2062,
+        "userValue": 0.241,
+        "changeMagnitude": 0.024,
+        "actionability": 0.075,
+        "generality": 0.3,
+        "freshness": 0.7579,
+        "eventTypes": [],
+        "reasons": [],
+        "gateFailures": [
+          "事件显著性低于 70",
+          "缺少足以改变决策、采用或技术判断的证据",
+          "证据成熟度不足",
+          "Key Signal 专用得分低于 65"
+        ]
+      },
+      "contentHash": "222399a1ace8b3f290b9dda17fecfa2314e969155de8c9b58b8e3dd5058327c8"
+    },
+    {
+      "schemaVersion": "1.0.0",
       "id": "article-afd300f326ca249dcd20",
       "sourceId": "simon-willison-llms",
       "sourceType": "independent_author",
@@ -262,7 +416,7 @@
       "canonicalUrl": "https://simonwillison.net/2026/Aug/23/anthropics-best-ai-model-struggles-to-attract-users-as-cheaper-t",
       "language": "en",
       "publishedAt": "2026-08-23T20:24:52Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "Anthropic’s best AI model struggles to attract users as cheaper tools thrive",
         "authors": [],
@@ -289,7 +443,7 @@
       "topicScores": {
         "foundation-models": 0.425
       },
-      "contentScore": 0.5459,
+      "contentScore": 0.528,
       "contentScoreBreakdown": {
         "targetRelevance": 0.1913,
         "eventSignificance": 0.815,
@@ -299,7 +453,7 @@
         "engineeringApplicability": 0.44,
         "technicalGenerality": 0.18,
         "productIndustryImpact": 0.8036,
-        "freshness": 0.6771,
+        "freshness": 0.4979,
         "evidenceMaturity": 0.5,
         "completeness": 1.0
       },
@@ -312,12 +466,12 @@
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.5999,
+        "score": 0.582,
         "userValue": 0.5622,
         "changeMagnitude": 0.7147,
         "actionability": 0.6867,
         "generality": 0.18,
-        "freshness": 0.6771,
+        "freshness": 0.4979,
         "eventTypes": [
           "adoption_momentum"
         ],
@@ -376,7 +530,7 @@
       "topicScores": {
         "semantic-layer": 0.6
       },
-      "contentScore": 0.3644,
+      "contentScore": 0.3465,
       "contentScoreBreakdown": {
         "targetRelevance": 0.6,
         "eventSignificance": 0.0,
@@ -386,7 +540,7 @@
         "engineeringApplicability": 0.38,
         "technicalGenerality": 0.53,
         "productIndustryImpact": 0.21,
-        "freshness": 0.3624,
+        "freshness": 0.1832,
         "evidenceMaturity": 0.58,
         "completeness": 1.0
       },
@@ -395,16 +549,17 @@
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.2732,
+        "score": 0.2553,
         "userValue": 0.2785,
         "changeMagnitude": 0.136,
         "actionability": 0.1475,
         "generality": 0.53,
-        "freshness": 0.3624,
+        "freshness": 0.1832,
         "eventTypes": [],
         "reasons": [],
         "gateFailures": [
           "事件显著性低于 70",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "学术内容缺少高相关、可泛化的突破证据",
           "Key Signal 专用得分低于 65"
         ]
@@ -420,7 +575,7 @@
       "canonicalUrl": "https://event.on24.com/wcc/r/5460332/DAFEFF7A68EE900DEA7A14356089B553",
       "language": "en",
       "publishedAt": "2026-08-21T14:32:37Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "Stop Hunting, Start Solving: Accelerating Root Cause Analysis with Agentic AI",
         "authors": [],
@@ -448,7 +603,7 @@
         "rag-eval": 0.55,
         "ai-products-agents": 0.45
       },
-      "contentScore": 0.3848,
+      "contentScore": 0.3669,
       "contentScoreBreakdown": {
         "targetRelevance": 0.71,
         "eventSignificance": 0.0,
@@ -458,7 +613,7 @@
         "engineeringApplicability": 0.6,
         "technicalGenerality": 0.65,
         "productIndustryImpact": 0.28,
-        "freshness": 0.3564,
+        "freshness": 0.1772,
         "evidenceMaturity": 0.58,
         "completeness": 1.0
       },
@@ -468,12 +623,12 @@
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.2923,
+        "score": 0.2744,
         "userValue": 0.3675,
         "changeMagnitude": 0.054,
         "actionability": 0.22,
         "generality": 0.65,
-        "freshness": 0.3564,
+        "freshness": 0.1772,
         "eventTypes": [],
         "reasons": [
           "技术普适性较强"
@@ -482,6 +637,7 @@
           "媒体报道或作者观点不能单独作为 Key Signal",
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -496,7 +652,7 @@
       "canonicalUrl": "https://api-docs.deepseek.com/updates#deepseek-v4-flash-vision-exp-release",
       "language": "mixed",
       "publishedAt": "2026-08-21T00:00:00Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "DeepSeek-V4-Flash-Vision-Exp Release",
         "authors": [],
@@ -523,7 +679,7 @@
       "topicScores": {
         "foundation-models": 0.85
       },
-      "contentScore": 0.5694,
+      "contentScore": 0.5515,
       "contentScoreBreakdown": {
         "targetRelevance": 0.3825,
         "eventSignificance": 0.88,
@@ -533,7 +689,7 @@
         "engineeringApplicability": 0.52,
         "technicalGenerality": 0.53,
         "productIndustryImpact": 0.87,
-        "freshness": 0.2699,
+        "freshness": 0.0907,
         "evidenceMaturity": 0.85,
         "completeness": 1.0
       },
@@ -545,22 +701,24 @@
         "证据与对照较充分"
       ],
       "keySignal": {
-        "eligible": true,
-        "score": 0.6305,
+        "eligible": false,
+        "score": 0.6126,
         "userValue": 0.6511,
         "changeMagnitude": 0.626,
         "actionability": 0.7375,
         "generality": 0.53,
-        "freshness": 0.2699,
+        "freshness": 0.0907,
         "eventTypes": [
           "product_launch"
         ],
         "reasons": [
           "新产品或服务进入正式可用阶段",
-          "具备可行动性",
-          "重大一手事件仍在 7 日观察窗"
+          "具备可行动性"
         ],
-        "gateFailures": []
+        "gateFailures": [
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
+          "Key Signal 专用得分低于 65"
+        ]
       },
       "contentHash": "d949a22db5da1c94cf185ba96030cc577e7beae4bd85d0bd8e8dd514fa7bb36e"
     },
@@ -599,7 +757,7 @@
       "topicScores": {
         "data-agent": 1.3
       },
-      "contentScore": 0.2882,
+      "contentScore": 0.2803,
       "contentScoreBreakdown": {
         "targetRelevance": 1.0,
         "eventSignificance": 0.0,
@@ -609,7 +767,7 @@
         "engineeringApplicability": 0.08,
         "technicalGenerality": 0.18,
         "productIndustryImpact": 0.22,
-        "freshness": 0.0794,
+        "freshness": 0.0,
         "evidenceMaturity": 0.3,
         "completeness": 0.35
       },
@@ -618,17 +776,18 @@
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.1423,
+        "score": 0.1344,
         "userValue": 0.321,
         "changeMagnitude": 0.024,
         "actionability": 0.075,
         "generality": 0.18,
-        "freshness": 0.0794,
+        "freshness": 0.0,
         "eventTypes": [],
         "reasons": [],
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "证据成熟度不足",
           "Key Signal 专用得分低于 65"
         ]
@@ -644,7 +803,7 @@
       "canonicalUrl": "https://www.technologyreview.com/2026/08/18/1142226/how-people-use-ai",
       "language": "en",
       "publishedAt": "2026-08-18T10:06:43Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "We still don’t know how people are really using AI",
         "authors": [],
@@ -709,7 +868,7 @@
           "媒体报道或作者观点不能单独作为 Key Signal",
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -802,7 +961,7 @@
         ],
         "gateFailures": [
           "事件显著性低于 70",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "学术内容缺少高相关、可泛化的突破证据",
           "Key Signal 专用得分低于 65"
         ]
@@ -818,7 +977,7 @@
       "canonicalUrl": "https://github.blog/ai-and-ml/github-copilot/how-canvases-make-agentic-workflows-visible-steerable-and-cost-efficient",
       "language": "en",
       "publishedAt": "2026-08-17T16:00:00Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "How canvases make agentic workflows visible, steerable, and cost-efficient",
         "authors": [],
@@ -877,7 +1036,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -892,7 +1051,7 @@
       "canonicalUrl": "https://api-docs.deepseek.com/updates#deepseek-v4-pro-update",
       "language": "mixed",
       "publishedAt": "2026-08-13T00:00:00Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "DeepSeek-V4-Pro Update",
         "authors": [],
@@ -959,7 +1118,7 @@
           "具备可行动性"
         ],
         "gateFailures": [
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -1034,7 +1193,7 @@
           "媒体报道或作者观点不能单独作为 Key Signal",
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -1112,7 +1271,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "证据成熟度不足",
           "学术内容缺少高相关、可泛化的突破证据",
           "Key Signal 专用得分低于 65"
@@ -1187,7 +1346,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -1260,7 +1419,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -1331,7 +1490,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -1411,7 +1570,7 @@
         ],
         "gateFailures": [
           "媒体报道或作者观点不能单独作为 Key Signal",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -1486,100 +1645,12 @@
         "reasons": [],
         "gateFailures": [
           "事件显著性低于 70",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "学术内容缺少高相关、可泛化的突破证据",
           "Key Signal 专用得分低于 65"
         ]
       },
       "contentHash": "024419f6d6a77ad00636d2979398ec477f0fe954f4a85c1440849acf0bf8e06e"
-    },
-    {
-      "schemaVersion": "1.0.0",
-      "id": "article-cb908ccea1c039281a93",
-      "sourceId": "arxiv-cs-ai",
-      "sourceType": "official",
-      "evidenceTier": "primary",
-      "canonicalUrl": "https://arxiv.org/abs/2608.07446v1",
-      "language": "en",
-      "publishedAt": "2026-08-07T17:33:09Z",
-      "collectedAt": "2026-08-10T03:10:24.377306Z",
-      "facts": {
-        "title": "Taxonomy-Driven Analysis of Open-Source AI Risk Mitigation Tools",
-        "authors": [
-          "Afreen Alam",
-          "Evgenija Popchanovska",
-          "Ana Gjorgjevikj",
-          "Maryan Rizinski",
-          "Lubomir T. Chitkushev",
-          "Irena Vodenska",
-          "Dimitar Trajanov"
-        ],
-        "abstract": "Rapid adoption of large language models (LLMs) in enterprise settings has introduced operational, security, and governance risks. As generative AI applications move from pilot to production, manual harm identification and mitigation are becoming difficult to scale. Although many tools support model evaluation, adversarial testing, runtime guardrails, and observability, the tooling landscape remains fragmented. Tools are typically designed for specific engineering tasks and described in technical terms that do not align with governance frameworks or risk taxonomies, making it difficult to determine which tools address which risks and where critical gaps remain. This paper proposes a structured protocol to automate AI risk mitigation through a taxonomy-driven analysis of open-source LLM evaluation and security tools. We map the capabilities of 21 prominent open-source tools to the 32 subcategories of the extended MIT AI Risk Mitigation and Response Taxonomy. An LLM-assisted retrieval-augmented generation pipeline analyzes source code and documentation to extract capabilities for each taxonomy category. Reliability assessment yielded moderate agreement (Fleiss' Kappa = 0.509) among three independent reviewers. The analysis reveals a highly skewed landscape in which tools cluster around technical and operational controls, while governance, legal and regulatory, and financial and market controls remain largely unaddressed. This motivates a layered risk-mitigation architecture combining tool-based controls with organizational and regulatory processes. The mapping protocol achieved an F1 score of 75.5% after majority voting. Overall, the study provides a practical mapping between enterprise AI risk categories and open-source mitigation capabilities, identifies where human oversight remains necessary, and presents a taxonomy-driven framework applicable to open-source and proprietary solutions."
-      },
-      "ai": {
-        "titleZh": "基于分类法的开源AI风险缓解工具分析",
-        "summaryZh": "研究提出基于分类法的协议，自动分析21个开源LLM评估与安全工具，映射至MIT AI风险分类的32个子类。结果显示工具集中于技术与运营控制，治理、法律及金融控制覆盖不足，需结合组织与监管流程。",
-        "whyItMatters": "揭示开源AI风险工具分布不均，为治理与合规缺口提供实证依据。",
-        "keyPoints": [
-          "提出分类法驱动分析协议",
-          "映射21个工具至32个风险子类",
-          "工具集中于技术运营控制",
-          "治理法律金融控制覆盖不足"
-        ],
-        "provider": "deepseek",
-        "model": "deepseek-v4-flash",
-        "promptVersion": "article-enrichment-v3",
-        "generatedAt": "2026-08-10T03:10:26.019230Z"
-      },
-      "evidenceIds": [
-        "evidence-0ceab7598be1a877d9a0"
-      ],
-      "topicScores": {
-        "rag-eval": 1.1,
-        "foundation-models": 0.85
-      },
-      "contentScore": 0.4958,
-      "contentScoreBreakdown": {
-        "targetRelevance": 0.83,
-        "eventSignificance": 0.0,
-        "decisionImpact": 0.0,
-        "adoptionMomentum": 0.0,
-        "technicalAdvancement": 0.59,
-        "engineeringApplicability": 0.92,
-        "technicalGenerality": 0.8,
-        "productIndustryImpact": 0.68,
-        "freshness": 0.0,
-        "evidenceMaturity": 0.9,
-        "completeness": 1.0
-      },
-      "selectionReasons": [
-        "目标主题高度相关",
-        "具备工程落地价值",
-        "适用范围较广",
-        "产品或行业影响较高",
-        "证据与对照较充分"
-      ],
-      "keySignal": {
-        "eligible": false,
-        "score": 0.3977,
-        "userValue": 0.5615,
-        "changeMagnitude": 0.118,
-        "actionability": 0.4,
-        "generality": 0.8,
-        "freshness": 0.0,
-        "eventTypes": [],
-        "reasons": [
-          "技术普适性较强"
-        ],
-        "gateFailures": [
-          "事件显著性低于 70",
-          "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
-          "学术内容缺少高相关、可泛化的突破证据",
-          "Key Signal 专用得分低于 65"
-        ]
-      },
-      "contentHash": "0ceab7598be1a877d9a0edecc9cbe442831451f57ed85178672a45c25248e76e"
     },
     {
       "schemaVersion": "1.0.0",
@@ -1645,7 +1716,7 @@
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
           "与 AI、产品或技术决策范围关联不足",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "证据成熟度不足",
           "Key Signal 专用得分低于 65"
         ]
@@ -1715,7 +1786,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "证据成熟度不足",
           "Key Signal 专用得分低于 65"
         ]
@@ -1786,7 +1857,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -1857,7 +1928,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "证据成熟度不足",
           "Key Signal 专用得分低于 65"
         ]
@@ -1930,7 +2001,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -2000,7 +2071,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -2070,7 +2141,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -2085,7 +2156,7 @@
       "canonicalUrl": "https://github.blog/ai-and-ml/github-copilot/how-the-github-legal-team-used-copilot-cli-to-streamline-their-workflows",
       "language": "en",
       "publishedAt": "2026-08-04T19:02:34Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "How the GitHub legal team used Copilot CLI to streamline their workflows",
         "authors": [],
@@ -2141,7 +2212,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -2211,7 +2282,7 @@
         "gateFailures": [
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -2281,7 +2352,7 @@
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
           "与 AI、产品或技术决策范围关联不足",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -2296,7 +2367,7 @@
       "canonicalUrl": "https://api-docs.deepseek.com/updates#deepseek-v4-flash-update",
       "language": "mixed",
       "publishedAt": "2026-07-31T00:00:00Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "DeepSeek-V4-Flash Update",
         "authors": [],
@@ -2363,7 +2434,7 @@
           "技术普适性较强"
         ],
         "gateFailures": [
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -2371,146 +2442,370 @@
     },
     {
       "schemaVersion": "1.0.0",
-      "id": "article-4e90420c69645ce576fc",
+      "id": "article-9b368ab3b44b71646ac3",
       "sourceId": "github-ai-ml",
       "sourceType": "official",
       "evidenceTier": "primary",
-      "canonicalUrl": "https://github.blog/ai-and-ml/github-copilot/the-harness-is-all-you-need-mostly",
+      "canonicalUrl": "https://github.blog/ai-and-ml/github-copilot/github-copilot-app-for-beginners-automate-dependabot-pull-request-triage",
       "language": "en",
-      "publishedAt": "2026-07-27T18:00:00Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "publishedAt": "2026-08-26T20:12:53Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
-        "title": "The harness is all you need (mostly)",
+        "title": "GitHub Copilot app for Beginners: Automate Dependabot pull request triage",
         "authors": [],
-        "abstract": "If you’re feeling overwhelmed by AI right now, you’re not alone. Every day it seems there is a new tool, new MCP, new model, new skill, new workflow, new feature, new social post that is some form of “Hey look! I have completely figured out AI with this one weird prompt.” I…don’t believe you. I work with AI every single day, and what I’m finding is that less is way more. It’s not about what I install or configure or trick the agent into doing that makes any real difference. That stuff is interesting, but at the end of the day it feels like gimmicks. I see the biggest gains in my productivity from how I use the harness and how well I understand it. So in this post, I’m sharing you a simple workflow that you can use to drastically improve your effectiveness with AI just by using existing features of GitHub Copilot. No weird prompts. No skill everyone else seems to know about. Just the harness. The harness is all you need—mostly. Disclaimers I’m using the term “harness” interchangeably with “GitHub Copilot.” The point of this post is to keep things simple, so just know that GitHub Copilot is an agent harness. I don’t mean to insinuate that you won’t ever need any skills or MCPs or instructions or custom agents, etc. In fact, those things will become quite important as you progress and need to define complex workflows and automate things for your teams. In fact, I use a few throughout this blog post! What I am pointing out here is that you do not need any of those things to be highly successful with AI. Also, there is a lot of slop out there. If you don’t believe that, ask the agent to create a skill to do anything at all. It will happily oblige. Whether or not that generated skill actually works, it can be easily published to any number of skill or MCP registries. 1. Pick a tool, any tool This is an obvious one, right? Pick a tool! It’s so easy! But even within the GitHub Copilot family, there are a lot of options. These include the CLI, the new GitHub Copilot app, VS Code, Visual Studio, and JetBrains, just to name a few. The good news is that these experiences are increasingly being centralized on the same harness. The details can differ by tool, but the core workflow is consistent. Learn the harness once, use it everywhere. That said, I do believe that learning the harness is key, and the best way to learn it is to be as close to it as possible. So if you are just starting out, I’d recommend beginning with the GitHub Copilot CLI. It’s a terminal interface,"
+        "abstract": "I might be biased, but I think Dependabot is pretty amazing. It helps keep my projects up to date, ensuring I’m always using secure libraries. But because there’re frequently new vulnerabilities, there’re frequently new pull requests from Dependabot. Sometimes it’s a minor version bump. Sometimes it’s a major version upgrade. Sometimes everything will work just fine. And sometimes… well, every single developer has been caught by a breaking change. How can we best triage these pull requests? The work isn’t particularly difficult per se, but it certainly is repetitive. It’s the perfect task to offload to Copilot! With GitHub Copilot app automations, you can hand off that first round of review. Instead of manually inspecting every Dependabot pull request, you can create an automation that reviews open pull requests, groups them by risk, verifies CI status, and delivers a summary before your day begins. Follow the steps below to build a daily Dependabot triage automation. Step 1: Create a new automation From the GitHub Copilot app, create a new automation. You’ll configure two things first: Name: Give the automation a descriptive name, such as Daily Dependabot Triage. Trigger: Decide when it should run. Available trigger options include: Manual Hourly Daily Weekly When an issue is created For recurring maintenance tasks like Dependabot reviews, a daily schedule is often a good choice. For example, you might schedule it to run before your workday begins so the results are waiting when you log in. You can also choose whether the automation runs in the cloud or on your local machine. Step 2: Describe the task in natural language Next, tell Copilot what you want it to do. For example: Review the open Dependabot pull requests, group them by risk, identify the safe patch and minor version updates, verify that CI is passing for each pull request, and provide a short summary of the recommended next steps. Because the prompt uses natural language, you can customize it to match your team’s workflow. Step 3: Select the repository Choose the repository or project the automation should analyze. Once you’ve selected the repository, create the automation. If you want to test it immediately instead of waiting for the scheduled run, choose Create and Run. Step 4: Review the results When the automation finishes, Copilot returns a summary instead of a list of individual pull requests. For example, it might: Group safe patch updates together Separate minor and major version upgra"
       },
       "ai": {
-        "titleZh": "大多数时候，先把 Agent Harness 用好就够了",
-        "summaryZh": "文章主张先理解并稳定使用 Agent Harness 的基础能力，再按复杂工作流需要增加技能、MCP、指令或自定义 Agent。作者以 GitHub Copilot 的多种界面为例，强调共享 Harness 让核心工作方式可以跨工具复用。",
-        "whyItMatters": "Agent 产品容易堆叠工具和配置；先固化任务流程、上下文与验证方式，通常更利于团队形成可复用的使用方法。",
+        "titleZh": "GitHub Copilot 应用入门：自动化 Dependabot 拉取请求分类",
+        "summaryZh": "GitHub Copilot 应用推出自动化功能，可每日自动审查 Dependabot 拉取请求，按风险分组、验证 CI 状态并生成摘要，帮助开发者高效处理依赖更新，减少手动分类工作。",
+        "whyItMatters": "自动化依赖审查可显著提升开发效率，降低安全风险。",
         "keyPoints": [
-          "先掌握 Harness 的核心工作方式",
-          "复杂任务再增加技能与外部工具",
-          "共享 Harness 有利于跨界面复用"
+          "创建自动化，设置每日触发",
+          "自然语言描述任务",
+          "选择仓库并运行",
+          "获取分组摘要与建议"
         ],
-        "provider": "editorial",
-        "model": "编辑整理",
-        "promptVersion": "editorial-bootstrap-v1",
-        "generatedAt": "2026-08-10T04:25:00Z"
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "promptVersion": "article-enrichment-v3",
+        "generatedAt": "2026-08-27T08:46:05.710853Z"
       },
       "evidenceIds": [
-        "evidence-046266c591d3677a998d"
+        "evidence-411befffb34551782c83"
       ],
       "topicScores": {
         "ai-products-agents": 0.45
       },
-      "contentScore": 0.2848,
+      "contentScore": 0.5759,
       "contentScoreBreakdown": {
         "targetRelevance": 0.3375,
-        "eventSignificance": 0.0,
-        "decisionImpact": 0.0,
+        "eventSignificance": 0.82,
+        "decisionImpact": 0.82,
         "adoptionMomentum": 0.0,
-        "technicalAdvancement": 0.3,
+        "technicalAdvancement": 0.12,
         "engineeringApplicability": 0.52,
         "technicalGenerality": 0.18,
-        "productIndustryImpact": 0.71,
-        "freshness": 0.0,
-        "evidenceMaturity": 0.57,
+        "productIndustryImpact": 0.87,
+        "freshness": 0.9253,
+        "evidenceMaturity": 0.69,
         "completeness": 1.0
       },
       "selectionReasons": [
+        "风险事件可能影响产品或技术决策",
+        "核心能力、接口或成本条件发生变化",
+        "重大变化信号明确",
+        "可能影响产品或技术决策",
         "产品或行业影响较高"
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.2277,
-        "userValue": 0.3659,
-        "changeMagnitude": 0.06,
-        "actionability": 0.3075,
+        "score": 0.6285,
+        "userValue": 0.6519,
+        "changeMagnitude": 0.557,
+        "actionability": 0.7575,
         "generality": 0.18,
-        "freshness": 0.0,
-        "eventTypes": [],
-        "reasons": [],
+        "freshness": 0.9253,
+        "eventTypes": [
+          "security_risk",
+          "capability_update"
+        ],
+        "reasons": [
+          "风险事件可能影响产品或技术决策",
+          "核心能力、接口或成本条件发生变化",
+          "具备可行动性",
+          "24 小时内发布"
+        ],
         "gateFailures": [
-          "事件显著性低于 70",
-          "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
-      "contentHash": "046266c591d3677a998d98902d168a8c7c20f92e29c3a4aa5802f983bc9b3168"
+      "contentHash": "411befffb34551782c8336b33dcee2213c4192dae3e8b2125529be555279d5cd"
     },
     {
       "schemaVersion": "1.0.0",
-      "id": "article-3bbd8b07cb5a7e5a4148",
-      "sourceId": "github-ai-ml",
-      "sourceType": "official",
+      "id": "article-74f0fb40a0bd4261845a",
+      "sourceId": "arxiv-cs-ai",
+      "sourceType": "academic",
       "evidenceTier": "primary",
-      "canonicalUrl": "https://github.blog/ai-and-ml/github-copilot/github-copilot-app-for-beginners-getting-started",
+      "canonicalUrl": "https://arxiv.org/abs/2608.26036v1",
       "language": "en",
-      "publishedAt": "2026-07-27T16:00:00Z",
-      "collectedAt": "2026-08-25T02:31:41.740640Z",
+      "publishedAt": "2026-08-26T17:15:24Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
-        "title": "GitHub Copilot app for Beginners: Getting started",
-        "authors": [],
-        "abstract": "AI coding tools often begin with a chat window. While that works for quick questions or generating code, real software development rarely happens in a straight line. One minute you’re fixing a bug, the next you’re reviewing a pull request, digging into an unfamiliar part of the codebase, or exploring a new idea. The GitHub Copilot app is designed for that kind of workflow. Instead of treating AI as a single conversation, it gives you a workspace where you can manage multiple agent sessions, switch between tasks without losing momentum, and work with AI agents across the different parts of your workflow. Your work starts with a project Agent sessions are connected to a project, giving each session the repository context needed for a specific task. From the GitHub Copilot app home screen, you can choose a project you’ve worked with before or add a new one from GitHub or your local machine. Once a project is selected, you can start a session with the codebase, files, and tools needed to begin working on a task. For example, you might want to add a breadcrumb navigation component to an existing application. Instead of manually searching through files to find the right place to make the change, you can describe the update you want to make. The session can examine the project, identify relevant files, make the changes, and run tests to help validate the work. By starting each session with the project already connected, you can spend more time working and less time preparing your environment. Keep multiple threads moving Once you’ve selected a project and started an agent session, you can create additional sessions for other questions, ideas, or tasks without interrupting your existing work. Quick Chat lets you start a new conversation from the Copilot app home screen. Each conversation can focus on a different area of work, giving you a dedicated space to explore ideas, ask questions, or work through changes. For example, you can open a Quick Chat session to ask Copilot about Copilot, such as how worktrees function in the app, while another agent session continues working on a project update. You can also use Quick Chat to investigate how your codebase works, explore potential approaches, or gather context before deciding how to move forward. When you return to your original session, you can pick up where you left off, review the changes, and make any updates needed to move the task forward. Multiple sessions let you follow different threads of work without losi"
+        "title": "Trace Integrity for LLM Data Agents: A Vision for Auditable Structured Reasoning in Real-World Systems",
+        "authors": [
+          "Srimonti Dutta",
+          "Akshata Kishore Moharir"
+        ],
+        "abstract": "Answer accuracy is an insufficient reliability signal for LLM data agents. In structured-data tasks, a benchmark-correct answer can be produced by an invalid trace. This paper introduces Trace Integrity, a deployment reliability criterion for evaluating whether the computation recorded behind an answer is explicit, executable, schema-valid, operator-faithful, replayable, answer-consistent, and auditable. We identify the Structure Gap as the deployment failure mode that makes Trace Integrity necessary: natural-language reasoning and free-form rationales do not reliably specify the operator-level programs required by real-world systems. We operationalize Trace Integrity with execution contracts, structured artifacts that bind user intent to schema elements, operator plans, assumptions, executable queries, verification status, and final-answer linkage. We also introduce CAIT (Correct Answer / Invalid Trace) Rate, which measures how often answer-only evaluation counts computationally unsupported outputs as successes. In an empirical demonstration on BIRD Mini-Dev, Direct SQL, Operation Summary + SQL, and Contract-First SQL achieve answer accuracies of 20%, 22%, and 24%, while their Trace Integrity Pass Rates are 39%, 43%, and 40% and their CAIT Rates remain high at 55%, 59.1%, and 45.8%, showing that answer accuracy, trace validity, and silent-failure risk are distinct evaluation signals. Real-world LLM data agents should, therefore, be evaluated not only by whether their outputs match a reference answer, but by whether those outputs are backed by auditable computation."
       },
       "ai": {
-        "titleZh": "GitHub Copilot App 入门：从项目和多 Agent 会话开始",
-        "summaryZh": "GitHub Copilot App 将 Agent 会话与项目连接，使每个会话获得对应代码库、文件和工具上下文。用户可以同时维护多个任务会话，在修复缺陷、审查代码和探索方案之间切换，并保留各自的工作进度。",
-        "whyItMatters": "AI 编程产品正在从单一聊天框转向多任务工作空间，项目上下文和会话隔离会直接影响复杂任务的连续性。",
+        "titleZh": "LLM Data Agent 的轨迹完整性：面向真实世界系统中可审计结构化推理的愿景",
+        "summaryZh": "本文提出轨迹完整性作为LLM Data Agent的部署可靠性标准，要求计算过程显式、可执行、符合模式与算子、可重放且与答案一致。通过执行契约和CAIT率，在BIRD Mini-Dev上证明答案准确率与轨迹有效性是不同信号，强调需审计计算支撑。",
+        "whyItMatters": "仅凭答案准确率不足以评估LLM Data Agent，轨迹完整性确保计算可审计，降低静默失败风险。",
         "keyPoints": [
-          "Agent 会话绑定具体项目上下文",
-          "支持多个任务会话并行推进",
-          "减少重复准备代码环境的成本"
+          "引入轨迹完整性标准，涵盖七项要求",
+          "执行契约绑定意图与模式、算子等",
+          "CAIT率衡量无效轨迹被计为成功的比例",
+          "实验显示准确率与轨迹有效性独立"
         ],
-        "provider": "editorial",
-        "model": "编辑整理",
-        "promptVersion": "editorial-bootstrap-v1",
-        "generatedAt": "2026-08-10T04:25:00Z"
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "promptVersion": "article-enrichment-v3",
+        "generatedAt": "2026-08-27T08:46:05.710853Z"
       },
       "evidenceIds": [
-        "evidence-c4804358880b281aff36"
+        "evidence-ef54d927f0f978bd0d30"
       ],
       "topicScores": {
-        "ai-products-agents": 0.9
+        "data-agent": 1.3,
+        "foundation-models": 0.425
       },
-      "contentScore": 0.3379,
+      "contentScore": 0.5142,
       "contentScoreBreakdown": {
-        "targetRelevance": 0.675,
+        "targetRelevance": 1.0,
+        "eventSignificance": 0.0,
+        "decisionImpact": 0.0,
+        "adoptionMomentum": 0.0,
+        "technicalAdvancement": 0.49,
+        "engineeringApplicability": 0.6,
+        "technicalGenerality": 0.3,
+        "productIndustryImpact": 0.35,
+        "freshness": 0.9077,
+        "evidenceMaturity": 0.76,
+        "completeness": 1.0
+      },
+      "selectionReasons": [
+        "目标主题高度相关",
+        "24 小时内发布",
+        "证据与对照较充分"
+      ],
+      "keySignal": {
+        "eligible": false,
+        "score": 0.3652,
+        "userValue": 0.4575,
+        "changeMagnitude": 0.098,
+        "actionability": 0.2375,
+        "generality": 0.3,
+        "freshness": 0.9077,
+        "eventTypes": [],
+        "reasons": [
+          "24 小时内发布"
+        ],
+        "gateFailures": [
+          "事件显著性低于 70",
+          "缺少足以改变决策、采用或技术判断的证据",
+          "学术内容缺少高相关、可泛化的突破证据",
+          "Key Signal 专用得分低于 65"
+        ]
+      },
+      "contentHash": "ef54d927f0f978bd0d30c5cb6a3c8f13a65981ed73a367bcd8c59e31a3aa833d"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "article-f79c5348879621cc8def",
+      "sourceId": "mlcommons-news",
+      "sourceType": "research_institute",
+      "evidenceTier": "primary",
+      "canonicalUrl": "https://mlcommons.org/2026/08/endtoend-inference",
+      "language": "en",
+      "publishedAt": "2026-08-26T14:50:00Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
+      "facts": {
+        "title": "Introducing the MLPerf End-to-End RAG Inference Benchmark",
+        "authors": [],
+        "abstract": "The MLCommons MLPerf Inference Working Group is excited to introduce the first instance of a new End-to-End Retrieval-Augmented Generation (RAG) benchmark. By answering from documents retrieved at query time rather than from weights alone, RAG reduces hallucination and draws on current, private knowledge, which has made it one of the most common ways language models are deployed. A production RAG system is rarely a single model; it is a pipeline of several models that retrieve relevant documents and reason over them to produce a grounded answer. A Retrieval-Augmented Generation (RAG) pipeline ingests and chunks source data, converts it into semantic vector embeddings for storage and retrieval, and then combines relevant retrieved data with a user query to generate an accurate, model-driven response. This benchmark measures this entire pipeline. It is built around two workloads: An ingestion pipeline that builds the vector database from a document corpus. A question-and-answering (QnA) pipeline answers queries over the vector database, iterating retrieve-and-reason steps across multiple hops until it has enough evidence. Together they capture what governs a real RAG deployment — multiple models of different roles and sizes, served across an iterative loop — none of which a single-model benchmark can measure. It is the first multi-component MLPerf inference benchmark to score an entire RAG pipeline end to end. This post covers what makes this workload unique, the dataset and task, the models and metrics, and the reference implementation. Why End-to-End RAG? RAG is increasingly popular and for many deployments, essential. By grounding answers in documents retrieved at query time, it reduces hallucination, keeps answers up to date, and lets a general model use proprietary or private knowledge it was never trained on — exactly the properties enterprises need. By nature, RAG is a multi-component system, and its behavior emerges from how those components are composed and served together, not from any one of them alone. Single-model LLM benchmarks can’t capture this: they score one model on one prompt (most often without tokenzier/de-tokenizer involved), so the pipeline-specific behavior that governs a real RAG deployment goes unmeasured, and the optimization opportunities of serving several models together never arise. It is also a stepping stone toward benchmarking agentic AI. RAG in itself is one of the tools an agent reaches for, and its multi-component, multi"
+      },
+      "ai": {
+        "titleZh": "MLPerf 推出端到端 RAG 推理基准",
+        "summaryZh": "MLCommons 的 MLPerf 推理工作组发布了首个端到端检索增强生成（RAG）基准，覆盖从文档摄取到多跳问答的完整流水线，包含两个工作负载，衡量多个模型协同服务的性能，为代理式 AI 基准奠定基础。",
+        "whyItMatters": "首个端到端 RAG 基准，填补单模型基准无法评估多组件流水线的空白。",
+        "keyPoints": [
+          "覆盖摄取与问答两个工作负载",
+          "衡量多模型协同服务性能",
+          "为代理式 AI 基准奠定基础"
+        ],
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "promptVersion": "article-enrichment-v3",
+        "generatedAt": "2026-08-27T08:46:05.710853Z"
+      },
+      "evidenceIds": [
+        "evidence-9d55d29336f6b24245be"
+      ],
+      "topicScores": {
+        "rag-eval": 1.1,
+        "foundation-models": 0.425,
+        "ai-products-agents": 0.45
+      },
+      "contentScore": 0.7239,
+      "contentScoreBreakdown": {
+        "targetRelevance": 0.86,
+        "eventSignificance": 0.88,
+        "decisionImpact": 0.68,
+        "adoptionMomentum": 0.0,
+        "technicalAdvancement": 0.45,
+        "engineeringApplicability": 0.74,
+        "technicalGenerality": 0.3,
+        "productIndustryImpact": 0.77,
+        "freshness": 0.8933,
+        "evidenceMaturity": 0.8,
+        "completeness": 1.0
+      },
+      "selectionReasons": [
+        "新产品或服务进入正式可用阶段",
+        "重大变化信号明确",
+        "目标主题高度相关",
+        "具备工程落地价值",
+        "产品或行业影响较高"
+      ],
+      "keySignal": {
+        "eligible": true,
+        "score": 0.6933,
+        "userValue": 0.7595,
+        "changeMagnitude": 0.662,
+        "actionability": 0.7175,
+        "generality": 0.3,
+        "freshness": 0.8933,
+        "eventTypes": [
+          "product_launch"
+        ],
+        "reasons": [
+          "新产品或服务进入正式可用阶段",
+          "目标用户价值较高",
+          "具备可行动性",
+          "24 小时内发布"
+        ],
+        "gateFailures": []
+      },
+      "contentHash": "9d55d29336f6b24245bed05ac69d7bc49d1d5b0952f818d1a33bb2a0213cfdd9"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "article-c075cd6b7534fee8da4f",
+      "sourceId": "ieee-spectrum-ai",
+      "sourceType": "professional_media",
+      "evidenceTier": "secondary",
+      "canonicalUrl": "https://spectrum.ieee.org/silico-ai-interpretability",
+      "language": "en",
+      "publishedAt": "2026-08-26T12:00:01Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
+      "facts": {
+        "title": "New Platform Peers Inside AI’s Black Box",
+        "authors": [],
+        "abstract": "Prompt Claude, ChatGPT, Gemini, or any other popular large language model with a question like “What is the best film ever made?” and the response will vary. And you (and most worryingly, the people who built the LLM) have little idea exactly how it came up with that specific answer. This mysterious behavior can be useful in some situations. But—as highlighted by a recent incident where OpenAI could not explain why its advanced prerelease model hacked AI company Hugging Face—it can have negative and alarming consequences too. And when frontier AI models are writing code, generating results humans could not achieve alone, and performing other important tasks across society, the need to interpret AI “thinking” and outputs has never been greater. Goodfire, an AI lab focused solely on this very problem, recently made its cutting-edge Silico platform, filled with tools to interpret the behavior of AI, generally available to the public. As part of this, the company recently announced a new grant program offering US $1 million in free Silico usage for academic and nonprofit interpretability researchers. These efforts aim to democratize AI interpretability, placing techniques previously av"
+      },
+      "ai": null,
+      "evidenceIds": [
+        "evidence-597aa3446b41376c849e"
+      ],
+      "topicScores": {
+        "foundation-models": 0.85,
+        "ai-products-agents": 0.45
+      },
+      "contentScore": 0.4249,
+      "contentScoreBreakdown": {
+        "targetRelevance": 0.4125,
+        "eventSignificance": 0.0,
+        "decisionImpact": 0.0,
+        "adoptionMomentum": 0.0,
+        "technicalAdvancement": 0.34,
+        "engineeringApplicability": 0.52,
+        "technicalGenerality": 0.65,
+        "productIndustryImpact": 0.75,
+        "freshness": 0.8764,
+        "evidenceMaturity": 0.6,
+        "completeness": 1.0
+      },
+      "selectionReasons": [
+        "适用范围较广",
+        "产品或行业影响较高",
+        "24 小时内发布"
+      ],
+      "keySignal": {
+        "eligible": false,
+        "score": 0.3755,
+        "userValue": 0.3946,
+        "changeMagnitude": 0.068,
+        "actionability": 0.3175,
+        "generality": 0.65,
+        "freshness": 0.8764,
+        "eventTypes": [],
+        "reasons": [
+          "技术普适性较强",
+          "24 小时内发布"
+        ],
+        "gateFailures": [
+          "缺少可展示的中文标题或导读",
+          "媒体报道或作者观点不能单独作为 Key Signal",
+          "事件显著性低于 70",
+          "缺少足以改变决策、采用或技术判断的证据",
+          "Key Signal 专用得分低于 65"
+        ]
+      },
+      "contentHash": "597aa3446b41376c849e5164c92d4cbd8a8c134bc7b512ce3b650d2f616a08d9"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "article-3d4f4c59b13e90e2e4de",
+      "sourceId": "mit-technology-review-ai",
+      "sourceType": "professional_media",
+      "evidenceTier": "secondary",
+      "canonicalUrl": "https://www.technologyreview.com/2026/08/26/1141949/editors-letter-september-2026",
+      "language": "en",
+      "publishedAt": "2026-08-26T09:00:00Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
+      "facts": {
+        "title": "Raised on AI",
+        "authors": [],
+        "abstract": "When my oldest child was born, I immediately set up Gmail and Twitter accounts in her name. I broadly announced her birth online and proceeded to plaster her photo across all sorts of platforms. In short, I began creating her digital footprint long before she could stand on her own two feet. Fast-forward a couple of years to when my second kid came, and I had essentially the opposite reaction. I wanted to make sure I preserved her privacy. I didn’t want her birthday to be a matter of public record or her face to feed the algorithms. In time, I would go back and scrub much of the early footprint I had created for my first child as well. What happened? I watched the promise of the early internet give way to the reality of its potential for abuse. I myself was already fully in the throes of smartphone and social media obsession. My wife, a pediatric nurse, grew increasingly alarmed at the number of children admitted to her hospital struggling with the effects of things like body dysmorphia or cyberbullying as a result of interactions on social media. We became those parents. The ones whose kids carry flip phones and aren’t on TikTok. We are not alone in this. A surprising—maybe troubling—number of people I know who work at big tech companies also keep their kids at arm’s distance from technology. They lock down their phones, if they have phones at all, and keep them off social media. Hell, even Mark Zuckerberg doesn’t publicly post his children’s faces on Facebook or Instagram. If the desire to limit kids’ use of technology was once a subcurrent, it has become a raging flood. Jonathan Haidt’s best-selling 2024 book The Anxious Generation helped propel the issue into the mainstream (despite criticisms of his conclusions from some developmental psychologists). Last year, Australia became the first country to enact a social media ban for children under 16. Other nations, from Austria to Indonesia, have followed suit, announcing similar bans. The US Supreme Court recently upheld an age verification law in Texas, which acts as a de facto ban, and several states have flirted with their own measures. School districts all over the country are banning educational devices like iPads and Chromebooks in favor of actual books. Kids themselves seem to be embracing this tech skepticism too: The hottest gadget among the Gen Alpha set is a vintage Sony Walkman. We have to prepare our children to live in the actual world we have actually created, not the one we wish we had. Ye"
+      },
+      "ai": null,
+      "evidenceIds": [
+        "evidence-db02dcbf7024e91a663d"
+      ],
+      "topicScores": {
+        "rag-eval": 0.55
+      },
+      "contentScore": 0.3772,
+      "contentScoreBreakdown": {
+        "targetRelevance": 0.44,
         "eventSignificance": 0.0,
         "decisionImpact": 0.0,
         "adoptionMomentum": 0.0,
         "technicalAdvancement": 0.12,
         "engineeringApplicability": 0.52,
-        "technicalGenerality": 0.18,
-        "productIndustryImpact": 0.71,
-        "freshness": 0.0,
-        "evidenceMaturity": 0.57,
+        "technicalGenerality": 0.53,
+        "productIndustryImpact": 0.61,
+        "freshness": 0.8585,
+        "evidenceMaturity": 0.42,
         "completeness": 1.0
       },
       "selectionReasons": [
-        "目标主题相关",
-        "产品或行业影响较高"
+        "24 小时内发布"
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.2338,
-        "userValue": 0.4503,
+        "score": 0.3179,
+        "userValue": 0.3665,
         "changeMagnitude": 0.024,
-        "actionability": 0.3075,
-        "generality": 0.18,
-        "freshness": 0.0,
+        "actionability": 0.2825,
+        "generality": 0.53,
+        "freshness": 0.8585,
         "eventTypes": [],
-        "reasons": [],
+        "reasons": [
+          "24 小时内发布"
+        ],
         "gateFailures": [
+          "缺少可展示的中文标题或导读",
+          "媒体报道或作者观点不能单独作为 Key Signal",
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "证据成熟度不足",
           "Key Signal 专用得分低于 65"
         ]
       },
-      "contentHash": "c4804358880b281aff36e187deeb13d686a1cff664c7555713ff426e9600a0dd"
+      "contentHash": "db02dcbf7024e91a663d79f49b12b01c81ea76ae77e139bbb071ccfdc90a8899"
     },
     {
       "schemaVersion": "1.0.0",
@@ -2521,20 +2816,34 @@
       "canonicalUrl": "https://github.blog/ai-and-ml/llms/how-to-evaluate-llms-before-production",
       "language": "en",
       "publishedAt": "2026-08-25T21:35:11Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "How to evaluate LLMs before production",
         "authors": [],
         "abstract": "A language model can perform well on a clean benchmark and still struggle with the cases that matter in production. Benchmarks and curated datasets are useful when prototyping an LLM-based system. They help teams compare models, test an initial prompt, and determine whether an idea is technically plausible. But as a system moves closer to production, the evaluation problem changes. Real inputs are often ambiguous. Labels may be inconsistent. Important context may be missing or truncated. The evaluation set may not reflect the production distribution. Edge cases that rarely appear in benchmarks can become common sources of failure. Even when offline metrics improve, those results may not translate cleanly into production behavior. We encountered these challenges while evaluating an LLM-based system designed to reduce false positives in GitHub secret scanning. Secret scanning identifies credentials such as tokens and keys that may have been committed to a repository. Because some candidate strings resemble secrets, but don’t actually represent real credentials, developers may spend time investigating alerts that don’t require remediation. Rather than determine whether an LLM could classify a string correctly, we needed to understand whether the system could reduce noisy alerts while preserving enough recall to remain safe for a security workflow. In this post, we share the practices that helped us move from promising prototype results to production. The lessons apply broadly to LLM-powered systems in code analysis, developer tools, security, data analysis, and other production workflows. 1. Start with the product decision, not the model When an LLM system doesn’t perform as expected, the first instinct is often to adjust its technical components. Teams may rewrite the prompt, add context, introduce another reasoning step, adjust the surrounding pipeline, or switch models. Before making any of these changes, they should define the decision the evaluation is meant to support. For our secret-scanning work, we asked: Can the system reduce false positives while preserving enough recall to be safe in a production security workflow? To answer this question, teams must decide which mistakes are acceptable, which metrics should drive the product decision, and which guardrails must remain within their defined thresholds. In secret scanning, incorrectly suppressing a real credential can be more consequential than asking a developer to review an additional alert. We the"
       },
-      "ai": null,
+      "ai": {
+        "titleZh": "如何在上线前评估LLM",
+        "summaryZh": "文章指出，LLM在基准测试中表现良好，但生产环境中的真实输入往往模糊、标签不一致、上下文缺失，导致离线指标无法直接转化为生产表现。作者以GitHub秘密扫描为例，强调评估应始于产品决策而非模型，需明确可接受的错误类型和指标，并分享了从原型到生产的评估实践。",
+        "whyItMatters": "为LLM系统上线前的评估提供实用指导，避免依赖基准测试的误导。",
+        "keyPoints": [
+          "基准测试不等于生产表现",
+          "评估始于产品决策",
+          "关注真实输入与边缘案例",
+          "离线指标需谨慎转化"
+        ],
+        "provider": "deepseek",
+        "model": "deepseek-v4-flash",
+        "promptVersion": "article-enrichment-v3",
+        "generatedAt": "2026-08-27T08:46:05.710853Z"
+      },
       "evidenceIds": [
         "evidence-d49055666afb941a854a"
       ],
       "topicScores": {
         "foundation-models": 0.425
       },
-      "contentScore": 0.3933,
+      "contentScore": 0.3754,
       "contentScoreBreakdown": {
         "targetRelevance": 0.1913,
         "eventSignificance": 0.0,
@@ -2544,118 +2853,33 @@
         "engineeringApplicability": 0.74,
         "technicalGenerality": 0.18,
         "productIndustryImpact": 0.71,
-        "freshness": 0.9698,
+        "freshness": 0.7906,
         "evidenceMaturity": 0.73,
         "completeness": 1.0
       },
       "selectionReasons": [
         "具备工程落地价值",
         "产品或行业影响较高",
-        "24 小时内发布",
+        "近期发布",
         "证据与对照较充分"
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.3621,
+        "score": 0.3442,
         "userValue": 0.3733,
         "changeMagnitude": 0.09,
         "actionability": 0.3625,
         "generality": 0.18,
-        "freshness": 0.9698,
+        "freshness": 0.7906,
         "eventTypes": [],
-        "reasons": [
-          "24 小时内发布"
-        ],
+        "reasons": [],
         "gateFailures": [
-          "缺少可展示的中文标题或导读",
           "事件显著性低于 70",
           "缺少足以改变决策、采用或技术判断的证据",
           "Key Signal 专用得分低于 65"
         ]
       },
       "contentHash": "d49055666afb941a854a24980f12d8c001b8b7a31969fd91d7af33d16dd9f3dc"
-    },
-    {
-      "schemaVersion": "1.0.0",
-      "id": "article-31306ee0ff96ccca4ab2",
-      "sourceId": "arxiv-cs-ai",
-      "sourceType": "academic",
-      "evidenceTier": "primary",
-      "canonicalUrl": "https://arxiv.org/abs/2608.24825v1",
-      "language": "en",
-      "publishedAt": "2026-08-25T17:07:16Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
-      "facts": {
-        "title": "A Dual-Dimensional LLM Framework for Automated Item Incidental Content Similarity Analysis in Large-Scale Assessments",
-        "authors": [
-          "Jing Huang",
-          "Jihong Zhang",
-          "Hua-Hua Chang"
-        ],
-        "abstract": "The rapid expansion of large-scale assessments and the growing adoption of automatic item generation have intensified concerns about incidental content redundancy, where construct-irrelevant elements such as wording or contextual framing become unintentionally repetitive across items. Traditional similarity metrics like BLEU or cosine similarity, often fail to capture the nuanced structural and semantic layers that drive perceived redundancy simultaneously. This study proposes a dual-dimensional framework for Automated Item Similarity Analysis (AISA) powered by Large Language Models (LLMs), operationalizing similarity through Structured Decomposition and Semantic Relatedness. Psychometric validation indicates that LLM-derived metrics align more closely with indicators of construct-irrelevant local dependence and yield more coherent item parameter groupings than traditional text-based measures. The framework is further evaluated through its application in Computerized Adaptive Testing (CAT). Simulations reveal that incorporating LLM-based similarity constraints into item selection improves estimation stability and reduces bias with minimal efficiency trade-offs, outperforming constraints based on conventional metrics. These findings highlight the potential of LLM-powered AISA to support scalable bank curation, content-aware test assembly, and experience-sensitive adaptive testing across diverse assessment contexts."
-      },
-      "ai": {
-        "titleZh": "面向大规模测评的自动化题目附带内容相似性分析的双维LLM框架",
-        "summaryZh": "提出双维LLM框架（AISA），通过结构化分解与语义相关度分析题目附带内容相似性，优于传统文本指标，并在CAT中提升估计稳定性、减少偏差。",
-        "whyItMatters": "提升题库质量与自适应测试精度，减少无关内容冗余。",
-        "keyPoints": [
-          "双维LLM框架分析题目相似性",
-          "优于BLEU和余弦相似度",
-          "CAT中提升稳定性并减少偏差"
-        ],
-        "provider": "deepseek",
-        "model": "deepseek-v4-flash",
-        "promptVersion": "article-enrichment-v3",
-        "generatedAt": "2026-08-26T02:39:46.548611Z"
-      },
-      "evidenceIds": [
-        "evidence-b0d94bf6901650bf0c17"
-      ],
-      "topicScores": {
-        "semantic-layer": 0.6,
-        "foundation-models": 0.85
-      },
-      "contentScore": 0.4791,
-      "contentScoreBreakdown": {
-        "targetRelevance": 0.63,
-        "eventSignificance": 0.0,
-        "decisionImpact": 0.0,
-        "adoptionMomentum": 0.0,
-        "technicalAdvancement": 0.45,
-        "engineeringApplicability": 0.74,
-        "technicalGenerality": 0.65,
-        "productIndustryImpact": 0.54,
-        "freshness": 0.9432,
-        "evidenceMaturity": 0.58,
-        "completeness": 1.0
-      },
-      "selectionReasons": [
-        "目标主题相关",
-        "具备工程落地价值",
-        "适用范围较广",
-        "24 小时内发布"
-      ],
-      "keySignal": {
-        "eligible": false,
-        "score": 0.3964,
-        "userValue": 0.4405,
-        "changeMagnitude": 0.09,
-        "actionability": 0.32,
-        "generality": 0.65,
-        "freshness": 0.9432,
-        "eventTypes": [],
-        "reasons": [
-          "技术普适性较强",
-          "24 小时内发布"
-        ],
-        "gateFailures": [
-          "事件显著性低于 70",
-          "缺少足以改变决策、采用或技术判断的证据",
-          "学术内容缺少高相关、可泛化的突破证据",
-          "Key Signal 专用得分低于 65"
-        ]
-      },
-      "contentHash": "b0d94bf6901650bf0c177907df77362f95d01470b873c6de2e58f9dcdfad296c"
     },
     {
       "schemaVersion": "1.0.0",
@@ -2666,7 +2890,7 @@
       "canonicalUrl": "https://www.databricks.com/blog/data-governance-tools",
       "language": "en",
       "publishedAt": "2026-08-25T16:17:44Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "Choosing Data Governance Tools for Enterprise Data Governance",
         "authors": [],
@@ -2679,7 +2903,7 @@
       "topicScores": {
         "metadata-governance": 1.1
       },
-      "contentScore": 0.4593,
+      "contentScore": 0.4414,
       "contentScoreBreakdown": {
         "targetRelevance": 0.9,
         "eventSignificance": 0.0,
@@ -2689,27 +2913,25 @@
         "engineeringApplicability": 0.52,
         "technicalGenerality": 0.53,
         "productIndustryImpact": 0.71,
-        "freshness": 0.9383,
+        "freshness": 0.7591,
         "evidenceMaturity": 0.3,
         "completeness": 0.35
       },
       "selectionReasons": [
         "目标主题高度相关",
         "产品或行业影响较高",
-        "24 小时内发布"
+        "近期发布"
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.3468,
+        "score": 0.3289,
         "userValue": 0.5065,
         "changeMagnitude": 0.024,
         "actionability": 0.3075,
         "generality": 0.53,
-        "freshness": 0.9383,
+        "freshness": 0.7591,
         "eventTypes": [],
-        "reasons": [
-          "24 小时内发布"
-        ],
+        "reasons": [],
         "gateFailures": [
           "缺少可展示的中文标题或导读",
           "事件显著性低于 70",
@@ -2722,81 +2944,6 @@
     },
     {
       "schemaVersion": "1.0.0",
-      "id": "article-684943d623893cf6855a",
-      "sourceId": "databricks-blog",
-      "sourceType": "official",
-      "evidenceTier": "primary",
-      "canonicalUrl": "https://www.databricks.com/blog/data-mesh-vs-data-fabric",
-      "language": "en",
-      "publishedAt": "2026-08-25T16:05:34Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
-      "facts": {
-        "title": "Data Mesh vs. Data Fabric: Key Differences and How the Lakehouse Resolves the Debate",
-        "authors": [],
-        "abstract": "Executive Verdict: Organization vs. TechnologyData mesh vs. data fabric hinges on..."
-      },
-      "ai": {
-        "titleZh": "数据网格与数据编织：关键差异及湖仓如何化解争论",
-        "summaryZh": "文章探讨数据网格与数据编织的差异，并指出湖仓架构可解决两者之争。",
-        "whyItMatters": "数据网格与数据编织是两种主流数据管理理念，理解其差异及湖仓的调和作用，有助于企业选择合适的数据架构。",
-        "keyPoints": [
-          "数据网格强调组织架构",
-          "数据编织侧重技术集成",
-          "湖仓融合两者优势"
-        ],
-        "provider": "deepseek",
-        "model": "deepseek-v4-flash",
-        "promptVersion": "article-enrichment-v3",
-        "generatedAt": "2026-08-26T02:39:46.548611Z"
-      },
-      "evidenceIds": [
-        "evidence-222399a1ace8b3f290b9"
-      ],
-      "topicScores": {
-        "data-platform": 0.65,
-        "intelligent-lakehouse": 0.6
-      },
-      "contentScore": 0.3172,
-      "contentScoreBreakdown": {
-        "targetRelevance": 0.68,
-        "eventSignificance": 0.0,
-        "decisionImpact": 0.0,
-        "adoptionMomentum": 0.0,
-        "technicalAdvancement": 0.12,
-        "engineeringApplicability": 0.08,
-        "technicalGenerality": 0.3,
-        "productIndustryImpact": 0.22,
-        "freshness": 0.9371,
-        "evidenceMaturity": 0.3,
-        "completeness": 0.35
-      },
-      "selectionReasons": [
-        "目标主题相关",
-        "24 小时内发布"
-      ],
-      "keySignal": {
-        "eligible": false,
-        "score": 0.2241,
-        "userValue": 0.241,
-        "changeMagnitude": 0.024,
-        "actionability": 0.075,
-        "generality": 0.3,
-        "freshness": 0.9371,
-        "eventTypes": [],
-        "reasons": [
-          "24 小时内发布"
-        ],
-        "gateFailures": [
-          "事件显著性低于 70",
-          "缺少足以改变决策、采用或技术判断的证据",
-          "证据成熟度不足",
-          "Key Signal 专用得分低于 65"
-        ]
-      },
-      "contentHash": "222399a1ace8b3f290b9dda17fecfa2314e969155de8c9b58b8e3dd5058327c8"
-    },
-    {
-      "schemaVersion": "1.0.0",
       "id": "article-9054647ed85ebc2ee434",
       "sourceId": "databricks-blog",
       "sourceType": "official",
@@ -2804,7 +2951,7 @@
       "canonicalUrl": "https://www.databricks.com/blog/modernizing-sql-etl-lakehouse-declarative-patterns",
       "language": "en",
       "publishedAt": "2026-08-25T15:00:00Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "Modernizing SQL ETL in Lakehouse with Declarative Patterns",
         "authors": [],
@@ -2817,7 +2964,7 @@
       "topicScores": {
         "intelligent-lakehouse": 0.6
       },
-      "contentScore": 0.3716,
+      "contentScore": 0.3536,
       "contentScoreBreakdown": {
         "targetRelevance": 0.57,
         "eventSignificance": 0.0,
@@ -2827,27 +2974,25 @@
         "engineeringApplicability": 0.52,
         "technicalGenerality": 0.18,
         "productIndustryImpact": 0.71,
-        "freshness": 0.9306,
+        "freshness": 0.7514,
         "evidenceMaturity": 0.3,
         "completeness": 0.35
       },
       "selectionReasons": [
         "目标主题相关",
         "产品或行业影响较高",
-        "24 小时内发布"
+        "近期发布"
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.2946,
+        "score": 0.2766,
         "userValue": 0.424,
         "changeMagnitude": 0.024,
         "actionability": 0.3075,
         "generality": 0.18,
-        "freshness": 0.9306,
+        "freshness": 0.7514,
         "eventTypes": [],
-        "reasons": [
-          "24 小时内发布"
-        ],
+        "reasons": [],
         "gateFailures": [
           "缺少可展示的中文标题或导读",
           "事件显著性低于 70",
@@ -2867,7 +3012,7 @@
       "canonicalUrl": "https://www.technologyreview.com/2026/08/24/1142630/ai-school-classroom-policies",
       "language": "en",
       "publishedAt": "2026-08-24T14:20:19Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "How to encourage smarter AI use in the classroom",
         "authors": [],
@@ -2882,7 +3027,7 @@
         "foundation-models": 0.85,
         "ai-products-agents": 0.45
       },
-      "contentScore": 0.4034,
+      "contentScore": 0.3855,
       "contentScoreBreakdown": {
         "targetRelevance": 0.5,
         "eventSignificance": 0.0,
@@ -2892,7 +3037,7 @@
         "engineeringApplicability": 0.52,
         "technicalGenerality": 0.65,
         "productIndustryImpact": 0.61,
-        "freshness": 0.7838,
+        "freshness": 0.6046,
         "evidenceMaturity": 0.42,
         "completeness": 1.0
       },
@@ -2903,12 +3048,12 @@
       ],
       "keySignal": {
         "eligible": false,
-        "score": 0.3362,
+        "score": 0.3183,
         "userValue": 0.3815,
         "changeMagnitude": 0.06,
         "actionability": 0.2825,
         "generality": 0.65,
-        "freshness": 0.7838,
+        "freshness": 0.6046,
         "eventTypes": [],
         "reasons": [
           "技术普适性较强"
@@ -2926,130 +3071,6 @@
     },
     {
       "schemaVersion": "1.0.0",
-      "id": "article-afc5b7a435ce10761d81",
-      "sourceId": "mit-technology-review-ai",
-      "sourceType": "professional_media",
-      "evidenceTier": "secondary",
-      "canonicalUrl": "https://www.technologyreview.com/2026/08/24/1141740/kids-machines-language-learning",
-      "language": "en",
-      "publishedAt": "2026-08-24T09:00:00Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
-      "facts": {
-        "title": "Kids outlearn AI—and we still don’t know why",
-        "authors": [],
-        "abstract": "People have been talking to each other for at least 100,000 years, as best we can tell. And in all that time, there has been only one thing in the world that could learn a human language to perfect fluency: a human child. Now there are two. Four short years after the release of ChatGPT, many of us now take it for granted that we can converse naturally with our phones or computers. LLMs like Claude, DeepSeek, and OpenAI’s GPT models are fluent and flexible enough to masquerade convincingly as humans. But peek behind the computational curtain, and there’s a catch: Teaching a computer to use human language still requires an inhuman amount of data. An LLM can easily churn through a hundred thousand times more words than a person will experience in the process of mastering their mother tongue—and way more than children might hear by their first birthday, when they typically start to grab hold of language. “The progress recently has been amazing,” Michael C. Frank, a cognitive scientist at Stanford University, says of LLMs. “But we still have to burn down a forest and scrape the entire sum of all human knowledge to re-create this milestone that happens in our living rooms over the course of a year.” This yawning divide between children and machines is called the data efficiency gap. And it raises a tantalizing question for cognitive scientists and a challenge for the architects of AI models: How is it that kids can still outperform the most linguistically sophisticated machines ever built? Finding answers has stakes for both AI research and cognitive science. For the past decade, language models have mostly gotten better by getting bigger. Meta’s open-weight LLM Llama 3.1, released two years ago, chewed through 15 trillion tokens (word-like chunks of language) in pretraining—the main step of training a model that happens before it is fine-tuned for a specific task, like being a chatbot. Frontier models could be pretraining on 10 times more data, says Ethan Gotlieb Wilcox, a cognitive scientist and linguist at Georgetown University. But there’s only so much internet to train on, and eventually—perhaps as early as the 2030s—the well of easily available data could run dry. Kids show that it could be possible to learn more with less. Far less. A preteen raised in a linguistically rich home may have heard something in the vicinity of 100 million words. Add literacy to the mix and you can boost that word count to maybe 300 million words by age 20. The difference in sc"
-      },
-      "ai": null,
-      "evidenceIds": [
-        "evidence-ad8665f80e90d36e3756"
-      ],
-      "topicScores": {
-        "foundation-models": 0.85,
-        "ai-products-agents": 0.45
-      },
-      "contentScore": 0.3835,
-      "contentScoreBreakdown": {
-        "targetRelevance": 0.4125,
-        "eventSignificance": 0.0,
-        "decisionImpact": 0.0,
-        "adoptionMomentum": 0.0,
-        "technicalAdvancement": 0.52,
-        "engineeringApplicability": 0.44,
-        "technicalGenerality": 0.3,
-        "productIndustryImpact": 0.59,
-        "freshness": 0.752,
-        "evidenceMaturity": 0.6,
-        "completeness": 1.0
-      },
-      "selectionReasons": [
-        "近期发布"
-      ],
-      "keySignal": {
-        "eligible": false,
-        "score": 0.3156,
-        "userValue": 0.3386,
-        "changeMagnitude": 0.104,
-        "actionability": 0.2575,
-        "generality": 0.3,
-        "freshness": 0.752,
-        "eventTypes": [],
-        "reasons": [],
-        "gateFailures": [
-          "缺少可展示的中文标题或导读",
-          "媒体报道或作者观点不能单独作为 Key Signal",
-          "事件显著性低于 70",
-          "缺少足以改变决策、采用或技术判断的证据",
-          "Key Signal 专用得分低于 65"
-        ]
-      },
-      "contentHash": "ad8665f80e90d36e375641d222ef84927e8cdc8e37ce2d00eb235c3651a787ef"
-    },
-    {
-      "schemaVersion": "1.0.0",
-      "id": "article-65c11cd6697d24998d9d",
-      "sourceId": "github-ai-ml",
-      "sourceType": "official",
-      "evidenceTier": "primary",
-      "canonicalUrl": "https://github.blog/engineering/using-the-github-copilot-sdk-for-java",
-      "language": "en",
-      "publishedAt": "2026-08-10T19:30:00Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
-      "facts": {
-        "title": "Using the GitHub Copilot SDK for Java",
-        "authors": [],
-        "abstract": "Java developers no longer have to rely on Java framework-specific approaches to drive AI from their enterprise apps. While it is true that Langchain4j empowered developers by disintermediating specific AI vendors, you still had a dependency on Langchain4j. And with Spring AI, well, of course you had a dependency on design choices made by Spring, if not on Spring itself. Now, GitHub Copilot SDK for Java is the first truly framework agnostic way to drive AI from Java. And with its BYOK support, GitHub Copilot SDK for Java is also AI vendor neutral. 💡 Even though it’s called GitHub Copilot SDK, you can use it with any direct model provider, such as OpenAI, Azure, Anthropic, or OpenAI-compatible endpoints, by passing a provider/ProviderConfig with your own baseUrl + apiKey (or bearer token). No Copilot subscription required. The GitHub Copilot SDK for Java is a client library that empowers your server-side Java code to create Copilot agent sessions, register tools, send prompts, and receive structured responses—all programmatically. It works in server environments, including Jakarta EE and Spring. If you’ve been building enterprise Java for any length of time, this SDK will feel like home: CompletableFuture, annotations, lambdas, virtual threads, it’s all here. This post shows you how to use the SDK, walks through a complete Jakarta EE 11 sample application, and leaves you with concrete next steps to try it yourself. I chose Jakarta EE 11 for my demo because I was the lead release coordinator for that release. I believe in open standards as the best way to empower developers. For more on Jakarta EE 11 see this InfoQ article. This sample app is an agent harness using Jakarta EE 11. But, of course, developers can build their own agent harness using the well-known Java frameworks and libraries of their choice. Clone the sample app and try it yourself > Where to get it The SDK is available as a Maven dependency: <dependency> <groupId>com.github</groupId> <artifactId>copilot-sdk-java</artifactId> <version>1.0.7-preview.1</version> </dependency> Prerequisites: JDK 17 or 25 (25 recommended — unlocks virtual threads and other modern features) Maven 3.9+ A GitHub account with an active Copilot subscription The Copilot CLI installed locally at version 1.0.71 or later. Walk through the sample app The best way to see the SDK in action is to run this sample application. Get the code git clone https://github.com/microsoft/Build26-BRK206-your-agent-anywhere-multiclient-multi"
-      },
-      "ai": null,
-      "evidenceIds": [
-        "evidence-51ab86f463ca5824a71b"
-      ],
-      "topicScores": {
-        "ai-products-agents": 0.45
-      },
-      "contentScore": 0.3502,
-      "contentScoreBreakdown": {
-        "targetRelevance": 0.3375,
-        "eventSignificance": 0.0,
-        "decisionImpact": 0.0,
-        "adoptionMomentum": 0.0,
-        "technicalAdvancement": 0.22,
-        "engineeringApplicability": 0.92,
-        "technicalGenerality": 0.68,
-        "productIndustryImpact": 0.71,
-        "freshness": 0.0,
-        "evidenceMaturity": 0.71,
-        "completeness": 1.0
-      },
-      "selectionReasons": [
-        "具备工程落地价值",
-        "适用范围较广",
-        "产品或行业影响较高",
-        "证据与对照较充分"
-      ],
-      "keySignal": {
-        "eligible": false,
-        "score": 0.3229,
-        "userValue": 0.4459,
-        "changeMagnitude": 0.044,
-        "actionability": 0.4075,
-        "generality": 0.68,
-        "freshness": 0.0,
-        "eventTypes": [],
-        "reasons": [
-          "技术普适性较强"
-        ],
-        "gateFailures": [
-          "缺少可展示的中文标题或导读",
-          "事件显著性低于 70",
-          "缺少足以改变决策、采用或技术判断的证据",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
-          "Key Signal 专用得分低于 65"
-        ]
-      },
-      "contentHash": "51ab86f463ca5824a71b77527eceaece7524141912ec4b4c7ab9d03577b00e8d"
-    },
-    {
-      "schemaVersion": "1.0.0",
       "id": "article-f73d3a1c30182798f362",
       "sourceId": "ieee-spectrum-ai",
       "sourceType": "professional_media",
@@ -3057,7 +3078,7 @@
       "canonicalUrl": "https://spectrum.ieee.org/hugging-face-openai-cyberattack",
       "language": "en",
       "publishedAt": "2026-08-06T19:25:39Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "AI Safety Regulations in the U.S. Could Give Hackers an Edge",
         "authors": [],
@@ -3108,7 +3129,7 @@
           "媒体报道或作者观点不能单独作为 Key Signal",
           "事件显著性低于 70",
           "与 AI、产品或技术决策范围关联不足",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "Key Signal 专用得分低于 65"
         ]
       },
@@ -3123,7 +3144,7 @@
       "canonicalUrl": "https://www.interconnects.ai/p/introducing-our-artifacts-hub-and",
       "language": "en",
       "publishedAt": "2026-08-03T14:03:08Z",
-      "collectedAt": "2026-08-26T02:39:40.773031Z",
+      "collectedAt": "2026-08-27T08:46:00.012032Z",
       "facts": {
         "title": "Introducing our Artifacts Hub and Adoption Dashboard",
         "authors": [],
@@ -3176,7 +3197,7 @@
         "gateFailures": [
           "缺少可展示的中文标题或导读",
           "媒体报道或作者观点不能单独作为 Key Signal",
-          "发布时间超过 7 天，不进入首页实时 Key Signal",
+          "发布时间超过 5 天，不进入首页实时 Key Signal",
           "证据成熟度不足",
           "Key Signal 专用得分低于 65"
         ]
@@ -3187,30 +3208,12 @@
   "evidence": [
     {
       "schemaVersion": "1.0.0",
-      "id": "evidence-0ceab7598be1a877d9a0",
-      "articleId": "article-cb908ccea1c039281a93",
-      "sourceId": "arxiv-cs-ai",
-      "url": "https://arxiv.org/abs/2608.07446v1",
-      "excerpt": "Rapid adoption of large language models (LLMs) in enterprise settings has introduced operational, security, and governance risks. As generative AI applications move from pilot to production, manual harm identification and mitigation are becoming difficult to scale. Although many tools support model evaluation, adversarial testing, runtime guardrails, and observability, the tooling landscape remains fragmented. Tools are typically designed for specific engineering tasks and described in technical terms that do not align with governance frameworks or risk taxonomies, making it difficult to determine which tools address which risks and where critical gaps remain. This paper proposes a structured protocol to automate AI risk mitigation through a taxonomy-driven analysis of open-source LLM evaluation and security tools. We map the capabilities of 21 prominent open-source tools to the 32 subcategories of the extended MIT AI Risk Mitigation and Response Taxonomy. An LLM-assisted retrieval-augmented generation pipeline analyzes source code and documentation to extract capabilities for each taxonomy category. Reliability assessment yielded moderate agreement (Fleiss' Kappa = 0.509) among three independent reviewers. The analysis reveals a highly skewed landscape in which tools cluster around technical and operational controls, while governance, legal and regulatory, and financial and market controls remain largely unaddressed. This motivates a layered risk-mitigation architecture combining tool-based controls with organizational and regulatory processes. The mapping protocol achieved an F1 score of 75.5% after majority voting. Overall, the study provides a practical mapping between enterprise AI risk categories and open-source mitigation capabilities, identifies where human oversight remains necessary, and presents a taxonomy-driven framework applicable to open-source and proprietary solutions.",
-      "retrievedAt": "2026-08-10T03:10:24.377306Z"
-    },
-    {
-      "schemaVersion": "1.0.0",
       "id": "evidence-024419f6d6a77ad00636",
       "articleId": "article-ac90d732aad851eb833a",
       "sourceId": "arxiv-cs-ai",
       "url": "https://arxiv.org/abs/2608.07458v1",
       "excerpt": "Recent optimization studies on Retrieval-Augmented Generation (RAG) have exploited chunk-level KV cache reuse to avoid processing long retrieved contexts for higher efficiency, while significant information redundancy and noise still remain in the coarse-grained chunks. This paper optimizes the Pareto frontier under low prefill latency constraints while maximizing accuracy by proposing CoinRAG (Contextualized Information Nugget KV Cache Reuse for Long-Context RAG). The name metaphorically reflects our core mechanism: much like assembling small tokens (or \"coins\") to accumulate a larger value, CoinRAG compositionally reuses offline-computed, fine-grained nugget caches to form a learned contextual representation efficiently in a more semantically relevant but compact manner. Specifically, instead of full-chunk encoding, CoinRAG identifies query-relevant semantic units within retrieved chunks through two-stage retrieval and seamlessly assembles their sliced KV representations with a chunk-level context. Extensive evaluations on LongBench multi-hop question answering tasks demonstrate that CoinRAG significantly reduces operational costs and outperforms the other baselines with a new Pareto frontier and an average 5.3% relative improvement in answer quality (F1) under a standard fast prefill latency budget.",
       "retrievedAt": "2026-08-10T03:10:24.377306Z"
-    },
-    {
-      "schemaVersion": "1.0.0",
-      "id": "evidence-c4804358880b281aff36",
-      "articleId": "article-3bbd8b07cb5a7e5a4148",
-      "sourceId": "github-ai-ml",
-      "url": "https://github.blog/ai-and-ml/github-copilot/github-copilot-app-for-beginners-getting-started",
-      "excerpt": "AI coding tools often begin with a chat window. While that works for quick questions or generating code, real software development rarely happens in a straight line. One minute you’re fixing a bug, the next you’re reviewing a pull request, digging into an unfamiliar part of the codebase, or exploring a new idea. The GitHub Copilot app is designed for that kind of workflow. Instead of treating AI as a single conversation, it gives you a workspace where you can manage multiple agent sessions, switch between tasks without losing momentum, and work with AI agents across the different parts of your workflow. Your work starts with a project Agent sessions are connected to a project, giving each session the repository context needed for a specific task. From the GitHub Copilot app home screen, you can choose a project you’ve worked with before or add a new one from GitHub or your local machine. Once a project is selected, you can start a session with the codebase, files, and tools needed to begin working on a task. For example, you might want to add a breadcrumb navigation component to an existing application. Instead of manually searching through files to find the right place to make the change, you can describe the update you want to make. The session can examine the project, identify relevant files, make the changes, and run tests to help validate the work. By starting each session with the project already connected, you can spend more time working and less time preparing your environment. Keep multiple threads moving Once you’ve selected a project and started an agent session, you can create additional sessions for other questions, ideas, or tasks without interrupting your existing work. Quick Chat lets you start a new conversation from the Copilot app home screen. Each conversation can focus on a different area of work, giving you a dedicated space to explore ideas, ask questions, or work through changes. For example, you can open a Quick Chat session to ask Copilot a",
-      "retrievedAt": "2026-08-25T02:31:41.740640Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3228,7 +3231,7 @@
       "sourceId": "deepseek-updates",
       "url": "https://api-docs.deepseek.com/updates#deepseek-v4-flash-update",
       "excerpt": "The official release of the DeepSeek-V4-Flash API is now in public beta. The API calling method remains unchanged — simply set the model name to deepseek-v4-flash to use the latest version. Significantly enhanced agent capabilities, with benchmark results far exceeding V4-Pro-Preview: Terminal Bench 2.1: 82.7 NL2Repo: 54.2 Cybergym: 76.7 DeepSWE: 54.4 Toolathlon verified: 70.3 Agent Last Exam: 25.2 Automation Bench (Public): 25.1 DSBench-FullStack: 68.7 DSBench-Hard: 59.6 Note 1: For the Code Agent tasks in the public benchmark sets, the official DeepSeek-V4-Flash was tested using the DeepSeek Harness minimal mode (to be released soon) as the framework, with the max effort level, topp=0.95, and temperature=1.0 Note 2: DSBench-FullStack is an internal full-stack development test set, and DSBench-Hard is an internal Coding Agent hard-problem test set The official V4-Flash natively supports the Responses API format and is specifically adapted for Codex. For the specific configuration, please refer to the documentation. DeepSeek-V4-Flash-0731 keeps the same model architecture and size as DeepSeek-V4-Flash-Preview, and was only re-post-trained. Note: This update only upgrades the DeepSeek-V4-Flash API. The DeepSeek-V4-Pro API and the APP/WEB models are unchanged. The official release of DeepSeek-V4-Pro will follow soon.",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3246,7 +3249,7 @@
       "sourceId": "github-ai-ml",
       "url": "https://github.blog/ai-and-ml/github-copilot/how-the-github-legal-team-used-copilot-cli-to-streamline-their-workflows",
       "excerpt": "Whether you are just starting out or are not in a technical role at all, you likely already have the skills you need to build your own tools. If you have ever thought “I’m not technical enough to build that,” this post is for you. Let me introduce the team. We are lawyers, program managers, and business professionals—not engineers. A large part of our work is often repetitive, like reviewing the same kinds of contracts over and over or answering the same legal questions, and our prior guidance is frequently recycled. These are problems AI could help solve, but we lacked confidence in how to build the right tools. That is where GitHub Copilot CLI came in. We asked for what we wanted in plain language, plugged into our repos, and saw real changes fast. “I could never code” turned into “I just built something,” and that habit spread on its own until every one of us was building something. What follows are two real accounts of people who did exactly that. Plus, watch the videos for two additional stories. Why I built an internal drafting style guide The following is a first-person account from Ngandu Kasuku, Principal Product Counsel. I’m a product attorney, but commercial work remains a sizable part of my practice. Around March or April, I found myself buried in partnership deals involving data, infrastructure, and product integrations. No two deals looked quite alike, so each new matter felt like starting over. I started using Copilot CLI to manage the surge, which helped, but also had some problems. Then, after seeing what others had built with Copilot, I realized I wasn’t thinking big enough. Instead of using AI for one task at a time, I could build something around the way I work. So, I created a contract drafting tool using Copilot CLI. I called it terms-ai, which I admit isn’t the most original name. I started by scaffolding the project and storing key documents in a repository. This gave me one place to organize and version the instructions, drafting resources, ",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3256,15 +3259,6 @@
       "url": "https://www.databricks.com/blog/agentic-workflows",
       "excerpt": "As organizations move beyond single-prompt AI interactions, agentic workflows are...",
       "retrievedAt": "2026-08-10T03:10:24.377306Z"
-    },
-    {
-      "schemaVersion": "1.0.0",
-      "id": "evidence-046266c591d3677a998d",
-      "articleId": "article-4e90420c69645ce576fc",
-      "sourceId": "github-ai-ml",
-      "url": "https://github.blog/ai-and-ml/github-copilot/the-harness-is-all-you-need-mostly",
-      "excerpt": "If you’re feeling overwhelmed by AI right now, you’re not alone. Every day it seems there is a new tool, new MCP, new model, new skill, new workflow, new feature, new social post that is some form of “Hey look! I have completely figured out AI with this one weird prompt.” I…don’t believe you. I work with AI every single day, and what I’m finding is that less is way more. It’s not about what I install or configure or trick the agent into doing that makes any real difference. That stuff is interesting, but at the end of the day it feels like gimmicks. I see the biggest gains in my productivity from how I use the harness and how well I understand it. So in this post, I’m sharing you a simple workflow that you can use to drastically improve your effectiveness with AI just by using existing features of GitHub Copilot. No weird prompts. No skill everyone else seems to know about. Just the harness. The harness is all you need—mostly. Disclaimers I’m using the term “harness” interchangeably with “GitHub Copilot.” The point of this post is to keep things simple, so just know that GitHub Copilot is an agent harness. I don’t mean to insinuate that you won’t ever need any skills or MCPs or instructions or custom agents, etc. In fact, those things will become quite important as you progress and need to define complex workflows and automate things for your teams. In fact, I use a few throughout this blog post! What I am pointing out here is that you do not need any of those things to be highly successful with AI. Also, there is a lot of slop out there. If you don’t believe that, ask the agent to create a skill to do anything at all. It will happily oblige. Whether or not that generated skill actually works, it can be easily published to any number of skill or MCP registries. 1. Pick a tool, any tool This is an obvious one, right? Pick a tool! It’s so easy! But even within the GitHub Copilot family, there are a lot of options. These include the CLI, the new GitHub Copilot app, VS ",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3381,7 +3375,7 @@
       "sourceId": "deepseek-updates",
       "url": "https://api-docs.deepseek.com/updates#deepseek-v4-pro-update",
       "excerpt": "The GA release of DeepSeek-V4-Pro has been rolled out on the APP, Web, and API. The API calling method remains unchanged — simply set the model name to deepseek-v4-pro to use the latest version. Significantly enhanced Agent capabilities The GA version of DeepSeek V4 Pro greatly enhances agent capabilities, with particularly significant performance improvements in production environments. HLE (wo / w tools): 42.7/60.0 Terminal Bench 2.1: 87.9 NL2Repo: 61.5 Cybergym: 83.3 DeepSWE: 62.7 Toolathlon-Verified: 74.1 Agents' Last Exam: 25.7 AutomationBench (Public): 31.8 DSBench-FullStack: 71.1 DSBench-Hard: 67.2 Native support for the Responses API The DeepSeek API now natively supports the OpenAI Responses API format and is specifically adapted for Codex. Users can refer to the official documentation and complete the Codex configuration with a one-click configuration script. More flexible thinking effort control The thinking modes of V4-Pro and V4-Flash now support three thinking effort levels: low / high / max. In real-world usage, users can flexibly choose based on task complexity: use low for simple tasks, high for daily Agent tasks, and max for more complex scenarios. For setup instructions, please refer to the official API documentation: Thinking Mode. API Pricing Adjustment With the official release of the DeepSeek V4 model family, we will update and adjust API pricing. To allocate resources more reasonably, we will adopt peak/off-peak pricing, with off-peak prices set at half of the peak-hour prices, encouraging users to schedule their tasks based on actual usage. The new prices will take effect at 16:00 (UTC Time) on August 16, 2026. For more details, please refer to this documentation.",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3390,7 +3384,7 @@
       "sourceId": "interconnects",
       "url": "https://www.interconnects.ai/p/introducing-our-artifacts-hub-and",
       "excerpt": "No voiceover for this quick post, but a quick video version is here. We’re expanding our open models coverage into standalone projects that let you go deeper on the state of the open model ecosystem. The new free sources of data are: The Artifacts Hub — a curated view of the models trending on Hugging Face, highlighting inference tokens via Open Router, model intelligence via Artificial Analysis, and our tailored adoption metrics building on top of Hugging Face’s data. Our Adoption Dashboard — a living dashboard of download and derivative model numbers by geography and organization. This highlights the US-China gap and growing players in the open ecosystem. To date, our primary efforts on Interconnects have been release recaps for popular models like Kimi K3, GLM 5.2, DeepSeek R1, etc. and monthly round-ups of the open models that matter, Artifacts Log. We’re expanding on these, building on the tools and internal data we’ve collected for other projects like The ATOM Project (and report). This allows us to capture our ecosystem view of open models, develop methods for understanding adoption of giant MoE models, and everything in between. We’re sharing them freely to help the open ecosystem find its strengths and grow. Visit the Artifacts Hub The Artifacts Hub right now covers 792 models released in the last two years, across the core text-focused language models and multimodal generative models. At Interconnects we follow the data of every model on Hugging Face, analyze the core few thousand LLMs (this list is public on GitHub and regularly updated), and hand select these core few hundred for further explanation. We built the Hub as a way to go deeper on this analysis in collaboration with Project VAIL — an AI verification startup who has been one of the most loyal fans of our open model curation. For the most popular models, the Hub let’s you quickly see how far behind the model was in terms of frontier intelligence based on Artificial Analysis’s Intelligence Index,",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3399,7 +3393,7 @@
       "sourceId": "ieee-spectrum-ai",
       "url": "https://spectrum.ieee.org/hugging-face-openai-cyberattack",
       "excerpt": "On 11 July, Hugging Face was subjected to an intense cyberattack from a then-unknown actor. The speed and coordination of the attack on the company that hosts and supports popular AI developer resources led Hugging Face’s security team to conclude it was the work of an AI agent. Realizing this, the team tried to use “frontier models behind commercial APIs”—presumably from Anthropic and OpenAI, although only Anthropic was named in the second of the company’s two posts about the security incident—to analyze the onslaught. These models refused to help due to safety guardrails the AI labs have implemented to make their models harder to use for cyberattacks. Hugging Face instead turned to GLM 5.2, a model from Beijing-based AI lab Z.ai, to aid its analysis. On 21 July, OpenAI announced the attacker was an OpenAI model undergoing testing in a sandboxed environment. It escaped its internal sandbox, established a foothold in a third-party server, and then assailed Hugging Face. In other words, frontier models—those that score highest in AI performance benchmarks—had refused to assist Hugging Face’s security team in analyzing the attack, yet a prospective frontier model in testing had execu",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3417,7 +3411,7 @@
       "sourceId": "github-ai-ml",
       "url": "https://github.blog/ai-and-ml/github-copilot/how-canvases-make-agentic-workflows-visible-steerable-and-cost-efficient",
       "excerpt": "When I was in college, I joined the beta for one of the first versions of AI inline completions in VS Code. It felt like a game changer. Since then, GenAI has fundamentally changed software development: hybrid teams where agents and humans work in tandem, with the developer at the center as visionary and orchestrator. We are living in that transition right now. As a natural byproduct of how fast innovation in GenAI has moved, we now have tools to help us plan, build, review, and ship code. But in the current state, many workflows still feel disjointed. Context gets lost across threads and surfaces, and too much time gets spent reviewing agent-generated work. Agents can produce changes faster than any human can review them, and most developer tools were not originally designed for multi-agent orchestration. It becomes easy to lose track of what ran, what changed, what was validated, and what still needs human judgment. The GitHub Copilot app is a major step toward addressing this. One feature in particular that I’ve learned to love and use almost every day is canvases. Canvases let developers and agents interact on a durable, shared surface. Instead of treating chat as the only place where work happens, canvases make work visible, steerable, and approvable as it unfolds. Chat is great for intent, but weak for durable execution I still believe chat is one of the best interfaces we have for intent. It’s where you can think, refine, and direct. It’s fast and flexible, especially when the problem is still ambiguous. But once an agent starts doing real work, chat becomes a long scroll of instructions, logs, pivots, and corrections. The important parts are technically there, but buried: the plan, decision points, validations, and approval moments. If you have to reconstruct all of that from history, you’re already paying a coordination tax. Canvases solve that by giving workflows a home. They make state explicit and persistent. Humans can inspect and guide. Agents can upda",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3426,7 +3420,7 @@
       "sourceId": "mit-technology-review-ai",
       "url": "https://www.technologyreview.com/2026/08/18/1142226/how-people-use-ai",
       "excerpt": "AI companies like Anthropic and OpenAI regularly publish reports on how people are using products like Claude and ChatGPT, but they only release the data they want us to see, AI researchers say. “There is no independent source to corroborate it,” says Anka Reuel, a computer science PhD candidate at the Stanford Trustworthy AI Research (STAIR) Lab. Reuel is co-lead of a new research project, called the AI Observatory, that aims to fill the gap. It’s a public platform that aggregated and analyzed real AI conversations with popular models like Claude and Gemini that were collected with users’ consent through seven existing datasets. The intent is to provide independent sources of information that can help researchers and policymakers assess how people are using generative AI. Highly consequential decisions about AI’s benefits and risks are currently being made on the basis of very limited data, says Reuel. The AI Observatory found that AI use differs significantly across models and has changed over time. Its research shows many more sensitive behaviors than are captured in reports from major AI companies, which they say focus more on work than on personal use. The Anthropic Economic Index is one of the best-known and most widely cited sources of AI usage data, but it has blind spots. As its name suggests, it focuses on work- and productivity-related uses of Claude AI—filtering out conversations that are unrelated to these uses. When the AI Observatory researchers applied Anthropic’s methods to their dataset, they found that nearly half the conversations—48%—would have been filtered out. Those non-work-related conversations were more likely to involve health and relationships (44.2% versus 31.2% in Anthropic’s analysis), adult or illicit topics (7.9% versus 2.1%), harassment and hate (27.5% versus 5.66%), and sexual content (16.7% versus 2.4%). (OpenAI’s 2025 report on ChatGPT, similarly, found that only 30% of consumer use was related to work.) Anthropic has released s",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3444,7 +3438,7 @@
       "sourceId": "deepseek-updates",
       "url": "https://api-docs.deepseek.com/updates#deepseek-v4-flash-vision-exp-release",
       "excerpt": "Today, the new multimodal vision understanding model DeepSeek-V4-Flash-Vision-Exp is now available on the DeepSeek API platform. This is an experimental model that can be accessed by setting model='deepseek-v4-flash-vision-exp'. Terminal Bench 2.1: 83.9 NL2Repo: 57.7 DeepSWE: 59.3 DSBench-Hard: 63.6 AutomationBench (Public): 25.7 ApexBench (Pass@1): 36.5 Agents' Last Exam: 27.3 Chartography: 64.3 ZeroBench (Pass@5): 35.0 * For the Code Agent text tasks in the public benchmark sets, the DeepSeek family models were tested using the DeepSeek Harness minimal mode as the framework, with the max effort level, topp=0.95, and temperature=1.0; in the ApexBench and Agents' Last Exam evaluations, the text model DeepSeek-V4-Flash ignores the multimodal elements within them. In terms of pure-text capabilities (agent, reasoning, world knowledge, etc.), DeepSeek-V4-Flash-Vision-Exp is on par with the official DeepSeek-V4-Flash. On agent benchmarks that require visual understanding, DeepSeek-V4-Flash-Vision-Exp delivers a significant leap over DeepSeek-V4-Flash, bringing its multimodal agent capabilities close to Opus-4.8. For usage details, please refer to the Vision guide.",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3453,7 +3447,7 @@
       "sourceId": "ieee-spectrum-ai",
       "url": "https://event.on24.com/wcc/r/5460332/DAFEFF7A68EE900DEA7A14356089B553",
       "excerpt": "About this Webinar Turn Yield Excursions into Faster, More Confident Root Cause Analysis When a yield issue emerges, the answer rarely lives in a single system. Critical clues are spread across metrology data, tool traces, chemical analysis, and facilities systems, while growing data volumes make traditional dashboards slow, fragmented, and difficult to act on. What You’ll Learn: Discover how a purpose-built semiconductor analytics platform can help engineers connect insights across domains without moving data. See how Agentic AI, semiconductor-specific visualizations, and push-down compute enable faster investigation of yield excursions and process issues, even across billions of data points. In the session, a live demonstration shows how to conduct a multi-domain root cause investigation using Spotfire® Industry Pro. Key Takeaways: Understand why siloed manufacturing data delays yield recovery and inflates costs Learn how Agentic AI automates complex cross-domain analytics and visualization generation Explore methods for scaling high-performance analytics across massive fab datasets Who Should Attend: Yield, Process, and Integration Engineers; Fab and Manufacturing Operations Man",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3462,7 +3456,7 @@
       "sourceId": "simon-willison-llms",
       "url": "https://simonwillison.net/2026/Aug/23/anthropics-best-ai-model-struggles-to-attract-users-as-cheaper-t",
       "excerpt": "Anthropic’s best AI model struggles to attract users as cheaper tools thrive A few interesting numbers in this FT story gathered from \"people with knowledge of the matter\": Anthropic's \"annualized revenue\" for July is up to $65bn - it was $47bn in May, and I collected more historic numbers here. Anthropic expect Q3 to be profitable according to the same model they used to declare Q2 profitable. \"It also told investors that it had 6,000 customers that spend $100,000 annually or more.\" As for OpenAI, \"annualised revenue has jumped 35 per cent in the quarter to date and is now over $40bn, with the launch of GPT 5.6 in July jolting the company’s performance after a sluggish start to the year\". This article also introduced me to the Ramp AI index, which uses billing data from 70,000 Ramp credit card using companies to estimate model adoption. Here's Ramp's breakdown of Anthropic model spend for July 2026, which looks reasonable given that Opus 5 was only released on July 24th, and supports the idea that Fable's cost has made it a less popular model: Opus 4.8: 28.0% Sonnet 4.6: 8.3% Fable 5: 8.0% Opus 4.6: 6.9% Sonnet 5: 3.6% Opus 5: 3.5% Opus 4.7: 1.7% Sonnet 4.5: 1.3% Haiku 4.5: 1.0% O",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3475,30 +3469,12 @@
     },
     {
       "schemaVersion": "1.0.0",
-      "id": "evidence-51ab86f463ca5824a71b",
-      "articleId": "article-65c11cd6697d24998d9d",
-      "sourceId": "github-ai-ml",
-      "url": "https://github.blog/engineering/using-the-github-copilot-sdk-for-java",
-      "excerpt": "Java developers no longer have to rely on Java framework-specific approaches to drive AI from their enterprise apps. While it is true that Langchain4j empowered developers by disintermediating specific AI vendors, you still had a dependency on Langchain4j. And with Spring AI, well, of course you had a dependency on design choices made by Spring, if not on Spring itself. Now, GitHub Copilot SDK for Java is the first truly framework agnostic way to drive AI from Java. And with its BYOK support, GitHub Copilot SDK for Java is also AI vendor neutral. 💡 Even though it’s called GitHub Copilot SDK, you can use it with any direct model provider, such as OpenAI, Azure, Anthropic, or OpenAI-compatible endpoints, by passing a provider/ProviderConfig with your own baseUrl + apiKey (or bearer token). No Copilot subscription required. The GitHub Copilot SDK for Java is a client library that empowers your server-side Java code to create Copilot agent sessions, register tools, send prompts, and receive structured responses—all programmatically. It works in server environments, including Jakarta EE and Spring. If you’ve been building enterprise Java for any length of time, this SDK will feel like home: CompletableFuture, annotations, lambdas, virtual threads, it’s all here. This post shows you how to use the SDK, walks through a complete Jakarta EE 11 sample application, and leaves you with concrete next steps to try it yourself. I chose Jakarta EE 11 for my demo because I was the lead release coordinator for that release. I believe in open standards as the best way to empower developers. For more on Jakarta EE 11 see this InfoQ article. This sample app is an agent harness using Jakarta EE 11. But, of course, developers can build their own agent harness using the well-known Java frameworks and libraries of their choice. Clone the sample app and try it yourself > Where to get it The SDK is available as a Maven dependency: <dependency> <groupId>com.github</groupId> <artifactId>copilot",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
-    },
-    {
-      "schemaVersion": "1.0.0",
       "id": "evidence-54905db4e44587a9f21c",
       "articleId": "article-9d66d779c059a90077bd",
       "sourceId": "mit-technology-review-ai",
       "url": "https://www.technologyreview.com/2026/08/24/1142630/ai-school-classroom-policies",
       "excerpt": "This article is from Making AI Work, MIT Technology Review’s limited-run newsletter examining how to apply LLMs across industries. To receive it in your inbox, sign up here. Chatbots took many schools by surprise upon their release a few years ago. Suddenly, students carried an app in their phones that could magically answer almost any homework question or spin up an essay in seconds. Of course, teachers can often tell when a student is using AI—models make mistakes that most humans don’t, and some teachers say that AI-generated text has simple giveaways like too many em dashes. Nevertheless, the generative AI boom increased the burden on teachers, who were already working long hours to plan lessons, make homework assignments, and grade exams, and now needed to adapt to a new technology. For many, it still feels like there’s no clear path forward. Organizations ranging from OpenAI to UNESCO encourage AI use in the classroom, but many teachers feel confused about how exactly to handle it. Case study Cheshire Academy is a private boarding and day school in Connecticut with about 400 students in grades 9 through 12. Administrators there don’t force instructors to use AI at all, though the school’s librarian and technology coordinator George Aiello claims the “vast majority” of instructors use it in some way. The educators there are trying a patchwork of programs, including general-purpose chatbots like ChatGPT and Perplexity as well as more specialized tools like MagicSchool, an AI-powered platform meant specifically for educators. That patchwork approach is partly because the school, on the advice of consultants, opted to train its staff on general techniques for how to use AI instead of prescribing certain tech. The staff training covered topics like how to craft useful prompts but also stressed the technology’s limits, highlighting its potential for generating incorrect and biased responses. Now, teachers there often use generative AI to prepare class materials. Thi",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
-    },
-    {
-      "schemaVersion": "1.0.0",
-      "id": "evidence-ad8665f80e90d36e3756",
-      "articleId": "article-afc5b7a435ce10761d81",
-      "sourceId": "mit-technology-review-ai",
-      "url": "https://www.technologyreview.com/2026/08/24/1141740/kids-machines-language-learning",
-      "excerpt": "People have been talking to each other for at least 100,000 years, as best we can tell. And in all that time, there has been only one thing in the world that could learn a human language to perfect fluency: a human child. Now there are two. Four short years after the release of ChatGPT, many of us now take it for granted that we can converse naturally with our phones or computers. LLMs like Claude, DeepSeek, and OpenAI’s GPT models are fluent and flexible enough to masquerade convincingly as humans. But peek behind the computational curtain, and there’s a catch: Teaching a computer to use human language still requires an inhuman amount of data. An LLM can easily churn through a hundred thousand times more words than a person will experience in the process of mastering their mother tongue—and way more than children might hear by their first birthday, when they typically start to grab hold of language. “The progress recently has been amazing,” Michael C. Frank, a cognitive scientist at Stanford University, says of LLMs. “But we still have to burn down a forest and scrape the entire sum of all human knowledge to re-create this milestone that happens in our living rooms over the course of a year.” This yawning divide between children and machines is called the data efficiency gap. And it raises a tantalizing question for cognitive scientists and a challenge for the architects of AI models: How is it that kids can still outperform the most linguistically sophisticated machines ever built? Finding answers has stakes for both AI research and cognitive science. For the past decade, language models have mostly gotten better by getting bigger. Meta’s open-weight LLM Llama 3.1, released two years ago, chewed through 15 trillion tokens (word-like chunks of language) in pretraining—the main step of training a model that happens before it is fine-tuned for a specific task, like being a chatbot. Frontier models could be pretraining on 10 times more data, says Ethan Gotlieb Wilcox,",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3516,7 +3492,7 @@
       "sourceId": "databricks-blog",
       "url": "https://www.databricks.com/blog/data-governance-tools",
       "excerpt": "Data governance tools are software platforms that help organizations catalog, secure,...",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3525,7 +3501,7 @@
       "sourceId": "github-ai-ml",
       "url": "https://github.blog/ai-and-ml/llms/how-to-evaluate-llms-before-production",
       "excerpt": "A language model can perform well on a clean benchmark and still struggle with the cases that matter in production. Benchmarks and curated datasets are useful when prototyping an LLM-based system. They help teams compare models, test an initial prompt, and determine whether an idea is technically plausible. But as a system moves closer to production, the evaluation problem changes. Real inputs are often ambiguous. Labels may be inconsistent. Important context may be missing or truncated. The evaluation set may not reflect the production distribution. Edge cases that rarely appear in benchmarks can become common sources of failure. Even when offline metrics improve, those results may not translate cleanly into production behavior. We encountered these challenges while evaluating an LLM-based system designed to reduce false positives in GitHub secret scanning. Secret scanning identifies credentials such as tokens and keys that may have been committed to a repository. Because some candidate strings resemble secrets, but don’t actually represent real credentials, developers may spend time investigating alerts that don’t require remediation. Rather than determine whether an LLM could classify a string correctly, we needed to understand whether the system could reduce noisy alerts while preserving enough recall to remain safe for a security workflow. In this post, we share the practices that helped us move from promising prototype results to production. The lessons apply broadly to LLM-powered systems in code analysis, developer tools, security, data analysis, and other production workflows. 1. Start with the product decision, not the model When an LLM system doesn’t perform as expected, the first instinct is often to adjust its technical components. Teams may rewrite the prompt, add context, introduce another reasoning step, adjust the surrounding pipeline, or switch models. Before making any of these changes, they should define the decision the evaluation is meant to su",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3534,7 +3510,7 @@
       "sourceId": "databricks-blog",
       "url": "https://www.databricks.com/blog/modernizing-sql-etl-lakehouse-declarative-patterns",
       "excerpt": "Databricks is bringing declarative ETL to data warehousing workflows in Lakehouse...",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     },
     {
       "schemaVersion": "1.0.0",
@@ -3543,7 +3519,52 @@
       "sourceId": "databricks-blog",
       "url": "https://www.databricks.com/blog/data-mesh-vs-data-fabric",
       "excerpt": "Executive Verdict: Organization vs. TechnologyData mesh vs. data fabric hinges on...",
-      "retrievedAt": "2026-08-26T02:39:40.773031Z"
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-9d55d29336f6b24245be",
+      "articleId": "article-f79c5348879621cc8def",
+      "sourceId": "mlcommons-news",
+      "url": "https://mlcommons.org/2026/08/endtoend-inference",
+      "excerpt": "The MLCommons MLPerf Inference Working Group is excited to introduce the first instance of a new End-to-End Retrieval-Augmented Generation (RAG) benchmark. By answering from documents retrieved at query time rather than from weights alone, RAG reduces hallucination and draws on current, private knowledge, which has made it one of the most common ways language models are deployed. A production RAG system is rarely a single model; it is a pipeline of several models that retrieve relevant documents and reason over them to produce a grounded answer. A Retrieval-Augmented Generation (RAG) pipeline ingests and chunks source data, converts it into semantic vector embeddings for storage and retrieval, and then combines relevant retrieved data with a user query to generate an accurate, model-driven response. This benchmark measures this entire pipeline. It is built around two workloads: An ingestion pipeline that builds the vector database from a document corpus. A question-and-answering (QnA) pipeline answers queries over the vector database, iterating retrieve-and-reason steps across multiple hops until it has enough evidence. Together they capture what governs a real RAG deployment — multiple models of different roles and sizes, served across an iterative loop — none of which a single-model benchmark can measure. It is the first multi-component MLPerf inference benchmark to score an entire RAG pipeline end to end. This post covers what makes this workload unique, the dataset and task, the models and metrics, and the reference implementation. Why End-to-End RAG? RAG is increasingly popular and for many deployments, essential. By grounding answers in documents retrieved at query time, it reduces hallucination, keeps answers up to date, and lets a general model use proprietary or private knowledge it was never trained on — exactly the properties enterprises need. By nature, RAG is a multi-component system, and its behavior emerges from how those components are composed and s",
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-411befffb34551782c83",
+      "articleId": "article-9b368ab3b44b71646ac3",
+      "sourceId": "github-ai-ml",
+      "url": "https://github.blog/ai-and-ml/github-copilot/github-copilot-app-for-beginners-automate-dependabot-pull-request-triage",
+      "excerpt": "I might be biased, but I think Dependabot is pretty amazing. It helps keep my projects up to date, ensuring I’m always using secure libraries. But because there’re frequently new vulnerabilities, there’re frequently new pull requests from Dependabot. Sometimes it’s a minor version bump. Sometimes it’s a major version upgrade. Sometimes everything will work just fine. And sometimes… well, every single developer has been caught by a breaking change. How can we best triage these pull requests? The work isn’t particularly difficult per se, but it certainly is repetitive. It’s the perfect task to offload to Copilot! With GitHub Copilot app automations, you can hand off that first round of review. Instead of manually inspecting every Dependabot pull request, you can create an automation that reviews open pull requests, groups them by risk, verifies CI status, and delivers a summary before your day begins. Follow the steps below to build a daily Dependabot triage automation. Step 1: Create a new automation From the GitHub Copilot app, create a new automation. You’ll configure two things first: Name: Give the automation a descriptive name, such as Daily Dependabot Triage. Trigger: Decide when it should run. Available trigger options include: Manual Hourly Daily Weekly When an issue is created For recurring maintenance tasks like Dependabot reviews, a daily schedule is often a good choice. For example, you might schedule it to run before your workday begins so the results are waiting when you log in. You can also choose whether the automation runs in the cloud or on your local machine. Step 2: Describe the task in natural language Next, tell Copilot what you want it to do. For example: Review the open Dependabot pull requests, group them by risk, identify the safe patch and minor version updates, verify that CI is passing for each pull request, and provide a short summary of the recommended next steps. Because the prompt uses natural language, you can customize it to match y",
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-ef54d927f0f978bd0d30",
+      "articleId": "article-74f0fb40a0bd4261845a",
+      "sourceId": "arxiv-cs-ai",
+      "url": "https://arxiv.org/abs/2608.26036v1",
+      "excerpt": "Answer accuracy is an insufficient reliability signal for LLM data agents. In structured-data tasks, a benchmark-correct answer can be produced by an invalid trace. This paper introduces Trace Integrity, a deployment reliability criterion for evaluating whether the computation recorded behind an answer is explicit, executable, schema-valid, operator-faithful, replayable, answer-consistent, and auditable. We identify the Structure Gap as the deployment failure mode that makes Trace Integrity necessary: natural-language reasoning and free-form rationales do not reliably specify the operator-level programs required by real-world systems. We operationalize Trace Integrity with execution contracts, structured artifacts that bind user intent to schema elements, operator plans, assumptions, executable queries, verification status, and final-answer linkage. We also introduce CAIT (Correct Answer / Invalid Trace) Rate, which measures how often answer-only evaluation counts computationally unsupported outputs as successes. In an empirical demonstration on BIRD Mini-Dev, Direct SQL, Operation Summary + SQL, and Contract-First SQL achieve answer accuracies of 20%, 22%, and 24%, while their Trace Integrity Pass Rates are 39%, 43%, and 40% and their CAIT Rates remain high at 55%, 59.1%, and 45.8%, showing that answer accuracy, trace validity, and silent-failure risk are distinct evaluation signals. Real-world LLM data agents should, therefore, be evaluated not only by whether their outputs match a reference answer, but by whether those outputs are backed by auditable computation.",
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-597aa3446b41376c849e",
+      "articleId": "article-c075cd6b7534fee8da4f",
+      "sourceId": "ieee-spectrum-ai",
+      "url": "https://spectrum.ieee.org/silico-ai-interpretability",
+      "excerpt": "Prompt Claude, ChatGPT, Gemini, or any other popular large language model with a question like “What is the best film ever made?” and the response will vary. And you (and most worryingly, the people who built the LLM) have little idea exactly how it came up with that specific answer. This mysterious behavior can be useful in some situations. But—as highlighted by a recent incident where OpenAI could not explain why its advanced prerelease model hacked AI company Hugging Face—it can have negative and alarming consequences too. And when frontier AI models are writing code, generating results humans could not achieve alone, and performing other important tasks across society, the need to interpret AI “thinking” and outputs has never been greater. Goodfire, an AI lab focused solely on this very problem, recently made its cutting-edge Silico platform, filled with tools to interpret the behavior of AI, generally available to the public. As part of this, the company recently announced a new grant program offering US $1 million in free Silico usage for academic and nonprofit interpretability researchers. These efforts aim to democratize AI interpretability, placing techniques previously av",
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
+    },
+    {
+      "schemaVersion": "1.0.0",
+      "id": "evidence-db02dcbf7024e91a663d",
+      "articleId": "article-3d4f4c59b13e90e2e4de",
+      "sourceId": "mit-technology-review-ai",
+      "url": "https://www.technologyreview.com/2026/08/26/1141949/editors-letter-september-2026",
+      "excerpt": "When my oldest child was born, I immediately set up Gmail and Twitter accounts in her name. I broadly announced her birth online and proceeded to plaster her photo across all sorts of platforms. In short, I began creating her digital footprint long before she could stand on her own two feet. Fast-forward a couple of years to when my second kid came, and I had essentially the opposite reaction. I wanted to make sure I preserved her privacy. I didn’t want her birthday to be a matter of public record or her face to feed the algorithms. In time, I would go back and scrub much of the early footprint I had created for my first child as well. What happened? I watched the promise of the early internet give way to the reality of its potential for abuse. I myself was already fully in the throes of smartphone and social media obsession. My wife, a pediatric nurse, grew increasingly alarmed at the number of children admitted to her hospital struggling with the effects of things like body dysmorphia or cyberbullying as a result of interactions on social media. We became those parents. The ones whose kids carry flip phones and aren’t on TikTok. We are not alone in this. A surprising—maybe troubling—number of people I know who work at big tech companies also keep their kids at arm’s distance from technology. They lock down their phones, if they have phones at all, and keep them off social media. Hell, even Mark Zuckerberg doesn’t publicly post his children’s faces on Facebook or Instagram. If the desire to limit kids’ use of technology was once a subcurrent, it has become a raging flood. Jonathan Haidt’s best-selling 2024 book The Anxious Generation helped propel the issue into the mainstream (despite criticisms of his conclusions from some developmental psychologists). Last year, Australia became the first country to enact a social media ban for children under 16. Other nations, from Austria to Indonesia, have followed suit, announcing similar bans. The US Supreme Court recently ",
+      "retrievedAt": "2026-08-27T08:46:00.012032Z"
     }
   ],
   "briefs": [
