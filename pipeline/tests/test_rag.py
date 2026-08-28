@@ -14,7 +14,7 @@ from newseviday_pipeline.snapshot import load_snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
 CURRENT_SNAPSHOT = ROOT / "apps" / "web" / "public" / "data" / "current.json"
-RAG_DATASET = ROOT / "pipeline" / "eval" / "rag-gold-trial-v2.json"
+RAG_DATASET = ROOT / "pipeline" / "eval" / "rag-gold-trial-v3.json"
 RAG_CORPUS_SNAPSHOT_ID = json.loads(RAG_DATASET.read_text(encoding="utf-8"))["corpusSnapshotId"]
 PINNED_RAG_SNAPSHOT = (
     ROOT / "apps" / "web" / "public" / "data" / "versions" / f"{RAG_CORPUS_SNAPSHOT_ID}.json"

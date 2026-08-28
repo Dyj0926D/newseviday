@@ -216,7 +216,7 @@ onMounted(async () => {
         <article>
           <PhFlask :size="24" weight="duotone" aria-hidden="true" />
           <h2>黄金测试集设计</h2>
-          <p>验证集固定在同一生产快照，覆盖事实定位、多来源归纳和无答案拒答；人工复核完成前不作为上线结论。</p>
+          <p>验证集固定在同一生产快照，覆盖事实定位、多来源归纳和无答案拒答；24题检索证据与拒答判断已完成人工复核。</p>
           <dl class="dataset-plan">
             <div v-for="item in datasetPlan" :key="item[0]">
               <dt>{{ item[0] }}</dt>
@@ -265,7 +265,7 @@ onMounted(async () => {
           <PhWarningCircle :size="22" aria-hidden="true" />
           <div>
             <h2>当前限制</h2>
-            <p>当前验证集规模较小；黄金题、引用覆盖与模型回答质量仍需人工复核。</p>
+            <p>当前验证集规模较小；检索人工复核已完成，引用覆盖与模型回答质量仍待评测。</p>
           </div>
         </div>
         <p>当前结论仅用于比较检索策略，不能替代正式内容和在线链路的发布验收。</p>

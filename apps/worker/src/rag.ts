@@ -41,6 +41,11 @@ interface EvidenceAssessment {
   stopReason: StopReason;
 }
 
+interface RetrievalFusion {
+  ranked: LocalChunk[];
+  roundLeaderArticleIds: string[];
+}
+
 export type PreparedRagResponse =
   { kind: 'refusal'; data: RagRefusalData } | { kind: 'stream'; response: Response };
 
@@ -145,6 +150,70 @@ function retrieve(snapshot: ContentSnapshot, input: AskRequest, query: string): 
     .slice(0, 10);
 }
 
+const expansions: Array<[string, string]> = [
+  ['价格', 'price pricing cost subscription'],
+  ['订阅', 'subscription pricing monthly price'],
+  ['收购', 'acquisition acquire buyer'],
+  ['评测', 'evaluation benchmark eval harness'],
+  ['第三方', 'third-party'],
+  ['网络安全', 'cybersecurity cyber evaluation incidents'],
+  ['总体改进', 'new safeguards strengthen AI model testing evaluation'],
+  ['推理', 'reasoning inference test-time scaling'],
+  ['运行条件', 'protocol reproducibility context window reasoning effort tools'],
+  ['语义', 'semantic layer semantics'],
+  ['智能体', 'agent agentic'],
+  [
+    'agentic harness',
+    'performance efficiency models tasks controlled variables same model same benchmark tool selection MCP servers real-world metrics online experiments',
+  ],
+  ['agentic', 'agent agentic'],
+  ['多模态', 'multimodal video vision'],
+  ['安全', 'safety guardrail moderation prompt response'],
+  ['实时', 'real-time streaming'],
+  ['数据湖', 'data lake lakehouse'],
+];
+
+const comparisonTailPatterns = [
+  '为什么',
+  '如何',
+  '分别',
+  '共同',
+  '在解决',
+  '解决',
+  '有哪些',
+  '是什么',
+  '有什么',
+];
+
+function expandQuery(query: string): string {
+  const normalized = query.toLocaleLowerCase();
+  const expansion = expansions
+    .filter(([term]) => normalized.includes(term))
+    .map(([, value]) => value)
+    .join(' ');
+  return expansion ? `${query} ${expansion}` : query;
+}
+
+function comparisonSubqueries(question: string): string[] {
+  for (const connector of ['和', '与']) {
+    const connectorIndex = question.indexOf(connector);
+    if (connectorIndex < 0) continue;
+    const left = question.slice(0, connectorIndex).trim();
+    const right = question.slice(connectorIndex + connector.length);
+    const tailPositions = comparisonTailPatterns
+      .map((pattern) => right.indexOf(pattern))
+      .filter((position) => position >= 0);
+    if (!tailPositions.length) continue;
+    const tailStart = Math.min(...tailPositions);
+    const rightSubject = right.slice(0, tailStart).trim();
+    const sharedTail = right.slice(tailStart).trim();
+    if (left && rightSubject && sharedTail) {
+      return [expandQuery(`${left}${sharedTail}`), expandQuery(`${rightSubject}${sharedTail}`)];
+    }
+  }
+  return [];
+}
+
 function planQuestion(question: string, snapshot: ContentSnapshot): QueryPlan {
   const normalized = question.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
   const policyPatterns = [
@@ -201,29 +270,27 @@ function planQuestion(question: string, snapshot: ContentSnapshot): QueryPlan {
     : futureYear || ['何时', '时间线', '最新', 'when'].some((term) => normalized.includes(term))
       ? 'timeline'
       : 'single_fact';
-  const expansions: Array<[string, string]> = [
-    ['价格', 'price pricing cost subscription'],
-    ['订阅', 'subscription pricing monthly price'],
-    ['收购', 'acquisition acquire buyer'],
-    ['评测', 'evaluation benchmark eval harness'],
-    ['语义', 'semantic layer semantics'],
-    ['智能体', 'agent agentic'],
-    ['数据湖', 'data lake lakehouse'],
-  ];
-  const expansion = expansions
-    .filter(([term]) => normalized.includes(term))
-    .map(([, value]) => value)
-    .join(' ');
+  const comparisonQueries = route === 'comparison' ? comparisonSubqueries(question) : [];
+  const expanded = expandQuery(question);
+  const subqueries = comparisonQueries.length
+    ? comparisonQueries
+    : expanded === question
+      ? [question]
+      : [question, expanded];
+  if (comparisonQueries.length) requirements.push(`comparison_coverage:${comparisonQueries.length}`);
   return {
     agentMode: 'bounded_v1',
     route,
-    subqueries: expansion ? [question, `${question} ${expansion}`] : [question],
+    subqueries: subqueries.slice(0, 2),
     requirements,
     preflightReason: null,
   };
 }
 
-function mergeRetrievalRounds(rounds: LocalChunk[][]): LocalChunk[] {
+function mergeRetrievalRounds(
+  rounds: LocalChunk[][],
+  preserveRoundLeaders: boolean,
+): RetrievalFusion {
   const merged = new Map<string, LocalChunk>();
   for (const candidates of rounds) {
     for (const candidate of candidates) {
@@ -231,15 +298,34 @@ function mergeRetrievalRounds(rounds: LocalChunk[][]): LocalChunk[] {
       if (!current || candidate.score > current.score) merged.set(candidate.id, candidate);
     }
   }
-  return [...merged.values()]
-    .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
-    .slice(0, 10);
+  const ordered = [...merged.values()].sort(
+    (left, right) => right.score - left.score || left.id.localeCompare(right.id),
+  );
+  const leaders: LocalChunk[] = [];
+  const usedArticles = new Set<string>();
+  if (preserveRoundLeaders) {
+    for (const candidates of rounds) {
+      const leader =
+        candidates.find((candidate) => !usedArticles.has(candidate.articleId)) ?? candidates[0];
+      if (leader) {
+        leaders.push(leader);
+        usedArticles.add(leader.articleId);
+      }
+    }
+  }
+  const leaderIds = new Set(leaders.map((leader) => leader.id));
+  const ranked = [
+    ...leaders.sort((left, right) => right.score - left.score || left.id.localeCompare(right.id)),
+    ...ordered.filter((candidate) => !leaderIds.has(candidate.id)),
+  ].slice(0, 10);
+  return { ranked, roundLeaderArticleIds: leaders.map((leader) => leader.articleId) };
 }
 
 function assessEvidence(
   plan: QueryPlan,
   ranked: LocalChunk[],
   minimumScore: number,
+  roundLeaderArticleIds: string[],
 ): EvidenceAssessment {
   if (plan.preflightReason === 'policy_scope') {
     return { sufficient: false, reason: 'policy_scope', stopReason: 'policy_scope' };
@@ -304,6 +390,30 @@ function assessEvidence(
       reason: 'required_numeric_evidence_missing',
       stopReason: 'evidence_insufficient',
     };
+  }
+  const comparisonCoverage = plan.requirements
+    .find((item) => item.startsWith('comparison_coverage:'))
+    ?.split(':', 2)[1];
+  if (comparisonCoverage) {
+    const required = Number(comparisonCoverage);
+    const topArticleIds = new Set(ranked.slice(0, 5).map((item) => item.articleId));
+    if (
+      roundLeaderArticleIds.length < required ||
+      new Set(roundLeaderArticleIds).size < required
+    ) {
+      return {
+        sufficient: false,
+        reason: 'comparison_subquery_coverage_missing',
+        stopReason: 'evidence_insufficient',
+      };
+    }
+    if (!roundLeaderArticleIds.every((articleId) => topArticleIds.has(articleId))) {
+      return {
+        sufficient: false,
+        reason: 'comparison_source_missing_from_context',
+        stopReason: 'evidence_insufficient',
+      };
+    }
   }
   return {
     sufficient: true,
@@ -472,8 +582,17 @@ export async function prepareRagResponse(
   const retrievalResults = plan.preflightReason
     ? []
     : plan.subqueries.slice(0, 2).map((query) => retrieve(snapshot, input, query));
-  const ranked = mergeRetrievalRounds(retrievalResults);
-  const assessment = assessEvidence(plan, ranked, config.minimumScore);
+  const fusion = mergeRetrievalRounds(
+    retrievalResults,
+    plan.route === 'comparison' && plan.subqueries.length > 1,
+  );
+  const ranked = fusion.ranked;
+  const assessment = assessEvidence(
+    plan,
+    ranked,
+    config.minimumScore,
+    fusion.roundLeaderArticleIds,
+  );
   const retrievalRounds = retrievalResults.length;
   const traceId = crypto.randomUUID();
   const queryFingerprint = await fingerprint(input.question, config.traceSecret);
