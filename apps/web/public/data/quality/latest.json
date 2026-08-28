@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260827T211924Z-22e1c94c-rolling-28d17f24-ai-4ceb2141",
-  "generatedAt": "2026-08-27T21:19:31.865167Z",
+  "snapshotId": "snapshot-20260828T124734Z-df9b6afe-rolling-ae4cf317-ai-14af0615",
+  "generatedAt": "2026-08-28T12:47:42.076776Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -19,10 +19,10 @@
     "github-ai-ml": 5,
     "ieee-spectrum-ai": 3,
     "interconnects": 1,
-    "mit-technology-review-ai": 4,
+    "mit-technology-review-ai": 3,
     "mlcommons-news": 1,
     "openai-news": 8,
-    "simon-willison-llms": 2
+    "simon-willison-llms": 3
   },
   "zeroContributionSourceIds": [
     "anthropic-news",
@@ -36,10 +36,10 @@
     "data-agent": 2,
     "semantic-layer": 2,
     "intelligent-lakehouse": 2,
-    "rag-eval": 10,
+    "rag-eval": 9,
     "metadata-governance": 2,
-    "foundation-models": 23,
-    "ai-products-agents": 23
+    "foundation-models": 24,
+    "ai-products-agents": 24
   },
   "topicGaps": [],
   "visibleTopicCounts": {
@@ -54,7 +54,7 @@
   },
   "visibleTopicGaps": [],
   "keySignalEligibleCount": 1,
-  "highSignificanceEventCount": 4,
+  "highSignificanceEventCount": 3,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
@@ -68,7 +68,7 @@
   "recentChineseReadyCount": 33,
   "recentChineseGapCount": 7,
   "visibleRecent24hCount": 0,
-  "visibleRecent48hCount": 4,
+  "visibleRecent48hCount": 3,
   "latestVisiblePublishedAt": "2026-08-26T20:12:53Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [
