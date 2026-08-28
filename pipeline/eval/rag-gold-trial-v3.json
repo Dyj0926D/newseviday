@@ -1,7 +1,7 @@
 {
   "version": "rag-gold-trial-v3",
   "datasetKind": "production",
-  "reviewStatus": "trial_draft_pending_human_review",
+  "reviewStatus": "human_reviewed",
   "corpusSnapshotId": "snapshot-20260805T035314Z-a2c2f64d-ai-07822422",
   "questions": [
     {

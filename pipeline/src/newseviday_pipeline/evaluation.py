@@ -160,6 +160,7 @@ def evaluate_rag(
     embedder: EmbeddingProvider,
     *,
     minimum_score: float = 0.08,
+    citation_coverage: float | None = None,
     now: datetime | None = None,
 ) -> PublishedEvalReport:
     health = corpus_health(snapshot, index, dataset)
@@ -243,6 +244,8 @@ def evaluate_rag(
         and no_answer_accuracy >= 0.8
         and answerable_pass_rate >= 0.9
         and dataset.review_status == "human_reviewed"
+        and citation_coverage is not None
+        and citation_coverage >= 0.9
     )
     gate: Literal["pass", "fail", "observe"] = (
         "observe"
@@ -268,17 +271,24 @@ def evaluate_rag(
         review_status=dataset.review_status,
         corpus_health=health,
         answer_quality=AnswerQualityStatus(
-            citation_coverage=None,
+            citation_coverage=citation_coverage,
             no_answer_accuracy=no_answer_accuracy,
             low_score_refusal_accuracy=low_score_refusal_accuracy,
             answerable_pass_rate=answerable_pass_rate,
             agent_mode="bounded_v1",
             average_retrieval_rounds=round(statistics.fmean(retrieval_rounds), 2),
-            status="pending_generated_answer_review",
+            status=(
+                "human_reviewed"
+                if citation_coverage is not None
+                else "pending_generated_answer_review"
+            ),
         ),
         note=(
-            "当前结果来自小规模验证集。无答案识别已由单一阈值升级为有限步骤的"
-            "证据充分性门禁；黄金题和生成回答仍待人工复核，因此暂不作为正式发布结论。"
+            "当前结果来自小规模生产验证集。检索证据、拒答判断和生成回答引用"
+            "均已完成人工复核。"
+            if citation_coverage is not None
+            else "当前结果来自小规模生产验证集。检索证据和拒答判断已完成人工复核；"
+            "生成回答的引用覆盖率尚未评测，因此生产 Gate 继续关闭。"
         ),
     )
 

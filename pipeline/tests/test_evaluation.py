@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DATASET = ROOT / "pipeline" / "eval" / "rag-gold-trial-v3.json"
 
 
-def test_unreviewed_trial_eval_cannot_pass_production_gate() -> None:
+def test_human_reviewed_trial_still_requires_citation_gate() -> None:
     dataset = load_gold_dataset(DATASET)
     trial_snapshot = (
         ROOT
@@ -41,17 +41,30 @@ def test_unreviewed_trial_eval_cannot_pass_production_gate() -> None:
     assert report.run.sample_count == 24
     assert report.run.gate == "fail"
     assert report.dataset_kind == "production"
-    assert report.review_status == "trial_draft_pending_human_review"
+    assert report.review_status == "human_reviewed"
     assert report.corpus_health.passed
     assert report.run.metrics.recall_at5 == 1.0
     assert report.run.metrics.hit_at5 == 1.0
     assert report.answer_quality.citation_coverage is None
+    assert report.answer_quality.status == "pending_generated_answer_review"
     assert report.answer_quality.no_answer_accuracy >= 0.8
     assert (
         report.answer_quality.low_score_refusal_accuracy
         < report.answer_quality.no_answer_accuracy
     )
     assert report.answer_quality.answerable_pass_rate >= 0.9
+
+    passed_report = evaluate_rag(
+        snapshot,
+        index,
+        dataset,
+        embedder,
+        citation_coverage=0.9,
+        now=datetime(2026, 8, 2, tzinfo=UTC),
+    )
+    assert passed_report.run.gate == "pass"
+    assert passed_report.answer_quality.citation_coverage == 0.9
+    assert passed_report.answer_quality.status == "human_reviewed"
 
 
 def test_rag_review_packet_exposes_candidates_and_blank_human_labels() -> None:

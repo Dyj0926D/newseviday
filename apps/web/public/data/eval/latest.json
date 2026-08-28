@@ -2,8 +2,8 @@
   "schemaVersion": "1.0.0",
   "run": {
     "schemaVersion": "1.0.0",
-    "id": "eval-20260824094222",
-    "createdAt": "2026-08-24T09:42:22.904812Z",
+    "id": "eval-20260828081634",
+    "createdAt": "2026-08-28T08:16:34.559835Z",
     "datasetVersion": "rag-gold-trial-v3",
     "retrievalMode": "chunk_dense",
     "sampleCount": 24,
@@ -13,8 +13,8 @@
       "mrr": 0.9167,
       "ndcgAt10": 0.9385,
       "hitAt5": 1.0,
-      "p50LatencyMs": 35,
-      "p95LatencyMs": 46
+      "p50LatencyMs": 8,
+      "p95LatencyMs": 10
     },
     "gate": "fail",
     "datasetKind": "production",
@@ -22,7 +22,7 @@
     "embeddingModel": "hashing-chargram-v1"
   },
   "datasetKind": "production",
-  "reviewStatus": "trial_draft_pending_human_review",
+  "reviewStatus": "human_reviewed",
   "corpusHealth": {
     "passed": true,
     "articleCount": 40,
@@ -39,5 +39,5 @@
     "averageRetrievalRounds": 1.21,
     "status": "pending_generated_answer_review"
   },
-  "note": "v3 修复了 q10 证据口径以及 q11–q12 多来源查询拆分与融合；q10–q12 仍待人工复核，生成回答引用尚未评测，因此暂不作为正式发布结论。"
+  "note": "v3 的24题检索证据与拒答判断已完成人工复核；生成回答引用尚未评测，因此生产 Gate 继续关闭。"
 }
