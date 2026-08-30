@@ -1,25 +1,25 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260829T083913Z-12beacdc-rolling-996e1ea0-ai-236a02ab-brief-f53eae76",
-  "generatedAt": "2026-08-29T08:39:26.642557Z",
+  "snapshotId": "snapshot-20260830T064107Z-e2931e72-rolling-52c78560-ai-a5661cac",
+  "generatedAt": "2026-08-30T06:41:14.858533Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
   "contributingSourceCount": 10,
-  "structuredArticleCount": 33,
+  "structuredArticleCount": 32,
   "aiArticleCount": 20,
-  "editorialArticleCount": 13,
+  "editorialArticleCount": 12,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
   "sourceCounts": {
     "arxiv-cs-ai": 6,
     "databricks-blog": 6,
-    "deepseek-updates": 3,
+    "deepseek-updates": 2,
     "github-ai-ml": 6,
     "ieee-spectrum-ai": 3,
     "interconnects": 1,
-    "mit-technology-review-ai": 3,
+    "mit-technology-review-ai": 4,
     "mlcommons-news": 1,
     "openai-news": 8,
     "simon-willison-llms": 3
@@ -36,10 +36,10 @@
     "data-agent": 2,
     "semantic-layer": 2,
     "intelligent-lakehouse": 2,
-    "rag-eval": 9,
+    "rag-eval": 10,
     "metadata-governance": 1,
-    "foundation-models": 24,
-    "ai-products-agents": 25
+    "foundation-models": 23,
+    "ai-products-agents": 23
   },
   "topicGaps": [],
   "visibleTopicCounts": {
@@ -49,8 +49,8 @@
     "intelligent-lakehouse": 1,
     "rag-eval": 7,
     "metadata-governance": 1,
-    "foundation-models": 20,
-    "ai-products-agents": 20
+    "foundation-models": 19,
+    "ai-products-agents": 19
   },
   "visibleTopicGaps": [],
   "keySignalEligibleCount": 1,
@@ -58,15 +58,15 @@
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
-    "capability_update": 3,
+    "capability_update": 2,
     "product_launch": 6,
     "security_risk": 2
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
   "recentArticleCount": 40,
-  "recentChineseReadyCount": 33,
-  "recentChineseGapCount": 7,
+  "recentChineseReadyCount": 32,
+  "recentChineseGapCount": 8,
   "visibleRecent24hCount": 0,
   "visibleRecent48hCount": 0,
   "latestVisiblePublishedAt": "2026-08-26T20:12:53Z",
@@ -98,7 +98,7 @@
     }
   ],
   "issues": [
-    "近 30 天有 7 条外文内容待中文整理",
+    "近 30 天有 8 条外文内容待中文整理",
     "近 24 小时没有中文可见新内容"
   ]
 }
