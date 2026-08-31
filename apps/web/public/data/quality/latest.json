@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260830T064107Z-e2931e72-rolling-52c78560-ai-a5661cac",
-  "generatedAt": "2026-08-30T06:41:14.858533Z",
+  "snapshotId": "snapshot-20260831T070307Z-ab65358e-rolling-52c78560-ai-cac8ff09",
+  "generatedAt": "2026-08-31T07:03:14.271311Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -53,8 +53,8 @@
     "ai-products-agents": 19
   },
   "visibleTopicGaps": [],
-  "keySignalEligibleCount": 1,
-  "highSignificanceEventCount": 3,
+  "keySignalEligibleCount": 0,
+  "highSignificanceEventCount": 2,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
