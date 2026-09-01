@@ -356,7 +356,7 @@
         "id": { "$ref": "#/$defs/id" },
         "createdAt": { "$ref": "#/$defs/isoDateTime" },
         "queryFingerprint": { "type": "string", "minLength": 16 },
-        "retrievalMode": { "enum": ["chunk_dense", "article_dense", "hybrid_rerank"] },
+        "retrievalMode": { "enum": ["chunk_dense", "chunk_bm25", "article_dense", "hybrid_rerank"] },
         "rankedCandidates": {
           "type": "array",
           "items": {
@@ -401,7 +401,7 @@
         "id": { "$ref": "#/$defs/id" },
         "createdAt": { "$ref": "#/$defs/isoDateTime" },
         "datasetVersion": { "type": "string", "minLength": 1 },
-        "retrievalMode": { "enum": ["chunk_dense", "article_dense", "hybrid_rerank"] },
+        "retrievalMode": { "enum": ["chunk_dense", "chunk_bm25", "article_dense", "hybrid_rerank"] },
         "sampleCount": { "type": "integer", "minimum": 1 },
         "metrics": {
           "type": "object",

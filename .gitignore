@@ -30,6 +30,7 @@ htmlcov/
 
 # Runtime data
 data/runtime/
+pipeline/data/runtime/
 content-snapshots/current/
 
 # IDE and operating system

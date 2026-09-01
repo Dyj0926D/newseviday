@@ -2,10 +2,10 @@
   "schemaVersion": "1.0.0",
   "run": {
     "schemaVersion": "1.0.0",
-    "id": "eval-20260828081634",
-    "createdAt": "2026-08-28T08:16:34.559835Z",
+    "id": "eval-20260901072721",
+    "createdAt": "2026-09-01T07:27:21.667744Z",
     "datasetVersion": "rag-gold-trial-v3",
-    "retrievalMode": "chunk_dense",
+    "retrievalMode": "chunk_bm25",
     "sampleCount": 24,
     "metrics": {
       "recallAt5": 1.0,
@@ -13,8 +13,8 @@
       "mrr": 0.9167,
       "ndcgAt10": 0.9385,
       "hitAt5": 1.0,
-      "p50LatencyMs": 8,
-      "p95LatencyMs": 10
+      "p50LatencyMs": 42,
+      "p95LatencyMs": 60
     },
     "gate": "fail",
     "datasetKind": "production",
@@ -32,6 +32,11 @@
   },
   "answerQuality": {
     "citationCoverage": null,
+    "citationValidity": null,
+    "citationFaithfulness": null,
+    "answerCorrectness": null,
+    "answerCompleteness": null,
+    "humanReviewComplete": false,
     "noAnswerAccuracy": 1.0,
     "lowScoreRefusalAccuracy": 0.25,
     "answerablePassRate": 1.0,

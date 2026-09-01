@@ -20,6 +20,11 @@ from newseviday_pipeline.ai import (
     update_weekly_brief,
 )
 from newseviday_pipeline.ai_models import AiUsageReport, WeeklyBriefUsageReport
+from newseviday_pipeline.answer_evaluation import (
+    build_answer_review_packet,
+    load_answer_review_packet,
+    write_answer_review_packet,
+)
 from newseviday_pipeline.budget import (
     load_rollover_ledger,
     plan_rollover_budget,
@@ -38,6 +43,13 @@ from newseviday_pipeline.evaluation import (
 )
 from newseviday_pipeline.inventory import merge_rolling_inventory
 from newseviday_pipeline.models import ContentSnapshot
+from newseviday_pipeline.public_benchmarks import (
+    HuggingFaceDatasetClient,
+    evaluate_multihop_retrieval,
+    fetch_ragbench_reference,
+    load_or_download_multihop,
+    write_public_report,
+)
 from newseviday_pipeline.quality import (
     audit_snapshot,
     evaluate_release_guard,
@@ -213,7 +225,79 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Export per-question candidates and blank human-review fields.",
     )
-    eval_parser.add_argument("--minimum-score", type=float, default=0.08)
+    eval_parser.add_argument("--minimum-score", type=float, default=1.5)
+    eval_parser.add_argument(
+        "--retrieval-mode", choices=("chunk_dense", "chunk_bm25"), default="chunk_bm25"
+    )
+    eval_parser.add_argument(
+        "--answer-review",
+        type=Path,
+        help="Use a completed generated-answer review packet in the production Gate.",
+    )
+    answer_eval_parser = subparsers.add_parser(
+        "eval-rag-answers",
+        help="Generate or resume production-like answers and export claim-level review traces",
+    )
+    answer_eval_parser.add_argument("snapshot", type=Path)
+    answer_eval_parser.add_argument("dataset", type=Path)
+    answer_eval_parser.add_argument(
+        "--output", type=Path, default=Path("data/runtime/eval/answer-review.json")
+    )
+    answer_eval_parser.add_argument(
+        "--cache", type=Path, default=Path("data/runtime/rag-answer-cache")
+    )
+    answer_eval_parser.add_argument("--minimum-score", type=float, default=1.5)
+    answer_eval_parser.add_argument(
+        "--retrieval-mode", choices=("chunk_dense", "chunk_bm25"), default="chunk_bm25"
+    )
+    answer_eval_parser.add_argument("--maximum-context-chars", type=int, default=8_000)
+    answer_eval_parser.add_argument("--max-model-calls", type=int, default=5)
+    answer_eval_parser.add_argument(
+        "--allow-model",
+        action="store_true",
+        help="Explicitly permit paid DeepSeek answer generation calls.",
+    )
+    summarize_answers_parser = subparsers.add_parser(
+        "summarize-rag-answers",
+        help="Recompute the Gate summary after claim-level human review",
+    )
+    summarize_answers_parser.add_argument("packet", type=Path)
+    summarize_answers_parser.add_argument("--output", type=Path)
+    public_eval_parser = subparsers.add_parser(
+        "eval-public-rag",
+        help="Run the versioned MultiHop-RAG retrieval benchmark without model calls",
+    )
+    public_eval_parser.add_argument(
+        "--cache", type=Path, default=Path("data/runtime/public-benchmarks/multihop.json")
+    )
+    public_eval_parser.add_argument(
+        "--report", type=Path, default=Path("data/runtime/eval/multihop-latest.json")
+    )
+    public_eval_parser.add_argument("--sample-size", type=int, default=120)
+    public_eval_parser.add_argument("--seed", default="newseviday-public-v1")
+    public_eval_parser.add_argument("--dimensions", type=int, default=384)
+    public_eval_parser.add_argument(
+        "--retrieval-mode",
+        choices=("article_dense_hashing", "bm25", "hybrid_rrf"),
+        default="article_dense_hashing",
+    )
+    public_eval_parser.add_argument("--maximum-document-chars", type=int, default=12_000)
+    public_eval_parser.add_argument(
+        "--allow-network",
+        action="store_true",
+        help="Explicitly download the pinned public benchmark when no cache exists.",
+    )
+    ragbench_parser = subparsers.add_parser(
+        "inspect-ragbench",
+        help="Fetch a deterministic RAGBench label sample for evaluator calibration",
+    )
+    ragbench_parser.add_argument("--config", default="techqa")
+    ragbench_parser.add_argument("--split", default="test")
+    ragbench_parser.add_argument("--sample-size", type=int, default=100)
+    ragbench_parser.add_argument(
+        "--report", type=Path, default=Path("data/runtime/eval/ragbench-reference.json")
+    )
+    ragbench_parser.add_argument("--allow-network", action="store_true")
     signal_eval_parser = subparsers.add_parser(
         "eval-key-signal", help="Evaluate change-event detection and Key Signal eligibility"
     )
@@ -680,12 +764,29 @@ def eval_rag(args: argparse.Namespace) -> int:
     dataset = load_gold_dataset(args.dataset)
     provider = HashingEmbedder()
     index = build_dense_index(snapshot, provider)
+    answer_summary = None
+    if args.answer_review:
+        answer_packet = load_answer_review_packet(args.answer_review)
+        if answer_packet.dataset_version != dataset.version:
+            raise ValueError("answer_review_dataset_version_mismatch")
+        if answer_packet.corpus_snapshot_id != snapshot.snapshot_id:
+            raise ValueError("answer_review_snapshot_mismatch")
+        answer_summary = answer_packet.summary
     report = evaluate_rag(
         snapshot,
         index,
         dataset,
         provider,
         minimum_score=args.minimum_score,
+        retrieval_mode=args.retrieval_mode,
+        citation_coverage=(answer_summary.citation_coverage if answer_summary else None),
+        citation_validity=(answer_summary.citation_validity if answer_summary else None),
+        citation_faithfulness=(answer_summary.citation_faithfulness if answer_summary else None),
+        answer_correctness=(answer_summary.answer_correctness if answer_summary else None),
+        answer_completeness=(answer_summary.answer_completeness if answer_summary else None),
+        answer_human_review_complete=(
+            answer_summary.human_review_complete if answer_summary else False
+        ),
     )
     write_eval_report(report, args.report)
     if args.review_packet:
@@ -695,8 +796,105 @@ def eval_rag(args: argparse.Namespace) -> int:
             dataset,
             provider,
             minimum_score=args.minimum_score,
+            retrieval_mode=args.retrieval_mode,
         )
         write_rag_review_packet(packet, args.review_packet)
+    print(report.model_dump_json(by_alias=True, indent=2))
+    return 0
+
+
+def eval_rag_answers(args: argparse.Namespace) -> int:
+    if not 0 <= args.max_model_calls <= 10:
+        print("--max-model-calls must be between 0 and 10.")
+        return 2
+    if args.maximum_context_chars < 1_000 or args.maximum_context_chars > 20_000:
+        print("--maximum-context-chars must be between 1000 and 20000.")
+        return 2
+    snapshot = load_snapshot(args.snapshot)
+    dataset = load_gold_dataset(args.dataset)
+    provider = HashingEmbedder()
+    index = build_dense_index(snapshot, provider)
+    client = DeepSeekStructuredClient.from_environment() if args.allow_model else None
+    packet = build_answer_review_packet(
+        snapshot,
+        index,
+        dataset,
+        provider,
+        client=client,
+        cache=FileAiCache(args.cache),
+        maximum_model_calls=args.max_model_calls,
+        minimum_score=args.minimum_score,
+        maximum_context_chars=args.maximum_context_chars,
+        retrieval_mode=args.retrieval_mode,
+    )
+    if client is not None:
+        usage = client.usage_totals
+        packet.usage_reported_calls = client.usage_reported_calls
+        packet.prompt_tokens = usage.prompt_tokens
+        packet.completion_tokens = usage.completion_tokens
+        packet.total_tokens = usage.total_tokens
+        input_price, output_price = _token_prices_from_environment()
+        if (
+            client.usage_reported_calls == packet.model_calls
+            and input_price is not None
+            and output_price is not None
+        ):
+            packet.estimated_cost_cny = round(
+                (
+                    usage.prompt_tokens * input_price
+                    + usage.completion_tokens * output_price
+                )
+                / 1_000_000,
+                6,
+            )
+    write_answer_review_packet(packet, args.output)
+    print(packet.model_dump_json(by_alias=True, indent=2))
+    return 0 if packet.summary.gate != "fail" else 1
+
+
+def summarize_rag_answers(args: argparse.Namespace) -> int:
+    packet = load_answer_review_packet(args.packet)
+    output = args.output or args.packet
+    write_answer_review_packet(packet, output)
+    print(packet.summary.model_dump_json(by_alias=True, indent=2))
+    return 0 if packet.summary.gate == "pass" else 1
+
+
+def eval_public_rag(args: argparse.Namespace) -> int:
+    if args.sample_size < 0:
+        print("--sample-size must be nonnegative; use 0 for the full answerable set.")
+        return 2
+    artifact = load_or_download_multihop(
+        args.cache,
+        allow_network=args.allow_network,
+    )
+    report = evaluate_multihop_retrieval(
+        artifact,
+        HashingEmbedder(dimensions=args.dimensions),
+        sample_size=args.sample_size,
+        seed=args.seed,
+        maximum_document_chars=args.maximum_document_chars,
+        retrieval_mode=args.retrieval_mode,
+    )
+    write_public_report(report, args.report)
+    print(report.model_dump_json(by_alias=True, indent=2))
+    return 0
+
+
+def inspect_ragbench(args: argparse.Namespace) -> int:
+    if not args.allow_network:
+        print("RAGBench download requires an explicit --allow-network flag.")
+        return 2
+    if args.sample_size < 1 or args.sample_size > 1_000:
+        print("--sample-size must be between 1 and 1000.")
+        return 2
+    report = fetch_ragbench_reference(
+        HuggingFaceDatasetClient(),
+        config=args.config,
+        split=args.split,
+        sample_size=args.sample_size,
+    )
+    write_public_report(report, args.report)
     print(report.model_dump_json(by_alias=True, indent=2))
     return 0
 
@@ -864,6 +1062,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         return build_index(args)
     if args.command == "eval-rag":
         return eval_rag(args)
+    if args.command == "eval-rag-answers":
+        return eval_rag_answers(args)
+    if args.command == "summarize-rag-answers":
+        return summarize_rag_answers(args)
+    if args.command == "eval-public-rag":
+        return eval_public_rag(args)
+    if args.command == "inspect-ragbench":
+        return inspect_ragbench(args)
     if args.command == "eval-key-signal":
         return eval_key_signal(args)
     if args.command == "audit-snapshot":

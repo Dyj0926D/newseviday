@@ -277,7 +277,7 @@ class RagTrace(ContractModel):
     id: str
     created_at: datetime
     query_fingerprint: str
-    retrieval_mode: Literal["chunk_dense", "article_dense", "hybrid_rerank"]
+    retrieval_mode: Literal["chunk_dense", "chunk_bm25", "article_dense", "hybrid_rerank"]
     ranked_candidates: list[RagCandidate] = Field(default_factory=list)
     injected_chunk_ids: list[str] = Field(default_factory=list)
     answer_id: str | None = None
@@ -308,7 +308,7 @@ class EvalRun(ContractModel):
     id: str
     created_at: datetime
     dataset_version: str
-    retrieval_mode: Literal["chunk_dense", "article_dense", "hybrid_rerank"]
+    retrieval_mode: Literal["chunk_dense", "chunk_bm25", "article_dense", "hybrid_rerank"]
     sample_count: int = Field(ge=1)
     metrics: EvalMetrics
     gate: Literal["pass", "fail", "observe"]

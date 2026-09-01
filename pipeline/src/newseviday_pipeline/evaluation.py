@@ -13,7 +13,7 @@ from pydantic import Field
 from newseviday_pipeline.agentic import retrieve_with_agent
 from newseviday_pipeline.embeddings import EmbeddingProvider
 from newseviday_pipeline.models import ContentSnapshot, ContractModel, EvalMetrics, EvalRun
-from newseviday_pipeline.rag import DenseIndexArtifact, retrieve_dense
+from newseviday_pipeline.rag import DenseIndexArtifact, RetrievalMode, retrieve
 
 
 class GoldQuestion(ContractModel):
@@ -42,6 +42,11 @@ class CorpusHealth(ContractModel):
 
 class AnswerQualityStatus(ContractModel):
     citation_coverage: float | None = None
+    citation_validity: float | None = None
+    citation_faithfulness: float | None = None
+    answer_correctness: float | None = None
+    answer_completeness: float | None = None
+    human_review_complete: bool = False
     no_answer_accuracy: float
     low_score_refusal_accuracy: float
     answerable_pass_rate: float
@@ -161,6 +166,12 @@ def evaluate_rag(
     *,
     minimum_score: float = 0.08,
     citation_coverage: float | None = None,
+    citation_validity: float | None = None,
+    citation_faithfulness: float | None = None,
+    answer_correctness: float | None = None,
+    answer_completeness: float | None = None,
+    answer_human_review_complete: bool = False,
+    retrieval_mode: RetrievalMode = "chunk_dense",
     now: datetime | None = None,
 ) -> PublishedEvalReport:
     health = corpus_health(snapshot, index, dataset)
@@ -177,7 +188,13 @@ def evaluate_rag(
 
     for question in dataset.questions:
         started = time.perf_counter()
-        result = retrieve_dense(question.question, index, embedder, top_k=10)
+        result = retrieve(
+            question.question,
+            index,
+            embedder,
+            top_k=10,
+            retrieval_mode=retrieval_mode,
+        )
         agentic = retrieve_with_agent(
             question.question,
             snapshot,
@@ -185,6 +202,7 @@ def evaluate_rag(
             embedder,
             top_k=10,
             minimum_score=minimum_score,
+            retrieval_mode=retrieval_mode,
         )
         retrieval_rounds.append(agentic.retrieval_rounds)
         latencies.append((time.perf_counter() - started) * 1_000)
@@ -245,7 +263,15 @@ def evaluate_rag(
         and answerable_pass_rate >= 0.9
         and dataset.review_status == "human_reviewed"
         and citation_coverage is not None
-        and citation_coverage >= 0.9
+        and citation_coverage >= 0.95
+        and citation_validity == 1.0
+        and citation_faithfulness is not None
+        and citation_faithfulness >= 0.9
+        and answer_correctness is not None
+        and answer_correctness >= 0.9
+        and answer_completeness is not None
+        and answer_completeness >= 0.9
+        and answer_human_review_complete
     )
     gate: Literal["pass", "fail", "observe"] = (
         "observe"
@@ -257,7 +283,7 @@ def evaluate_rag(
         id=f"eval-{created_at.strftime('%Y%m%d%H%M%S')}",
         created_at=created_at,
         dataset_version=dataset.version,
-        retrieval_mode="chunk_dense",
+        retrieval_mode=retrieval_mode,
         sample_count=len(dataset.questions),
         metrics=metrics,
         gate=gate,
@@ -272,6 +298,11 @@ def evaluate_rag(
         corpus_health=health,
         answer_quality=AnswerQualityStatus(
             citation_coverage=citation_coverage,
+            citation_validity=citation_validity,
+            citation_faithfulness=citation_faithfulness,
+            answer_correctness=answer_correctness,
+            answer_completeness=answer_completeness,
+            human_review_complete=answer_human_review_complete,
             no_answer_accuracy=no_answer_accuracy,
             low_score_refusal_accuracy=low_score_refusal_accuracy,
             answerable_pass_rate=answerable_pass_rate,
@@ -279,14 +310,14 @@ def evaluate_rag(
             average_retrieval_rounds=round(statistics.fmean(retrieval_rounds), 2),
             status=(
                 "human_reviewed"
-                if citation_coverage is not None
+                if answer_human_review_complete
                 else "pending_generated_answer_review"
             ),
         ),
         note=(
             "当前结果来自小规模生产验证集。检索证据、拒答判断和生成回答引用"
             "均已完成人工复核。"
-            if citation_coverage is not None
+            if answer_human_review_complete
             else "当前结果来自小规模生产验证集。检索证据和拒答判断已完成人工复核；"
             "生成回答的引用覆盖率尚未评测，因此生产 Gate 继续关闭。"
         ),
@@ -301,6 +332,7 @@ def build_rag_review_packet(
     *,
     minimum_score: float = 0.08,
     now: datetime | None = None,
+    retrieval_mode: RetrievalMode = "chunk_dense",
 ) -> RagReviewPacket:
     """Export per-question evidence and blank human labels without model answers."""
 
@@ -314,6 +346,7 @@ def build_rag_review_packet(
             embedder,
             top_k=10,
             minimum_score=minimum_score,
+            retrieval_mode=retrieval_mode,
         )
         candidates = []
         for item in agentic.candidates[:5]:

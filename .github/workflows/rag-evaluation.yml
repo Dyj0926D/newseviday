@@ -1,0 +1,93 @@
+name: RAG Evaluation
+
+on:
+  workflow_dispatch:
+    inputs:
+      answer_model_calls:
+        description: Maximum paid answer calls for this run
+        required: true
+        default: "5"
+      run_public_benchmark:
+        description: Run the no-model MultiHop-RAG benchmark
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rag-evaluation
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
+      DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' }}
+      DEEPSEEK_THINKING_ENABLED: "false"
+      DEEPSEEK_INPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_INPUT_CNY_PER_MILLION || '4' }}
+      DEEPSEEK_OUTPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_OUTPUT_CNY_PER_MILLION || '12' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pipeline/pyproject.toml
+
+      - name: Install pipeline
+        run: python -m pip install -e pipeline
+
+      - name: Restore answer cache
+        uses: actions/cache@v4
+        with:
+          path: pipeline/data/runtime/rag-answer-cache
+          key: rag-answer-cache-v1-${{ github.run_id }}
+          restore-keys: |
+            rag-answer-cache-v1-
+
+      - name: Run internal retrieval Gate
+        working-directory: pipeline
+        run: >-
+          newseviday-pipeline eval-rag
+          ../apps/web/public/data/versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json
+          eval/rag-gold-trial-v3.json
+          --retrieval-mode chunk_bm25
+          --report data/runtime/eval/internal-bm25.json
+          --review-packet data/runtime/eval/internal-bm25-review.json
+
+      - name: Generate bounded answer-review batch
+        working-directory: pipeline
+        run: >-
+          newseviday-pipeline eval-rag-answers
+          ../apps/web/public/data/versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json
+          eval/rag-gold-trial-v3.json
+          --retrieval-mode chunk_bm25
+          --allow-model
+          --max-model-calls ${{ inputs.answer_model_calls }}
+          --cache data/runtime/rag-answer-cache
+          --output data/runtime/eval/answer-review.json
+
+      - name: Run public MultiHop-RAG benchmark
+        if: ${{ inputs.run_public_benchmark }}
+        working-directory: pipeline
+        run: >-
+          newseviday-pipeline eval-public-rag
+          --allow-network
+          --sample-size 120
+          --retrieval-mode bm25
+          --cache data/runtime/public-benchmarks/multihop.json
+          --report data/runtime/eval/multihop-bm25.json
+
+      - name: Upload private evaluation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rag-evaluation-${{ github.run_number }}
+          path: pipeline/data/runtime/eval/*.json
+          if-no-files-found: error
+          retention-days: 14

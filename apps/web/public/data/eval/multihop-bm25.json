@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0.0",
+  "runId": "public-eval-20260901071448",
+  "generatedAt": "2026-09-01T07:14:48.301798Z",
+  "benchmark": "MultiHop-RAG",
+  "datasetId": "yixuantt/MultiHopRAG",
+  "datasetRevision": "71ac0d0bd1f951d2d6b70311f7d2ae404e1ffa82",
+  "license": "ODC-BY-1.0",
+  "retrievalMode": "bm25",
+  "embeddingModel": "none",
+  "corpusDocumentCount": 609,
+  "benchmarkQuestionCount": 2556,
+  "evaluatedQuestionCount": 2255,
+  "excludedNullQuestionCount": 301,
+  "seed": "newseviday-public-v1",
+  "metrics": {
+    "recallAt5": 0.7394,
+    "recallAt10": 0.8604,
+    "hitAt5": 0.9805,
+    "mrr": 0.8418,
+    "ndcgAt10": 0.7601,
+    "p50LatencyMs": 18,
+    "p95LatencyMs": 33
+  },
+  "byQuestionType": [
+    {
+      "questionType": "comparison_query",
+      "sampleCount": 856,
+      "recallAt5": 0.7893,
+      "hitAt5": 0.9743
+    },
+    {
+      "questionType": "inference_query",
+      "sampleCount": 816,
+      "recallAt5": 0.647,
+      "hitAt5": 0.9828
+    },
+    {
+      "questionType": "temporal_query",
+      "sampleCount": 583,
+      "recallAt5": 0.7953,
+      "hitAt5": 0.9863
+    }
+  ],
+  "note": "MultiHop-RAG 用于检验跨文档检索迁移能力；本报告是 NewsEviday 的 BM25 公开基准结果，不等同于内部中文生产集，也不作为上线的唯一 Gate。"
+}

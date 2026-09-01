@@ -95,6 +95,13 @@ class StructuredCompletionClient(Protocol):
     def complete_json(self, *, system: str, user: str) -> Mapping[str, Any]: ...
 
 
+class TextCompletionClient(Protocol):
+    @property
+    def model(self) -> str: ...
+
+    def complete_text(self, *, system: str, user: str) -> str: ...
+
+
 def _json_object(value: str) -> Mapping[str, Any]:
     cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", value.strip(), flags=re.IGNORECASE)
     payload = json.loads(cleaned)
@@ -146,24 +153,32 @@ class DeepSeekStructuredClient:
         )
 
     def complete_json(self, *, system: str, user: str) -> Mapping[str, Any]:
+        return _json_object(self._complete(system=system, user=user, json_mode=True))
+
+    def complete_text(self, *, system: str, user: str) -> str:
+        return self._complete(system=system, user=user, json_mode=False)
+
+    def _complete(self, *, system: str, user: str, json_mode: bool) -> str:
         self._request_count += 1
+        request_payload: dict[str, Any] = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "thinking": {"type": "enabled" if self.thinking_enabled else "disabled"},
+            **({} if self.thinking_enabled else {"temperature": 0.1}),
+            "max_tokens": 1_200,
+        }
+        if json_mode:
+            request_payload["response_format"] = {"type": "json_object"}
         response = httpx.post(
             f"{self.base_url}/chat/completions",
             headers={
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
             },
-            json={
-                "model": self.model,
-                "messages": [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-                "thinking": {"type": "enabled" if self.thinking_enabled else "disabled"},
-                "response_format": {"type": "json_object"},
-                **({} if self.thinking_enabled else {"temperature": 0.1}),
-                "max_tokens": 1_200,
-            },
+            json=request_payload,
             timeout=self.timeout_seconds,
         )
         response.raise_for_status()
@@ -184,7 +199,7 @@ class DeepSeekStructuredClient:
                     total_tokens=total_tokens or prompt_tokens + completion_tokens,
                 )
             )
-        return _json_object(str(content))
+        return str(content).strip()
 
     @classmethod
     def from_environment(cls) -> "DeepSeekStructuredClient":
@@ -199,7 +214,7 @@ class DeepSeekStructuredClient:
 def _nonnegative_int(value: Any) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
         return 0
-    return value
+    return int(value)
 
 
 class FileAiCache:

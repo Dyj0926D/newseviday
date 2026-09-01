@@ -15,6 +15,8 @@ import { untrustedEvidenceBlock } from './security';
 
 const EMBEDDING_DIMENSIONS = 384;
 const MAX_CHUNKS_PER_ARTICLE = 2;
+const CHUNK_MAXIMUM_CHARS = 900;
+const CHUNK_OVERLAP_CHARS = 120;
 
 interface LocalChunk {
   id: string;
@@ -116,6 +118,43 @@ function readableArticle(article: ContentSnapshot['articles'][number]): string {
     .join('\n\n');
 }
 
+function splitText(text: string): string[] {
+  const normalized = text
+    .split(/\n\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join('\n\n');
+  if (!normalized) return [];
+  const chunks: string[] = [];
+  let start = 0;
+  while (start < normalized.length) {
+    const proposedEnd = Math.min(start + CHUNK_MAXIMUM_CHARS, normalized.length);
+    let end = proposedEnd;
+    if (proposedEnd < normalized.length) {
+      const boundary = normalized.lastIndexOf('\n\n', proposedEnd);
+      if (boundary >= start + CHUNK_MAXIMUM_CHARS / 2) end = boundary;
+    }
+    const chunk = normalized.slice(start, end).trim();
+    if (chunk) chunks.push(chunk);
+    if (end >= normalized.length) break;
+    start = Math.max(start + 1, end - CHUNK_OVERLAP_CHARS);
+  }
+  return chunks;
+}
+
+function lexicalTokens(value: string): string[] {
+  const normalized = value.toLocaleLowerCase();
+  const latin = normalized.match(/[a-z0-9][a-z0-9._+-]*/g) ?? [];
+  const cjkRuns = normalized.match(/[\u3400-\u9fff]+/g) ?? [];
+  const cjk: string[] = [];
+  for (const run of cjkRuns) {
+    for (let index = 0; index < Math.max(1, run.length - 1); index += 1) {
+      cjk.push(run.slice(index, index + 2));
+    }
+  }
+  return [...latin, ...cjk];
+}
+
 function inRange(
   publishedAt: string | null,
   range: AskRequest['range'],
@@ -127,7 +166,7 @@ function inRange(
   return Number.isFinite(age) && age <= maximumDays * 86_400_000;
 }
 
-function retrieve(snapshot: ContentSnapshot, input: AskRequest, query: string): LocalChunk[] {
+function retrieveDense(snapshot: ContentSnapshot, input: AskRequest, query: string): LocalChunk[] {
   const queryVector = embed(query);
   return snapshot.articles
     .filter(
@@ -148,6 +187,72 @@ function retrieve(snapshot: ContentSnapshot, input: AskRequest, query: string): 
     })
     .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
     .slice(0, 10);
+}
+
+function retrieveBm25(snapshot: ContentSnapshot, input: AskRequest, query: string): LocalChunk[] {
+  const chunks = snapshot.articles
+    .filter(
+      (article) =>
+        (!input.articleId || article.id === input.articleId) &&
+        inRange(article.publishedAt, input.range, snapshot.generatedAt),
+    )
+    .flatMap((article) =>
+      splitText(readableArticle(article)).map((text, position) => ({
+        id: `local-${article.id}-${position}`,
+        articleId: article.id,
+        text,
+        vector: [],
+        score: 0,
+      })),
+    );
+  const queryTokens = new Set(lexicalTokens(query));
+  const frequencies = chunks.map((chunk) => {
+    const counts = new Map<string, number>();
+    for (const token of lexicalTokens(chunk.text)) counts.set(token, (counts.get(token) ?? 0) + 1);
+    return counts;
+  });
+  const documentFrequency = new Map<string, number>();
+  for (const counts of frequencies) {
+    for (const token of counts.keys()) {
+      documentFrequency.set(token, (documentFrequency.get(token) ?? 0) + 1);
+    }
+  }
+  const lengths = frequencies.map((counts) =>
+    [...counts.values()].reduce((sum, value) => sum + value, 0),
+  );
+  const averageLength = lengths.length
+    ? lengths.reduce((sum, value) => sum + value, 0) / lengths.length
+    : 0;
+  return chunks
+    .map((chunk, chunkIndex) => {
+      let score = 0;
+      for (const token of queryTokens) {
+        const frequency = frequencies[chunkIndex]?.get(token) ?? 0;
+        if (!frequency || !averageLength) continue;
+        const containingDocuments = documentFrequency.get(token) ?? 0;
+        const inverseFrequency = Math.log(
+          1 + (chunks.length - containingDocuments + 0.5) / (containingDocuments + 0.5),
+        );
+        const lengthRatio = (lengths[chunkIndex] ?? 0) / averageLength;
+        score +=
+          (inverseFrequency * frequency * 2.5) /
+          (frequency + 1.5 * (0.25 + 0.75 * lengthRatio));
+      }
+      return { ...chunk, score };
+    })
+    .sort((left, right) => right.score - left.score || left.id.localeCompare(right.id))
+    .slice(0, 10);
+}
+
+function retrieve(
+  snapshot: ContentSnapshot,
+  input: AskRequest,
+  query: string,
+  mode: 'chunk_bm25' | 'article_dense',
+): LocalChunk[] {
+  return mode === 'chunk_bm25'
+    ? retrieveBm25(snapshot, input, query)
+    : retrieveDense(snapshot, input, query);
 }
 
 const expansions: Array<[string, string]> = [
@@ -532,13 +637,14 @@ function traceLog(
   retrievalRounds: number,
   assessment: EvidenceAssessment,
   startedAt: number,
+  retrievalMode: 'chunk_bm25' | 'article_dense',
 ): void {
   console.log(
     JSON.stringify({
       event: 'rag_trace',
       traceId,
       queryFingerprint,
-      retrievalMode: 'article_dense',
+      retrievalMode,
       rankedCandidates: chunks.map((chunk, index) => ({
         chunkId: chunk.id,
         rank: index + 1,
@@ -581,7 +687,9 @@ export async function prepareRagResponse(
   const plan = planQuestion(input.question, snapshot);
   const retrievalResults = plan.preflightReason
     ? []
-    : plan.subqueries.slice(0, 2).map((query) => retrieve(snapshot, input, query));
+    : plan.subqueries
+        .slice(0, 2)
+        .map((query) => retrieve(snapshot, input, query, config.retrievalMode));
   const fusion = mergeRetrievalRounds(
     retrievalResults,
     plan.route === 'comparison' && plan.subqueries.length > 1,
@@ -607,6 +715,7 @@ export async function prepareRagResponse(
       retrievalRounds,
       assessment,
       startedAt,
+      config.retrievalMode,
     );
     return {
       kind: 'refusal',
@@ -647,7 +756,7 @@ export async function prepareRagResponse(
   });
   const meta: RagStreamMeta = {
     traceId,
-    retrievalMode: 'article_dense',
+    retrievalMode: config.retrievalMode,
     agentMode: plan.agentMode,
     route: plan.route,
     retrievalRounds,
@@ -667,6 +776,7 @@ export async function prepareRagResponse(
           retrievalRounds,
           assessment,
           startedAt,
+          config.retrievalMode,
         ),
       ),
       {

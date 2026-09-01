@@ -139,7 +139,7 @@ export async function handleRequest(
         },
         rag: {
           state: ragAvailable ? generationState : 'static-only',
-          retrievalMode: ragAvailable ? 'article_dense' : null,
+          retrievalMode: ragAvailable ? rag.retrievalMode : null,
           corpusSnapshotId: ragAvailable ? content.snapshotId : null,
         },
         protection: {

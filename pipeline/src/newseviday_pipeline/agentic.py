@@ -5,7 +5,7 @@ from pydantic import Field
 
 from newseviday_pipeline.embeddings import EmbeddingProvider
 from newseviday_pipeline.models import ContentSnapshot, ContractModel
-from newseviday_pipeline.rag import DenseIndexArtifact, RetrievedChunk, retrieve_dense
+from newseviday_pipeline.rag import DenseIndexArtifact, RetrievalMode, RetrievedChunk, retrieve
 
 AgentRoute = Literal["single_fact", "comparison", "timeline", "policy_scope"]
 
@@ -313,6 +313,7 @@ def retrieve_with_agent(
     *,
     top_k: int = 10,
     minimum_score: float = 0.08,
+    retrieval_mode: RetrievalMode = "chunk_dense",
 ) -> AgenticRetrieval:
     plan = plan_question(question, snapshot)
     if plan.preflight_reason:
@@ -328,7 +329,13 @@ def retrieve_with_agent(
     rounds: list[list[RetrievedChunk]] = []
     for subquery in plan.subqueries:
         round_count += 1
-        result = retrieve_dense(subquery, index, embedder, top_k=top_k)
+        result = retrieve(
+            subquery,
+            index,
+            embedder,
+            top_k=top_k,
+            retrieval_mode=retrieval_mode,
+        )
         rounds.append(result.candidates)
     ranked, round_leader_article_ids = _rank_with_round_leaders(
         rounds,
