@@ -21,11 +21,35 @@ jobs:
     timeout-minutes: 5
     env:
       PUBLIC_SNAPSHOT_URL: https://newseviday.dyjnewseviday-worker.workers.dev/data/current.json
-      MAX_AGE_HOURS: '26'
+      DAILY_REFRESH_ENABLED: ${{ vars.DAILY_REFRESH_ENABLED || 'false' }}
+      WEEKLY_BRIEF_ENABLED: ${{ vars.WEEKLY_BRIEF_ENABLED || 'false' }}
       ALERT_TITLE: '[Ops] NewsEviday public snapshot is stale'
       GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Resolve monitoring policy
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "schedule" && \
+                "$DAILY_REFRESH_ENABLED" != "true" && \
+                "$WEEKLY_BRIEF_ENABLED" != "true" ]]; then
+            echo "RUN_MONITOR=false" >> "$GITHUB_ENV"
+            printf '## Public snapshot freshness\n\nPlanned skip: the site is in archive mode and both scheduled content switches are off.\n' \
+              >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "RUN_MONITOR=true" >> "$GITHUB_ENV"
+          if [[ "$DAILY_REFRESH_ENABLED" == "true" ]]; then
+            echo "MAX_AGE_HOURS=26" >> "$GITHUB_ENV"
+          elif [[ "$WEEKLY_BRIEF_ENABLED" == "true" ]]; then
+            echo "MAX_AGE_HOURS=194" >> "$GITHUB_ENV"
+          else
+            # A manual run always performs a real check, even in archive mode.
+            echo "MAX_AGE_HOURS=26" >> "$GITHUB_ENV"
+          fi
+
       - name: Check public snapshot age
+        if: env.RUN_MONITOR == 'true'
         id: freshness
         shell: bash
         run: |
@@ -60,7 +84,7 @@ jobs:
           PY
 
       - name: Open one stale snapshot alert
-        if: steps.freshness.outputs.stale == 'true'
+        if: env.RUN_MONITOR == 'true' && steps.freshness.outputs.stale == 'true'
         shell: bash
         run: |
           issue_number="$(gh issue list \
@@ -80,7 +104,7 @@ jobs:
           fi
 
       - name: Close recovered stale snapshot alert
-        if: steps.freshness.outputs.stale != 'true'
+        if: env.RUN_MONITOR == 'true' && steps.freshness.outputs.stale != 'true'
         shell: bash
         run: |
           issue_number="$(gh issue list \

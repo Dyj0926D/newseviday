@@ -2,8 +2,12 @@ name: Weekly trend brief
 
 on:
   schedule:
-    # Saturday 10:00 Asia/Shanghai. The evidence window closes at Saturday 09:00.
+    # Primary: Saturday 10:00 Asia/Shanghai. Recovery attempts: 12:00 and 15:00.
+    # A successful same-day run makes later attempts stop before checkout or model calls.
+    # The evidence window always closes at Saturday 09:00.
     - cron: '0 2 * * 6'
+    - cron: '0 4 * * 6'
+    - cron: '0 7 * * 6'
   workflow_dispatch:
     inputs:
       allow_model:
@@ -37,7 +41,7 @@ jobs:
       DEEPSEEK_THINKING_ENABLED: ${{ vars.DEEPSEEK_THINKING_ENABLED || 'false' }}
       DEEPSEEK_INPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_INPUT_CNY_PER_MILLION || '2' }}
       DEEPSEEK_OUTPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_OUTPUT_CNY_PER_MILLION || '4' }}
-      WEEKLY_BRIEF_ENABLED: ${{ vars.WEEKLY_BRIEF_ENABLED || 'true' }}
+      WEEKLY_BRIEF_ENABLED: ${{ vars.WEEKLY_BRIEF_ENABLED || 'false' }}
       WEEKLY_REFRESH_MAX_MODEL_CALLS: ${{ vars.WEEKLY_REFRESH_MAX_MODEL_CALLS || '5' }}
       WEEKLY_REFRESH_AUTO_MERGE: ${{ vars.WEEKLY_REFRESH_AUTO_MERGE || 'false' }}
       DAILY_REFRESH_MAX_MODEL_CALLS: ${{ vars.DAILY_REFRESH_MAX_MODEL_CALLS || '5' }}
@@ -60,6 +64,37 @@ jobs:
             echo "BASE_MODEL_CALL_LIMIT=$WEEKLY_REFRESH_MAX_MODEL_CALLS" >> "$GITHUB_ENV"
             echo "MODEL_CALL_LIMIT=$WEEKLY_REFRESH_MAX_MODEL_CALLS" >> "$GITHUB_ENV"
             echo "USE_ROLLOVER=false" >> "$GITHUB_ENV"
+          fi
+      - name: Avoid a duplicate scheduled weekly run
+        if: env.RUN_BRIEF == 'true' && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          local_today="$(TZ=Asia/Shanghai date +%F)"
+          successful_run_today=""
+          while IFS=$'\t' read -r run_id created_at; do
+            [[ -n "$run_id" ]] || continue
+            [[ "$run_id" != "$GITHUB_RUN_ID" ]] || continue
+            run_local_day="$(TZ=Asia/Shanghai date -d "$created_at" +%F)"
+            if [[ "$run_local_day" == "$local_today" ]]; then
+              successful_run_today="$run_id"
+              break
+            fi
+          done < <(gh run list \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow weekly-brief.yml \
+            --event schedule \
+            --status success \
+            --limit 20 \
+            --json databaseId,createdAt \
+            --jq '.[] | [.databaseId, .createdAt] | @tsv')
+
+          if [[ -n "$successful_run_today" ]]; then
+            echo "RUN_BRIEF=false" >> "$GITHUB_ENV"
+            echo "Recovery attempt skipped because successful weekly run ${successful_run_today} already completed today."
+            printf '## Weekly trend brief\n\nPlanned skip: successful run `%s` already completed today.\n' \
+              "$successful_run_today" >> "$GITHUB_STEP_SUMMARY"
           fi
       - uses: actions/checkout@v7
         if: env.RUN_BRIEF == 'true'
