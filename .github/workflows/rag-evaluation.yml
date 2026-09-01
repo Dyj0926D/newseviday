@@ -72,6 +72,29 @@ jobs:
           --max-model-calls ${{ inputs.answer_model_calls }}
           --cache data/runtime/rag-answer-cache
           --output data/runtime/eval/answer-review.json
+          > /tmp/answer-review-output.json
+
+      - name: Report answer batch summary
+        working-directory: pipeline
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          packet = json.loads(Path("data/runtime/eval/answer-review.json").read_text())
+          summary = packet["summary"]
+          print(json.dumps({
+              "model": packet["model"],
+              "modelCalls": packet["modelCalls"],
+              "totalTokens": packet["totalTokens"],
+              "estimatedCostCny": packet["estimatedCostCny"],
+              "generatedCaseCount": summary["generatedCaseCount"],
+              "pendingModelCallCount": summary["pendingModelCallCount"],
+              "citationCoverage": summary["citationCoverage"],
+              "citationValidity": summary["citationValidity"],
+              "gate": summary["gate"],
+          }, ensure_ascii=False, indent=2))
+          PY
 
       - name: Run public MultiHop-RAG benchmark
         if: ${{ inputs.run_public_benchmark }}

@@ -55,6 +55,10 @@ def test_claim_parser_detects_missing_and_invalid_citations() -> None:
     assert not claims[2].citation_valid
     assert invalid == [9]
 
+    lead_in, _invalid = analyze_answer_claims("回答分为以下三点：\n第一项事实。[1]", 1)
+    assert not lead_in[0].requires_citation
+    assert lead_in[1].requires_citation
+
 
 def test_answer_harness_is_bounded_cached_and_human_gated(tmp_path: Path) -> None:
     snapshot, index, dataset, embedder = _fixture()
