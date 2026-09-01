@@ -59,12 +59,27 @@ def test_human_reviewed_trial_still_requires_citation_gate() -> None:
         index,
         dataset,
         embedder,
-        citation_coverage=0.9,
+        citation_coverage=0.94,
+        now=datetime(2026, 8, 2, tzinfo=UTC),
+    )
+    assert passed_report.run.gate == "fail"
+    assert passed_report.answer_quality.citation_coverage == 0.94
+    assert passed_report.answer_quality.status == "pending_generated_answer_review"
+
+    passed_report = evaluate_rag(
+        snapshot,
+        index,
+        dataset,
+        embedder,
+        citation_coverage=0.95,
+        citation_validity=1.0,
+        citation_faithfulness=0.9,
+        answer_correctness=0.9,
+        answer_completeness=0.9,
+        answer_human_review_complete=True,
         now=datetime(2026, 8, 2, tzinfo=UTC),
     )
     assert passed_report.run.gate == "pass"
-    assert passed_report.answer_quality.citation_coverage == 0.9
-    assert passed_report.answer_quality.status == "human_reviewed"
 
 
 def test_rag_review_packet_exposes_candidates_and_blank_human_labels() -> None:

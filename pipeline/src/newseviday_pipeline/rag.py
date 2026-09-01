@@ -2,9 +2,13 @@ import hashlib
 import json
 import math
 import os
+import re
+import statistics
 import tempfile
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 
@@ -12,6 +16,7 @@ from newseviday_pipeline.embeddings import EmbeddingProvider, cosine_similarity
 from newseviday_pipeline.models import Article, Chunk, ContentSnapshot, ContractModel
 
 CHUNKING_VERSION = "article-readable-v1"
+RetrievalMode = Literal["chunk_dense", "chunk_bm25"]
 
 
 class IndexedVector(ContractModel):
@@ -157,6 +162,84 @@ def retrieve_dense(
             for rank, (chunk, score) in enumerate(scored[:top_k], start=1)
         ],
     )
+
+
+def lexical_tokens(value: str) -> list[str]:
+    normalized = value.casefold()
+    latin = re.findall(r"[a-z0-9][a-z0-9._+-]*", normalized)
+    cjk_runs = re.findall(r"[\u3400-\u9fff]+", normalized)
+    cjk = [
+        run[index : index + 2]
+        for run in cjk_runs
+        for index in range(max(1, len(run) - 1))
+    ]
+    return latin + cjk
+
+
+def retrieve_bm25(
+    query: str,
+    index: DenseIndexArtifact,
+    *,
+    top_k: int = 10,
+    article_id: str | None = None,
+) -> RetrievalResult:
+    if not query.strip():
+        raise ValueError("query_required")
+    records = [
+        record
+        for record in index.records
+        if article_id is None or record.chunk.article_id == article_id
+    ]
+    query_tokens = set(lexical_tokens(query))
+    frequencies: list[dict[str, int]] = []
+    document_frequency: dict[str, int] = defaultdict(int)
+    lengths: list[int] = []
+    for record in records:
+        counts: dict[str, int] = defaultdict(int)
+        for token in lexical_tokens(record.chunk.text):
+            counts[token] += 1
+        frequencies.append(dict(counts))
+        lengths.append(sum(counts.values()))
+        for token in counts:
+            document_frequency[token] += 1
+    average_length = statistics.fmean(lengths) if lengths else 0.0
+    scored: list[tuple[Chunk, float]] = []
+    for record, counts, length in zip(records, frequencies, lengths, strict=True):
+        score = 0.0
+        for token in query_tokens:
+            frequency = counts.get(token, 0)
+            if not frequency or not average_length:
+                continue
+            frequency_documents = document_frequency[token]
+            inverse_frequency = math.log(
+                1 + (len(records) - frequency_documents + 0.5) / (frequency_documents + 0.5)
+            )
+            score += inverse_frequency * (
+                frequency * 2.5 / (frequency + 1.5 * (0.25 + 0.75 * length / average_length))
+            )
+        scored.append((record.chunk, score))
+    scored.sort(key=lambda item: (-item[1], item[0].id))
+    return RetrievalResult(
+        mode="chunk_bm25",
+        candidates=[
+            RetrievedChunk(chunk=chunk, rank=rank, score=round(score, 8))
+            for rank, (chunk, score) in enumerate(scored[:top_k], start=1)
+        ],
+    )
+
+
+def retrieve(
+    query: str,
+    index: DenseIndexArtifact,
+    embedder: EmbeddingProvider,
+    *,
+    top_k: int = 10,
+    article_id: str | None = None,
+    retrieval_mode: RetrievalMode = "chunk_dense",
+) -> RetrievalResult:
+    if retrieval_mode == "chunk_bm25":
+        return retrieve_bm25(query, index, top_k=top_k, article_id=article_id)
+    return retrieve_dense(query, index, embedder, top_k=top_k, article_id=article_id)
 
 
 def retrieve_with_article_fallback(

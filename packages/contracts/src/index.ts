@@ -82,7 +82,7 @@ export interface StatusData {
   };
   rag: {
     state: CapabilityState;
-    retrievalMode: 'chunk_dense' | 'article_dense' | null;
+    retrievalMode: 'chunk_dense' | 'chunk_bm25' | 'article_dense' | null;
     corpusSnapshotId: string | null;
   };
   protection: {
@@ -314,7 +314,7 @@ export interface RagTrace {
   id: string;
   createdAt: IsoDateTime;
   queryFingerprint: string;
-  retrievalMode: 'chunk_dense' | 'article_dense' | 'hybrid_rerank';
+  retrievalMode: 'chunk_dense' | 'chunk_bm25' | 'article_dense' | 'hybrid_rerank';
   rankedCandidates: Array<{
     chunkId: string;
     rank: number;
@@ -392,7 +392,7 @@ export interface RagCitation {
 
 export interface RagStreamMeta {
   traceId: string;
-  retrievalMode: 'chunk_dense' | 'article_dense';
+  retrievalMode: 'chunk_dense' | 'chunk_bm25' | 'article_dense';
   agentMode?: 'bounded_v1';
   route?: 'single_fact' | 'comparison' | 'timeline' | 'policy_scope';
   retrievalRounds?: number;

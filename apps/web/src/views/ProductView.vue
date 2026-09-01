@@ -364,7 +364,7 @@ const architectureLayers = [
           </li>
           <li>
             <span>Retrieve</span><strong>召回相关候选</strong>
-            <p>按需补充跨语言表达，最多两轮检索，不允许无限循环。</p>
+            <p>以分块 BM25 为低成本主路径，按需补充跨语言表达，最多两轮检索。</p>
           </li>
           <li>
             <span>Gate</span><strong>检查证据是否够用</strong>
@@ -417,7 +417,7 @@ const architectureLayers = [
         <PhFlask :size="24" weight="duotone" aria-hidden="true" />
         <div>
           <strong>可复现检索基线</strong>
-          <p>24 题生产试运行集可以重复运行；正式开放前还需完成人工复核和引用质量评测。</p>
+          <p>24 题内部黄金集与 2,255 题 MultiHop-RAG 公开基准可重复运行；回答正在进行逐句引用评测。</p>
         </div>
         <RouterLink class="button button--secondary" to="/eval">查看质量评测</RouterLink>
       </div>

@@ -121,7 +121,7 @@ const baseEnv: Env = {
   DEEPSEEK_OUTPUT_CNY_PER_MILLION: '1',
   TRACE_HASH_SECRET: 'test-trace-secret-at-least-16',
   IP_HASH_SECRET: 'test-ip-secret-at-least-16',
-  RAG_MIN_SCORE: '0.08',
+  RAG_MIN_SCORE: '1.5',
   ASSETS: {
     async fetch() {
       return Response.json(snapshot);
@@ -242,6 +242,7 @@ describe('RAG endpoint', () => {
     expect(response.headers.get('Content-Type')).toContain('text/event-stream');
     expect(body).toContain('event: meta');
     expect(body).toContain('bounded_v1');
+    expect(body).toContain('chunk_bm25');
     expect(body).toContain('article-rag');
     expect(body).toContain('回答 [1]');
   });

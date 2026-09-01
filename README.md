@@ -47,21 +47,18 @@ flowchart LR
 
 ## RAG 评测基线
 
-当前仓库保留 30 题 Demo 工程集，并维护固定在首个真实生产快照上的 24 题试运行集。公开结果如下：
+当前仓库维护固定在真实生产快照上的 24 题内部黄金集，并接入 MultiHop-RAG 全量可回答问题作为跨文档迁移验证。检索主路径已切换为无需模型调用的 BM25，hashing dense 保留为回滚对照。
 
-| 指标               |   结果 |
-| ------------------ | -----: |
-| Recall@5           | 0.9167 |
-| Recall@10          | 0.9167 |
-| MRR                | 0.7625 |
-| NDCG@10            | 0.7735 |
-| Hit@5              | 1.0000 |
-| 证据门禁无答案识别 | 1.0000 |
-| 旧单阈值拒答基线   | 0.2500 |
-| 可回答问题通过率   | 1.0000 |
-| 本地 p95           |  26 ms |
+| 指标 | 内部 24 题 | MultiHop-RAG 2,255 题 |
+| --- | ---: | ---: |
+| Recall@5 | 1.0000 | 0.7394 |
+| Recall@10 | 1.0000 | 0.8604 |
+| MRR | 0.9167 | 0.8418 |
+| NDCG@10 | 0.9385 | 0.7601 |
+| Hit@5 | 1.0000 | 0.9805 |
+| 本地 p95 | 60 ms | 33 ms |
 
-这些结果来自 40 篇真实文章、69 个分块和 `hashing-chargram-v1` 基线。证据门禁已经达到工程草稿线，但题集仍待人工复核，生成回答的引用覆盖率也没有完成，因此总 Gate 仍为 `fail`，线上 RAG 继续关闭。线上文章级检索与离线分块评测尚未完全对齐。指标、边界和下一轮评测设计见 [RAG 与评测体系](./docs/RAG与评测体系.md)。
+内部集覆盖 40 篇真实文章、69 个分块，24 题检索证据与拒答判断已完成人工复核；MultiHop-RAG 使用固定 revision `71ac0d0b`、609 篇语料和 2,255 道可回答问题。RAGBench 的逐句支持、相关性、证据利用率和完整性标签用于校准回答评测字段。生成回答的逐句引用与忠实度仍在受控评测，因此总 Gate 保持 `fail`，线上 RAG 继续关闭。指标口径与复现命令见 [RAG 与评测体系](./docs/RAG与评测体系.md)。
 
 ## 本地运行
 
@@ -88,7 +85,11 @@ Python 离线评测：
 
 ```powershell
 python -m uv run --project pipeline newseviday-pipeline eval-rag `
-  apps/web/public/data/current.json pipeline/eval/rag-gold-trial-v2.json
+  apps/web/public/data/versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json `
+  pipeline/eval/rag-gold-trial-v3.json --retrieval-mode chunk_bm25
+
+python -m uv run --project pipeline newseviday-pipeline eval-public-rag `
+  --allow-network --sample-size 0 --retrieval-mode bm25
 ```
 
 ## 安全默认值
@@ -128,7 +129,7 @@ migrations/             D1 数据库迁移
 - 当前公开内容来自受控生产快照，日更和周报都通过 Pull Request 审查后发布；
 - DeepSeek 已配置为 V4 Flash，用于受控批量中文整理和周报候选；访客在线 RAG 与画像生成仍由质量 Gate 控制；
 - 已实现 `bounded_v1` 有限步骤 Agentic RAG 编排；它是有固定步数和成本上限的 MVP，不宣称为开放式研究 Agent；
-- RAG Trace 当前输出到 Worker 可观测日志；证据门禁通过草稿线，但人工黄金集和回答引用 Gate 未通过；
+- RAG Trace 记录检索输入、排序候选、注入上下文和停止原因；内部黄金集已签字，生成回答的逐句引用 Gate 尚未完成；
 - `workers.dev` 在部分中国大陆网络下可能无法直连；
 - 开源许可证和信息源使用条款需在仓库转为公开前单独确认。
 

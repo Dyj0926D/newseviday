@@ -24,6 +24,8 @@ Worker 会把问题路由为单事实、对比、时序或范围外请求。显�
 - `pass`、`fail`、`observe` 质量 Gate；
 - 可替换的 Hashing Baseline 和 OpenAI-compatible Embedding 适配层；
 - JSON 评测报告，供网页评测页和 CI 使用。
+- 生成回答 Eval Harness：缓存受控模型调用，记录 retriever input、ranked candidates、injected context、answer、逐句 citation 和人工标签；
+- MultiHop-RAG 公开检索适配器与 RAGBench 回答标签校准适配器，均固定数据 revision 和许可证。
 
 ## 当前生产试运行结果
 
@@ -32,7 +34,7 @@ Worker 会把问题路由为单事实、对比、时序或范围外请求。显�
 | 数据集 | `rag-gold-trial-v3` |
 | 问题数 | 24，其中可回答 12、无答案/越界/安全边界 12 |
 | 语料 | 固定生产快照，40 篇文章、69 个分块 |
-| 检索器 | `hashing-chargram-v1` |
+| 检索器 | `chunk_bm25`；`hashing-chargram-v1` 作为回滚对照 |
 | 评测状态 | `human_reviewed` |
 | Gate | `fail` |
 
@@ -47,24 +49,42 @@ Worker 会把问题路由为单事实、对比、时序或范围外请求。显�
 | 旧单阈值拒答基线 | 0.2500 |
 | 可回答问题通过率 | 1.0000 |
 | 平均检索轮次 | 1.21 / 2 |
-| 本地 p95 | 46 ms |
+| 本地 p95 | 60 ms |
 
-v3 的指标按 Agentic 多轮融合后的前五候选计算，修复了此前“公开指标使用单轮检索、人工包使用多轮检索”的口径错位。2026-08-28 已完成 q10–q12 重新签字，24 题检索证据与拒答判断全部通过；回答引用覆盖率尚未评测，所以 Gate 明确为 `fail`。线上文章级检索与离线分块检索尚未完全对齐，本地延迟也不代表云端生产链路延迟。旧单阈值结果继续公开，用来说明为什么不能只调相似度阈值。
+v3 的指标按 Agentic 多轮融合后的前五候选计算。2026-08-28 已完成 24 题检索证据与拒答判断签字。2026-09-01 把线上与离线默认检索统一为分块 BM25；同一内部集保持 Recall@5/10 1.0、MRR 0.9167，并消除了原先“线上文章级、离线分块级”的口径错位。生成回答的引用覆盖、引用有效性、忠实度、答案正确性和完整性尚未完成人工 Gate，所以总 Gate 仍为 `fail`。旧单阈值结果继续保留，用来说明为什么不能只调相似度阈值。
 
-## 下一轮正式评测
+## 公开权威基准
 
-下一版正式评测集计划从 24 题扩展到 40–50 题，并按场景分层：
+[MultiHop-RAG](https://github.com/yixuantt/MultiHop-RAG) 是 COLM 2024 接收的跨文档 RAG 数据集，包含 2,556 道问题；当前固定 [Hugging Face 数据版本](https://huggingface.co/datasets/yixuantt/MultiHopRAG) revision `71ac0d0bd1f951d2d6b70311f7d2ae404e1ffa82`。其中 301 道无证据题不参与纯检索指标，其余 2,255 道全量运行结果如下：
 
-| 场景 | 目标 |
-| --- | --- |
-| 单篇事实 | 验证基本召回和引用 |
-| 多来源对比 | 验证跨文章证据覆盖 |
-| 时序变化 | 验证时间范围和新旧信息区分 |
-| 跨语言检索 | 验证中文问题对海外资料的召回 |
-| 无答案 | 验证拒答和阈值 |
-| 提示注入 | 验证证据中的恶意指令不会改变系统约束 |
+| 指标 | BM25 结果 |
+| --- | ---: |
+| Recall@5 | 0.7394 |
+| Recall@10 | 0.8604 |
+| Hit@5 | 0.9805 |
+| MRR | 0.8418 |
+| NDCG@10 | 0.7601 |
+| p50 / p95 | 18 / 33 ms |
 
-生成质量将增加引用覆盖率、引用正确率、事实忠实度、答案相关性和人工抽检，并同时记录 Token、费用和端到端延迟。
+对照实验中，article-level hashing 在固定 120 题样本上的 Recall@5 仅 0.2681，BM25 为 0.7646；简单 RRF 混合受到弱 dense 路径拖累，Recall@5 为 0.4875。因此 MVP 选择 BM25 主路径并保留 dense 回滚，不把“混合检索”本身当成质量保证。
+
+[RAGBench](https://huggingface.co/datasets/galileo-ai/ragbench) 固定 revision `97808f3e5fd16ede40bbff6c2949af8139b2eb7b`。当前接入其 TechQA test 的逐句支持、回答相关性、证据利用率和完整性字段，用于校准 Eval Harness 数据结构；RAGBench 自带回答与标签不记作 NewsEviday 模型成绩。
+
+## 生成回答发布 Gate
+
+生成回答采用分批缓存：每次最多 5 次 DeepSeek 调用，重复运行复用已生成答案。每个可回答问题记录完整 Trace，并按以下条件发布：
+
+| Gate | 阈值 |
+| --- | ---: |
+| 事实句引用覆盖率 | ≥ 95% |
+| 引用编号有效率 | 100% |
+| 人工引用忠实度 | ≥ 90% |
+| 人工答案正确率 | ≥ 90% |
+| 人工答案完整率 | ≥ 90% |
+| 检索 Recall@5 / Hit@5 | ≥ 75% / ≥ 85% |
+| p95 | ≤ 4 秒 |
+
+任一答案未生成、任一人工标签未填写、出现无效引用或成本记录不完整时，Gate 保持 `pending/fail`。
 
 ## 有限步骤 Agentic RAG 边界
 
@@ -77,11 +97,20 @@ v3 的指标按 Agentic 多轮融合后的前五候选计算，修复了此前�
 5. 固定步数、Token、时间和成本上限；
 6. 评测报告同时保留旧单阈值基线，避免指标口径被替换后失去对照。
 
-在线 Worker 已具备同类编排，但当前仍保持总开关关闭。只有当人工黄金集、引用覆盖、p95 延迟和费用都通过 Gate，才进入公开试用。
+在线 Worker 与离线 Harness 已统一为 `chunk_bm25`，`article_dense` 可通过 `RAG_RETRIEVAL_MODE` 一键回滚。当前仍保持总开关关闭；回答人工 Gate 通过后，先进入 Cloudflare Preview 受控验证，再决定是否公开。
 
 ## 运行评测
 
 ```powershell
 python -m uv run --project pipeline newseviday-pipeline eval-rag `
-  apps/web/public/data/current.json pipeline/eval/rag-gold-trial-v3.json
+  apps/web/public/data/versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json `
+  pipeline/eval/rag-gold-trial-v3.json --retrieval-mode chunk_bm25
+
+python -m uv run --project pipeline newseviday-pipeline eval-rag-answers `
+  apps/web/public/data/versions/snapshot-20260805T035314Z-a2c2f64d-ai-07822422.json `
+  pipeline/eval/rag-gold-trial-v3.json --retrieval-mode chunk_bm25 `
+  --allow-model --max-model-calls 5
+
+python -m uv run --project pipeline newseviday-pipeline eval-public-rag `
+  --allow-network --sample-size 0 --retrieval-mode bm25
 ```

@@ -154,7 +154,7 @@ components:
               required: [state, retrievalMode, corpusSnapshotId]
               properties:
                 state: { enum: [available, saving-mode, static-only, rate-limited, budget-paused] }
-                retrievalMode: { enum: [chunk_dense, article_dense, null] }
+                retrievalMode: { enum: [chunk_dense, chunk_bm25, article_dense, null] }
                 corpusSnapshotId: { type: [string, 'null'] }
             protection:
               type: object

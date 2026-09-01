@@ -37,6 +37,7 @@ export interface Env {
   DEEPSEEK_OUTPUT_CNY_PER_MILLION?: string;
   RAG_MIN_SCORE?: string;
   RAG_MAX_CONTEXT_CHARS?: string;
+  RAG_RETRIEVAL_MODE?: string;
   PUBLIC_TOPIC_IDS?: string;
   ASSETS?: { fetch(request: Request): Promise<Response> };
   GUARDRAIL_DB?: D1Database;
@@ -179,6 +180,7 @@ export interface RagConfig {
   enabled: boolean;
   minimumScore: number;
   maxContextChars: number;
+  retrievalMode: 'chunk_bm25' | 'article_dense';
   traceSecret: string | null;
 }
 
@@ -286,9 +288,19 @@ export function ragConfig(env: Env): RagConfig {
   if (traceSecret && traceSecret.length < 16) {
     throw new ConfigurationError('TRACE_HASH_SECRET must contain at least 16 characters');
   }
+  const retrievalMode = env.RAG_RETRIEVAL_MODE?.trim() || 'chunk_bm25';
+  if (retrievalMode !== 'chunk_bm25' && retrievalMode !== 'article_dense') {
+    throw new ConfigurationError('RAG_RETRIEVAL_MODE must be chunk_bm25 or article_dense');
+  }
   return {
     enabled: runtime.features.rag,
-    minimumScore: asNumber(env.RAG_MIN_SCORE, 0.08, 0, 1, 'RAG_MIN_SCORE'),
+    minimumScore: asNumber(
+      env.RAG_MIN_SCORE,
+      retrievalMode === 'chunk_bm25' ? 1.5 : 0.08,
+      0,
+      100,
+      'RAG_MIN_SCORE',
+    ),
     maxContextChars: asInteger(
       env.RAG_MAX_CONTEXT_CHARS,
       8_000,
@@ -296,6 +308,7 @@ export function ragConfig(env: Env): RagConfig {
       20_000,
       'RAG_MAX_CONTEXT_CHARS',
     ),
+    retrievalMode,
     traceSecret,
   };
 }
