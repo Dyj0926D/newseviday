@@ -54,6 +54,7 @@ class AnswerEvidence(ContractModel):
 
 class AnswerClaim(ContractModel):
     text: str
+    requires_citation: bool = True
     cited_indexes: list[int] = Field(default_factory=list)
     valid_cited_indexes: list[int] = Field(default_factory=list)
     citation_present: bool
@@ -144,9 +145,11 @@ def analyze_answer_claims(answer: str, citation_count: int) -> tuple[list[Answer
         cited = [int(value) for value in _CITATION_PATTERN.findall(sentence)]
         valid = [value for value in cited if 1 <= value <= citation_count]
         invalid.update(value for value in cited if value not in valid)
+        requires_citation = bool(cited) or not sentence.rstrip().endswith((":", "："))
         claims.append(
             AnswerClaim(
                 text=sentence,
+                requires_citation=requires_citation,
                 cited_indexes=cited,
                 valid_cited_indexes=valid,
                 citation_present=bool(cited),
@@ -217,7 +220,9 @@ def summarize_answer_review(cases: list[AnswerReviewCase]) -> AnswerReviewSummar
     answerable = [case for case in cases if case.answerable]
     generated = [case for case in answerable if case.answer is not None]
     pending_count = sum(case.generation_status == "pending_model_call" for case in answerable)
-    claims = [claim for case in generated for claim in case.claims]
+    claims = [
+        claim for case in generated for claim in case.claims if claim.requires_citation
+    ]
     cited_claims = sum(claim.citation_present and claim.citation_valid for claim in claims)
     reference_count = sum(len(claim.cited_indexes) for claim in claims)
     valid_reference_count = sum(len(claim.valid_cited_indexes) for claim in claims)
