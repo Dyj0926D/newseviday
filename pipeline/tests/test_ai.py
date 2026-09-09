@@ -57,6 +57,9 @@ def topic() -> TopicConfig:
 def prepare_enrichable_article(article: Any, *, now: datetime, suffix: str) -> None:
     """Keep AI-call tests independent from the ordering and scores of the live snapshot."""
 
+    article.source_type = "official"
+    article.evidence_tier = "primary"
+    article.language = "en"
     article.facts.title = f"Data Agent platform capability update {suffix}"
     article.facts.abstract = (
         "The official Data Agent platform update is available for production customers. "
@@ -734,13 +737,10 @@ def test_article_enrichment_caps_new_items_per_source(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[2]
     snapshot = load_snapshot(root / "apps" / "web" / "public" / "data" / "current.json")
     snapshot.articles = snapshot.articles[:4]
-    for article in snapshot.articles:
+    now = datetime(2026, 8, 10, tzinfo=UTC)
+    for index, article in enumerate(snapshot.articles):
+        prepare_enrichable_article(article, now=now, suffix=f"source-cap-{index}")
         article.source_id = "same-source"
-        article.ai = None
-        article.content_score = 0.8
-        article.published_at = datetime(2026, 8, 9, tzinfo=UTC)
-        assert article.content_score_breakdown is not None
-        article.content_score_breakdown.target_relevance = 0.8
     telemetry = EnrichmentTelemetry()
 
     result, model_calls = enrich_snapshot(
@@ -750,7 +750,7 @@ def test_article_enrichment_caps_new_items_per_source(tmp_path: Path) -> None:
         topics=[topic()],
         telemetry=telemetry,
         max_model_calls=5,
-        now=datetime(2026, 8, 10, tzinfo=UTC),
+        now=now,
     )
 
     assert model_calls == 3
