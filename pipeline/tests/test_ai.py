@@ -671,9 +671,20 @@ def test_article_enrichment_does_not_pay_for_stale_backlog(tmp_path: Path) -> No
     snapshot.articles = snapshot.articles[:1]
     article = snapshot.articles[0]
     article.ai = None
+    article.source_type = "official"
+    article.evidence_tier = "primary"
+    article.topic_scores = {"data-agent": 1.0}
     article.content_score = 0.9
     article.published_at = datetime(2026, 5, 1, tzinfo=UTC)
     article.facts.abstract = "High-quality but stale source evidence. " * 8
+    assert article.content_score_breakdown is not None
+    article.content_score_breakdown.target_relevance = 1.0
+    article.content_score_breakdown.event_significance = 0.0
+    article.content_score_breakdown.decision_impact = 0.0
+    article.content_score_breakdown.adoption_momentum = 0.0
+    article.content_score_breakdown.technical_advancement = 0.8
+    article.content_score_breakdown.engineering_applicability = 0.8
+    article.content_score_breakdown.product_industry_impact = 0.8
     telemetry = EnrichmentTelemetry()
 
     _result, model_calls = enrich_snapshot(
