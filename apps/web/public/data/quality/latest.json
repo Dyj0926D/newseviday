@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260909T032721Z-5779a6c2-rolling-9b81e733-ai-ffb843ce-editorial-4ceec336-editorial-ccd0371e",
-  "generatedAt": "2026-09-09T04:26:50.739502Z",
+  "snapshotId": "snapshot-20260909T055949Z-35ae1ac0-rolling-9a80873c-ai-5bc6e0a1",
+  "generatedAt": "2026-09-09T05:59:56.350192Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -76,18 +76,6 @@
     {
       "id": "story-001",
       "articleIds": [
-        "article-3b94d67ca1b43079540d",
-        "article-74f0fb40a0bd4261845a"
-      ],
-      "sourceCount": 2,
-      "sharedTerms": [
-        "agents",
-        "data"
-      ]
-    },
-    {
-      "id": "story-002",
-      "articleIds": [
         "article-3784d7aba9718af9aa19",
         "article-904ea86174aa4acc4bec"
       ],
@@ -98,6 +86,18 @@
         "openai",
         "research",
         "view"
+      ]
+    },
+    {
+      "id": "story-002",
+      "articleIds": [
+        "article-3b94d67ca1b43079540d",
+        "article-74f0fb40a0bd4261845a"
+      ],
+      "sourceCount": 2,
+      "sharedTerms": [
+        "agents",
+        "data"
       ]
     }
   ],
