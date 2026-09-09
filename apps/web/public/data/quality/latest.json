@@ -1,75 +1,76 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260831T070307Z-ab65358e-rolling-52c78560-ai-cac8ff09",
-  "generatedAt": "2026-08-31T07:03:14.271311Z",
+  "snapshotId": "snapshot-20260909T032721Z-5779a6c2-rolling-9b81e733-ai-ffb843ce-editorial-4ceec336",
+  "generatedAt": "2026-09-09T03:46:12.414688Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
-  "contributingSourceCount": 10,
-  "structuredArticleCount": 32,
-  "aiArticleCount": 20,
-  "editorialArticleCount": 12,
+  "contributingSourceCount": 9,
+  "structuredArticleCount": 30,
+  "aiArticleCount": 17,
+  "editorialArticleCount": 13,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
   "sourceCounts": {
     "arxiv-cs-ai": 6,
-    "databricks-blog": 6,
+    "databricks-blog": 4,
     "deepseek-updates": 2,
-    "github-ai-ml": 6,
+    "github-ai-ml": 8,
     "ieee-spectrum-ai": 3,
-    "interconnects": 1,
-    "mit-technology-review-ai": 4,
-    "mlcommons-news": 1,
-    "openai-news": 8,
-    "simon-willison-llms": 3
+    "mit-technology-review-ai": 5,
+    "mlcommons-news": 2,
+    "openai-news": 6,
+    "simon-willison-llms": 4
   },
   "zeroContributionSourceIds": [
     "anthropic-news",
     "dbt-labs-blog",
     "huggingface-blog",
+    "interconnects",
     "metr-blog",
     "qwen-blog"
   ],
   "topicCounts": {
     "data-platform": 2,
     "data-agent": 2,
-    "semantic-layer": 2,
+    "semantic-layer": 3,
     "intelligent-lakehouse": 2,
-    "rag-eval": 10,
-    "metadata-governance": 1,
-    "foundation-models": 23,
-    "ai-products-agents": 23
+    "rag-eval": 11,
+    "metadata-governance": 2,
+    "foundation-models": 22,
+    "ai-products-agents": 25
   },
   "topicGaps": [],
   "visibleTopicCounts": {
     "data-platform": 2,
     "data-agent": 2,
-    "semantic-layer": 2,
-    "intelligent-lakehouse": 1,
-    "rag-eval": 7,
-    "metadata-governance": 1,
-    "foundation-models": 19,
-    "ai-products-agents": 19
+    "semantic-layer": 3,
+    "intelligent-lakehouse": 2,
+    "rag-eval": 6,
+    "metadata-governance": 2,
+    "foundation-models": 17,
+    "ai-products-agents": 18
   },
   "visibleTopicGaps": [],
-  "keySignalEligibleCount": 0,
-  "highSignificanceEventCount": 2,
+  "keySignalEligibleCount": 1,
+  "highSignificanceEventCount": 1,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
     "capability_update": 2,
-    "product_launch": 6,
-    "security_risk": 2
+    "product_launch": 5,
+    "security_risk": 3,
+    "technical_breakthrough": 1
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
   "recentArticleCount": 40,
-  "recentChineseReadyCount": 32,
-  "recentChineseGapCount": 8,
-  "visibleRecent24hCount": 0,
-  "visibleRecent48hCount": 0,
-  "latestVisiblePublishedAt": "2026-08-26T20:12:53Z",
+  "recentChineseReadyCount": 30,
+  "recentChineseGapCount": 10,
+  "visibleRecent24hCount": 4,
+  "visibleRecent48hCount": 4,
+  "latestVisiblePublishedAt": "2026-09-09T03:00:00Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [
     {
@@ -87,18 +88,20 @@
     {
       "id": "story-002",
       "articleIds": [
-        "article-13844026d0b31ab87e4a",
-        "article-1f08b431314013b7175a"
+        "article-3784d7aba9718af9aa19",
+        "article-904ea86174aa4acc4bec"
       ],
       "sourceCount": 2,
       "sharedTerms": [
-        "agentic",
-        "workflows"
+        "acceleration",
+        "inside",
+        "openai",
+        "research",
+        "view"
       ]
     }
   ],
   "issues": [
-    "近 30 天有 8 条外文内容待中文整理",
-    "近 24 小时没有中文可见新内容"
+    "近 30 天有 10 条外文内容待中文整理"
   ]
 }
