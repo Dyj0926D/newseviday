@@ -6,7 +6,7 @@ on:
       answer_model_calls:
         description: Maximum paid answer calls for this run
         required: true
-        default: "5"
+        default: '5'
       run_public_benchmark:
         description: Run the no-model MultiHop-RAG benchmark
         required: true
@@ -28,7 +28,7 @@ jobs:
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
       DEEPSEEK_BASE_URL: ${{ vars.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' }}
-      DEEPSEEK_THINKING_ENABLED: "false"
+      DEEPSEEK_THINKING_ENABLED: 'false'
       DEEPSEEK_INPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_INPUT_CNY_PER_MILLION || '4' }}
       DEEPSEEK_OUTPUT_CNY_PER_MILLION: ${{ vars.DEEPSEEK_OUTPUT_CNY_PER_MILLION || '12' }}
     steps:
@@ -36,7 +36,7 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: '3.12'
           cache: pip
           cache-dependency-path: pipeline/pyproject.toml
 
@@ -50,6 +50,56 @@ jobs:
           key: rag-answer-cache-v1-${{ github.run_id }}
           restore-keys: |
             rag-answer-cache-v1-
+
+      - name: Restore answer cache from a retained evaluation artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          cache_dir="pipeline/data/runtime/rag-answer-cache"
+          mkdir -p "$cache_dir"
+          if find "$cache_dir" -type f -print -quit | grep -q .; then
+            echo "The Actions cache already contains generated answers."
+            exit 0
+          fi
+
+          previous_run_id=""
+          artifact_name=""
+          while IFS= read -r candidate_run_id; do
+            [[ -n "$candidate_run_id" ]] || continue
+            [[ "$candidate_run_id" != "$GITHUB_RUN_ID" ]] || continue
+            candidate_artifact="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${candidate_run_id}/artifacts" \
+              --jq '[.artifacts[] | select((.expired | not) and (.name | startswith("rag-evaluation-")))] | .[0].name // empty')"
+            if [[ -n "$candidate_artifact" ]]; then
+              previous_run_id="$candidate_run_id"
+              artifact_name="$candidate_artifact"
+              break
+            fi
+          done < <(gh run list \
+            --repo "$GITHUB_REPOSITORY" \
+            --workflow rag-evaluation.yml \
+            --status success \
+            --limit 20 \
+            --json databaseId \
+            --jq '.[].databaseId')
+
+          if [[ -z "$artifact_name" ]]; then
+            echo "No retained RAG evaluation artifact was available; starting with an empty answer cache."
+            exit 0
+          fi
+
+          artifact_dir="$(mktemp -d)"
+          gh run download "$previous_run_id" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "$artifact_name" \
+            --dir "$artifact_dir"
+          if [[ -d "$artifact_dir/rag-answer-cache" ]]; then
+            cp -R "$artifact_dir/rag-answer-cache/." "$cache_dir/"
+            echo "Restored generated answers from run ${previous_run_id}."
+          else
+            echo "The retained artifact predates persistent answer-cache uploads."
+          fi
 
       - name: Run internal retrieval Gate
         working-directory: pipeline
@@ -111,6 +161,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: rag-evaluation-${{ github.run_number }}
-          path: pipeline/data/runtime/eval/*.json
+          path: |
+            pipeline/data/runtime/eval/*.json
+            pipeline/data/runtime/rag-answer-cache/
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
