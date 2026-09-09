@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-09T05:20:00Z",
+  "articles": [
+    {
+      "contentHash": "3ed744a746dbeca2327c716be495b732f5e2c0fa590f6b471e7de9e68febcb65",
+      "titleZh": "AI 推理重塑内存与存储架构：优化目标走向系统协同",
+      "summaryZh": "MIT Technology Review 分析 AI 推理基础设施的变化：持续、分布式且对延迟敏感的工作负载，使算力、内存带宽、存储吞吐和网络无法继续单点优化。架构选择需要共同衡量性能、每瓦效率、成本、弹性与后续扩展能力。",
+      "whyItMatters": "AI 应用的瓶颈会沿完整数据路径迁移；模型之外的内存、存储与网络设计直接影响响应速度和单位任务成本。",
+      "keyPoints": [
+        "推理工作负载持续运行且分布广",
+        "内存、存储和网络需要协同优化",
+        "评价维度扩展到性能、能耗与成本",
+        "架构需为规模扩展和故障恢复预留空间"
+      ]
+    },
+    {
+      "contentHash": "5a4ebf72d872f557d81bf9e84ab1473a4b290f695b5294fa8b820258cc7e174b",
+      "titleZh": "从 Loop 到 Harness：AI Agent 工程术语背后的运行模式",
+      "summaryZh": "GitHub 将 Loop Engineering 定义为围绕 Agent 设计可重复运行的系统，并以定时获取任务、执行、验证和异常升级为例。Ralph Loop 通过反复执行计划—行动—检查推进复杂任务，但会增加 Token 与计算成本；成熟的 Harness 还需加入技能、可观测性、验证、路由和检查点。",
+      "whyItMatters": "Agent 能否稳定完成长任务，取决于循环控制、上下文管理、验证与恢复机制，不能只依赖一次提示词效果。",
+      "keyPoints": [
+        "Loop 将单次提示扩展为可重复流程",
+        "Ralph Loop 适合拆解长任务但成本更高",
+        "Harness 负责技能、观测、验证和路由",
+        "异常升级与检查点决定运行可控性"
+      ]
+    },
+    {
+      "contentHash": "90ecd7215fed9d557e837206f655d254e28e908cd0a255f78cf21dcf86b1b98d",
+      "titleZh": "Agent 降本不能只压缩单次输出，要优化任务级总成本",
+      "summaryZh": "GitHub 指出，缩短单次工具输出可能迫使 Agent 重新读取结果或再次执行命令，反而增加总 Token、时延和费用。其优化先在 Agent 编码基准上离线评估，再通过线上受控实验验证，重点包括保留有效上下文、移除无效格式、压缩指令和减少额外检索。",
+      "whyItMatters": "Agent 成本应以任务完成质量、总调用量和端到端时延共同衡量，局部节省容易造成全局效率下降。",
+      "keyPoints": [
+        "单次 Token 数不能代表任务效率",
+        "上下文不足会引发重复读取与重试",
+        "改动先做离线基准再做线上实验",
+        "优化目标是任务结果与整体成本"
+      ]
+    },
+    {
+      "contentHash": "4253abd625b5a31f05f06df3dfdafef6f62ac067a943c116e3e5bb11fa0501f3",
+      "titleZh": "MLPerf Storage v3 加入 KV Cache、向量数据库与 S3 测试",
+      "summaryZh": "MLCommons 发布 MLPerf Storage v3.0，新增长语言模型推理 KV Cache 读写测试和向量数据库索引、查询测试，并在 POSIX 之外加入 S3 对象存储访问层。新版本把训练检查点、推理缓存和向量检索等存储路径拆开衡量。",
+      "whyItMatters": "AI 基础设施评测开始覆盖 RAG 与推理的数据路径，团队可以用标准化负载定位存储瓶颈并指导容量规划。",
+      "keyPoints": [
+        "新增 KV Cache 读写测试",
+        "新增向量数据库索引与查询测试",
+        "支持 S3 与 POSIX 两类访问层",
+        "训练和推理存储路径分项评估"
+      ]
+    }
+  ],
+  "brief": {
+    "id": "brief-2026-08-29-2026-09-05-v1",
+    "title": "Agent 工程进入 Harness、语义治理与系统评测阶段",
+    "periodStart": "2026-08-29T01:00:00Z",
+    "periodEnd": "2026-09-05T00:59:59.999999Z",
+    "publishedAt": "2026-09-09T05:20:00Z",
+    "sections": [
+      {
+        "heading": "Agent 工程从提示词优化转向运行 Harness 与全局效率",
+        "body": "GitHub 将 Loop、验证、路由、可观测性和检查点放进 Agent Harness，并用离线基准与线上受控实验说明：压缩单次输出可能触发重复读取和重试，成本应按任务结果评估。Databricks 同期把 AI 数据治理扩展到业务上下文、知识与本体。三条信息共同指向一套更完整的工程对象：运行编排、语义上下文、质量验证和端到端成本。判断边界是，现有证据主要来自厂商工程实践，跨产品的通用效果仍需更多独立数据验证。",
+        "evidenceIds": [
+          "evidence-5a4ebf72d872f557d81b",
+          "evidence-90ecd7215fed9d557e83",
+          "evidence-a57bbab4719b39315ebb"
+        ]
+      },
+      {
+        "heading": "AI 基础设施评测开始覆盖推理与 RAG 的数据路径",
+        "body": "MLCommons 在 MLPerf Storage v3.0 中加入 KV Cache、向量数据库与 S3 访问测试，把推理缓存、向量索引和对象存储纳入可复现基准。MIT Technology Review 则从系统架构角度指出，持续且延迟敏感的推理负载要求算力、内存、存储和网络协同优化。两条证据表明，AI 基础设施的评价口径正从单点算力扩展到完整数据路径、能耗与任务成本。判断边界是，基准结果仍需结合具体模型、数据规模和线上流量验证。",
+        "evidenceIds": [
+          "evidence-4253abd625b5a31f05f0",
+          "evidence-3ed744a746dbeca2327c"
+        ]
+      }
+    ]
+  }
+}

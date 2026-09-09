@@ -1,14 +1,14 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260909T032721Z-5779a6c2-rolling-9b81e733-ai-ffb843ce-editorial-4ceec336",
-  "generatedAt": "2026-09-09T03:46:12.414688Z",
+  "snapshotId": "snapshot-20260909T032721Z-5779a6c2-rolling-9b81e733-ai-ffb843ce-editorial-4ceec336-editorial-ccd0371e",
+  "generatedAt": "2026-09-09T04:26:50.739502Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
   "contributingSourceCount": 9,
-  "structuredArticleCount": 30,
+  "structuredArticleCount": 34,
   "aiArticleCount": 17,
-  "editorialArticleCount": 13,
+  "editorialArticleCount": 17,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
@@ -47,10 +47,10 @@
     "data-agent": 2,
     "semantic-layer": 3,
     "intelligent-lakehouse": 2,
-    "rag-eval": 6,
+    "rag-eval": 9,
     "metadata-governance": 2,
-    "foundation-models": 17,
-    "ai-products-agents": 18
+    "foundation-models": 19,
+    "ai-products-agents": 20
   },
   "visibleTopicGaps": [],
   "keySignalEligibleCount": 1,
@@ -66,8 +66,8 @@
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
   "recentArticleCount": 40,
-  "recentChineseReadyCount": 30,
-  "recentChineseGapCount": 10,
+  "recentChineseReadyCount": 34,
+  "recentChineseGapCount": 6,
   "visibleRecent24hCount": 4,
   "visibleRecent48hCount": 4,
   "latestVisiblePublishedAt": "2026-09-09T03:00:00Z",
@@ -102,6 +102,6 @@
     }
   ],
   "issues": [
-    "近 30 天有 10 条外文内容待中文整理"
+    "近 30 天有 6 条外文内容待中文整理"
   ]
 }
