@@ -1,27 +1,27 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260909T055949Z-35ae1ac0-rolling-9a80873c-ai-5bc6e0a1",
-  "generatedAt": "2026-09-09T05:59:56.350192Z",
+  "snapshotId": "snapshot-20260910T055923Z-87151ed8-rolling-6591ff01-ai-604e0609",
+  "generatedAt": "2026-09-10T05:59:34.993987Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
   "contributingSourceCount": 9,
   "structuredArticleCount": 34,
-  "aiArticleCount": 17,
-  "editorialArticleCount": 17,
+  "aiArticleCount": 18,
+  "editorialArticleCount": 16,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
   "sourceCounts": {
     "arxiv-cs-ai": 6,
-    "databricks-blog": 4,
-    "deepseek-updates": 2,
+    "databricks-blog": 5,
+    "deepseek-updates": 3,
     "github-ai-ml": 8,
     "ieee-spectrum-ai": 3,
-    "mit-technology-review-ai": 5,
+    "mit-technology-review-ai": 4,
     "mlcommons-news": 2,
     "openai-news": 6,
-    "simon-willison-llms": 4
+    "simon-willison-llms": 3
   },
   "zeroContributionSourceIds": [
     "anthropic-news",
@@ -33,33 +33,33 @@
   ],
   "topicCounts": {
     "data-platform": 2,
-    "data-agent": 2,
-    "semantic-layer": 3,
+    "data-agent": 3,
+    "semantic-layer": 4,
     "intelligent-lakehouse": 2,
     "rag-eval": 11,
-    "metadata-governance": 2,
+    "metadata-governance": 3,
     "foundation-models": 22,
-    "ai-products-agents": 25
+    "ai-products-agents": 23
   },
   "topicGaps": [],
   "visibleTopicCounts": {
     "data-platform": 2,
-    "data-agent": 2,
+    "data-agent": 3,
     "semantic-layer": 3,
     "intelligent-lakehouse": 2,
     "rag-eval": 9,
     "metadata-governance": 2,
-    "foundation-models": 19,
-    "ai-products-agents": 20
+    "foundation-models": 18,
+    "ai-products-agents": 18
   },
   "visibleTopicGaps": [],
-  "keySignalEligibleCount": 1,
+  "keySignalEligibleCount": 0,
   "highSignificanceEventCount": 1,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
     "capability_update": 2,
-    "product_launch": 5,
+    "product_launch": 4,
     "security_risk": 3,
     "technical_breakthrough": 1
   },
@@ -68,9 +68,9 @@
   "recentArticleCount": 40,
   "recentChineseReadyCount": 34,
   "recentChineseGapCount": 6,
-  "visibleRecent24hCount": 4,
-  "visibleRecent48hCount": 4,
-  "latestVisiblePublishedAt": "2026-09-09T03:00:00Z",
+  "visibleRecent24hCount": 2,
+  "visibleRecent48hCount": 6,
+  "latestVisiblePublishedAt": "2026-09-10T00:00:00Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [
     {
