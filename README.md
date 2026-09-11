@@ -2,7 +2,7 @@
 
 > 有证据、可追溯、可暂停的 AI 产品与技术情报站。
 
-[在线体验](https://newseviday.dyjnewseviday-worker.workers.dev) · [产品说明](./docs/产品说明.md) · [技术架构](./docs/工程架构说明.md) · [RAG 与评测](./docs/RAG与评测体系.md)
+[在线体验](https://newseviday.dyjnewseviday-worker.workers.dev) · [产品说明](./docs/产品说明.md) · [技术架构](./docs/工程架构说明.md) · [RAG 与评测](./docs/RAG与评测体系.md) · [换机与远程运维](./docs/换机迁移与远程运维.md)
 
 NewsEviday 面向产品经理、AI 产品经理和数据产品从业者，整理海内外 AI、数据平台与产品情报。产品通过双语信息流、来源证据、关注偏好、趋势简报和引用式问答，降低跨语言阅读与信息核验成本。
 
@@ -67,11 +67,12 @@ flowchart LR
 ```powershell
 git clone https://github.com/Dyj0926D/newseviday.git
 cd newseviday
-npm ci
 python -m pip install uv
-python -m uv sync --project pipeline --frozen
+.\scripts\bootstrap.ps1
 npm run dev
 ```
+
+更换设备和浏览器远程控制说明见 [换机迁移与远程运维](./docs/换机迁移与远程运维.md)。
 
 完整检查：
 

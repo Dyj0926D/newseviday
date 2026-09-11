@@ -46,11 +46,14 @@ def merge_rolling_inventory(
     cutoff = incoming.generated_at - timedelta(days=window_days)
     accepted_by_hash = {article.content_hash: article for article in accepted.articles}
     accepted_by_url = {article.canonical_url: article for article in accepted.articles}
-    accepted_ready_hashes = {
-        article.content_hash
+    accepted_ready_urls = {
+        article.canonical_url
         for article in accepted.articles
         if _article_time(article) >= cutoff and chinese_display_ready(article)
     }
+    # A source may update the title or excerpt at the same canonical URL. That
+    # changes content_hash but must not create a second public article with the
+    # same stable URL-derived article id.
     candidates: dict[str, Article] = {}
 
     for item in incoming.articles:
@@ -61,16 +64,16 @@ def merge_rolling_inventory(
         if previous is not None and previous.ai is not None:
             article.ai = previous.ai.model_copy(deep=True)
         apply_article_scoring(article, anchor=incoming.generated_at)
-        candidates[article.content_hash] = article
+        candidates[article.canonical_url] = article
 
     for item in accepted.articles:
-        if item.content_hash in candidates:
+        if item.canonical_url in candidates:
             continue
         if _article_time(item) < cutoff or not chinese_display_ready(item):
             continue
         article = item.model_copy(deep=True)
         apply_article_scoring(article, anchor=incoming.generated_at)
-        candidates[article.content_hash] = article
+        candidates[article.canonical_url] = article
 
     ranked_ready = sorted(
         (
@@ -93,39 +96,45 @@ def merge_rolling_inventory(
 
     selected: list[Article] = []
     selected_hashes: set[str] = set()
+    selected_urls: set[str] = set()
     source_counts: dict[str, int] = {}
 
     def select(article: Article) -> bool:
-        if article.content_hash in selected_hashes or len(selected) >= max_total:
+        if (
+            article.content_hash in selected_hashes
+            or article.canonical_url in selected_urls
+            or len(selected) >= max_total
+        ):
             return False
         limit = _source_limit(article.source_id, max_per_source=max_per_source)
         if source_counts.get(article.source_id, 0) >= limit:
             return False
         selected.append(article)
         selected_hashes.add(article.content_hash)
+        selected_urls.add(article.canonical_url)
         source_counts[article.source_id] = source_counts.get(article.source_id, 0) + 1
         return True
 
     new_ready_count = sum(
-        article.content_hash not in accepted_ready_hashes and chinese_display_ready(article)
+        article.canonical_url not in accepted_ready_urls and chinese_display_ready(article)
         for article in incoming.articles
         if _article_time(article) >= cutoff
     )
     desired_ready = min(
         max_total,
-        max(minimum_chinese_ready, len(accepted_ready_hashes) + new_ready_count),
+        max(minimum_chinese_ready, len(accepted_ready_urls) + new_ready_count),
     )
     # Reserve the user's focus topics before the Chinese-ready pool can fill all
     # inventory slots. Enrichment runs after this merge, so a selected foreign-
     # language focus item can still receive its Chinese editorial package.
     covered_topics: set[str] = set()
     focus_cutoff = incoming.generated_at - timedelta(days=7)
-    incoming_hashes = {article.content_hash for article in incoming.articles}
+    incoming_urls = {article.canonical_url for article in incoming.articles}
     focus_candidates = sorted(
         (
             article
             for article in candidates.values()
-            if article.content_hash in incoming_hashes
+            if article.canonical_url in incoming_urls
             if _article_time(article) >= focus_cutoff
             and FOCUS_TOPIC_IDS.intersection(article.topic_scores)
             and article.content_score_breakdown is not None

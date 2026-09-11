@@ -131,6 +131,35 @@ def test_rolling_inventory_preserves_ai_on_a_reserved_focus_candidate() -> None:
     assert result.articles[0].ai == target.ai
 
 
+def test_rolling_inventory_replaces_same_url_when_source_content_changes() -> None:
+    accepted = load_snapshot(SNAPSHOT)
+    previous = next(article.model_copy(deep=True) for article in accepted.articles if article.ai)
+    accepted.articles = [previous]
+
+    incoming = accepted.model_copy(deep=True)
+    incoming.snapshot_id = "snapshot-source-revision"
+    incoming.generated_at = accepted.generated_at + timedelta(hours=1)
+    revised = previous.model_copy(deep=True)
+    revised.content_hash = hashlib.sha256(b"same-url-revised-content").hexdigest()
+    revised.facts.abstract = f"{previous.facts.abstract or ''} Revised source excerpt."
+    revised.ai = None
+    revised.collected_at = incoming.generated_at
+    incoming.articles = [revised]
+
+    result = merge_rolling_inventory(
+        incoming,
+        accepted,
+        max_total=1,
+        minimum_chinese_ready=1,
+    )
+
+    assert len(result.articles) == 1
+    assert result.articles[0].id == previous.id
+    assert result.articles[0].canonical_url == previous.canonical_url
+    assert result.articles[0].content_hash == revised.content_hash
+    assert result.articles[0].ai == previous.ai
+
+
 def test_release_guard_passes_after_five_new_chinese_items() -> None:
     accepted, incoming = _fresh_candidate(chinese_ready_count=5)
     candidate = merge_rolling_inventory(incoming, accepted)
