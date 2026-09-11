@@ -47,3 +47,13 @@ def test_published_web_snapshot_conforms_to_python_contract() -> None:
     assert snapshot.source_count == len(snapshot.sources)
     assert 1 <= len(snapshot.articles) <= 40
     assert any(article.ai and article.ai.why_it_matters for article in snapshot.articles)
+
+
+def test_snapshot_rejects_duplicate_article_identity() -> None:
+    project_root = Path(__file__).resolve().parents[2]
+    snapshot = load_snapshot(project_root / "apps" / "web" / "public" / "data" / "current.json")
+    payload = snapshot.model_dump(mode="json")
+    payload["articles"].append(payload["articles"][0].copy())
+
+    with pytest.raises(ValidationError, match="duplicate_article_id"):
+        ContentSnapshot.model_validate(payload)

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 SCHEMA_VERSION: Literal["1.0.0"] = "1.0.0"
 SourceType = Literal[
@@ -365,3 +365,16 @@ class ContentSnapshot(ContractModel):
     articles: list[Article] = Field(default_factory=list)
     evidence: list[Evidence] = Field(default_factory=list)
     briefs: list[Brief] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_collection_identity(self) -> "ContentSnapshot":
+        identity_fields = {
+            "article_id": [article.id for article in self.articles],
+            "article_canonical_url": [article.canonical_url for article in self.articles],
+            "article_content_hash": [article.content_hash for article in self.articles],
+            "evidence_id": [item.id for item in self.evidence],
+        }
+        for label, values in identity_fields.items():
+            if len(values) != len(set(values)):
+                raise ValueError(f"duplicate_{label}")
+        return self
