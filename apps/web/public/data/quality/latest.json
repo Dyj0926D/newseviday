@@ -1,27 +1,27 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260911T060125Z-b5478995-rolling-702b2ebc-ai-54fa77bf",
-  "generatedAt": "2026-09-11T06:47:51.678907Z",
+  "snapshotId": "snapshot-20260912T065330Z-8d3ea272-rolling-997e2878-ai-25f0eb71",
+  "generatedAt": "2026-09-12T06:53:44.887284Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
   "contributingSourceCount": 10,
   "structuredArticleCount": 33,
-  "aiArticleCount": 20,
-  "editorialArticleCount": 13,
+  "aiArticleCount": 21,
+  "editorialArticleCount": 12,
   "missingAbstractCount": 0,
   "missingAbstractRate": 0.0,
   "missingAbstractBySource": {},
   "sourceCounts": {
     "arxiv-cs-ai": 5,
     "databricks-blog": 6,
-    "deepseek-updates": 3,
+    "deepseek-updates": 2,
     "github-ai-ml": 8,
     "ieee-spectrum-ai": 3,
     "interconnects": 1,
     "mit-technology-review-ai": 4,
     "mlcommons-news": 2,
-    "openai-news": 5,
+    "openai-news": 6,
     "simon-willison-llms": 3
   },
   "zeroContributionSourceIds": [
@@ -36,10 +36,10 @@
     "data-agent": 4,
     "semantic-layer": 3,
     "intelligent-lakehouse": 3,
-    "rag-eval": 11,
+    "rag-eval": 10,
     "metadata-governance": 3,
     "foundation-models": 21,
-    "ai-products-agents": 20
+    "ai-products-agents": 21
   },
   "topicGaps": [],
   "visibleTopicCounts": {
@@ -47,19 +47,19 @@
     "data-agent": 4,
     "semantic-layer": 3,
     "intelligent-lakehouse": 3,
-    "rag-eval": 9,
+    "rag-eval": 8,
     "metadata-governance": 3,
     "foundation-models": 16,
-    "ai-products-agents": 16
+    "ai-products-agents": 17
   },
   "visibleTopicGaps": [],
   "keySignalEligibleCount": 0,
-  "highSignificanceEventCount": 1,
+  "highSignificanceEventCount": 0,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
-    "capability_update": 2,
-    "product_launch": 4,
+    "capability_update": 1,
+    "product_launch": 3,
     "security_risk": 3,
     "technical_breakthrough": 1
   },
@@ -70,22 +70,9 @@
   "recentChineseGapCount": 7,
   "visibleRecent24hCount": 2,
   "visibleRecent48hCount": 4,
-  "latestVisiblePublishedAt": "2026-09-10T15:05:10Z",
+  "latestVisiblePublishedAt": "2026-09-11T18:26:10Z",
   "trendBriefCount": 1,
-  "potentialStoryClusters": [
-    {
-      "id": "story-001",
-      "articleIds": [
-        "article-3b94d67ca1b43079540d",
-        "article-74f0fb40a0bd4261845a"
-      ],
-      "sourceCount": 2,
-      "sharedTerms": [
-        "agents",
-        "data"
-      ]
-    }
-  ],
+  "potentialStoryClusters": [],
   "issues": [
     "近 30 天有 7 条外文内容待中文整理"
   ]
