@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260912T065330Z-8d3ea272-rolling-997e2878-ai-25f0eb71",
-  "generatedAt": "2026-09-12T06:53:44.887284Z",
+  "snapshotId": "snapshot-20260913T061151Z-6b5c9091-rolling-167c1b5d-ai-57c6df87",
+  "generatedAt": "2026-09-13T06:12:12.545630Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -68,12 +68,13 @@
   "recentArticleCount": 40,
   "recentChineseReadyCount": 33,
   "recentChineseGapCount": 7,
-  "visibleRecent24hCount": 2,
-  "visibleRecent48hCount": 4,
+  "visibleRecent24hCount": 0,
+  "visibleRecent48hCount": 2,
   "latestVisiblePublishedAt": "2026-09-11T18:26:10Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [],
   "issues": [
-    "近 30 天有 7 条外文内容待中文整理"
+    "近 30 天有 7 条外文内容待中文整理",
+    "近 24 小时没有中文可见新内容"
   ]
 }
