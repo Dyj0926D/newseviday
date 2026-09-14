@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260913T061151Z-6b5c9091-rolling-167c1b5d-ai-57c6df87",
-  "generatedAt": "2026-09-13T06:12:12.545630Z",
+  "snapshotId": "snapshot-20260914T061840Z-21c6ffe6-rolling-fbc90a88-ai-008f4c43",
+  "generatedAt": "2026-09-14T06:18:48.414287Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -69,7 +69,7 @@
   "recentChineseReadyCount": 33,
   "recentChineseGapCount": 7,
   "visibleRecent24hCount": 0,
-  "visibleRecent48hCount": 2,
+  "visibleRecent48hCount": 0,
   "latestVisiblePublishedAt": "2026-09-11T18:26:10Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [],
