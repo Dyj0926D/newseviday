@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260915T061041Z-c0be4b54-rolling-204300d5-ai-29500bac",
-  "generatedAt": "2026-09-15T06:10:51.192405Z",
+  "snapshotId": "snapshot-20260916T060304Z-168913c0-rolling-b68e8232-ai-a1ab2abc",
+  "generatedAt": "2026-09-16T06:03:14.339395Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -19,10 +19,10 @@
     "github-ai-ml": 8,
     "ieee-spectrum-ai": 4,
     "interconnects": 1,
-    "mit-technology-review-ai": 4,
+    "mit-technology-review-ai": 3,
     "mlcommons-news": 2,
     "openai-news": 5,
-    "simon-willison-llms": 2
+    "simon-willison-llms": 3
   },
   "zeroContributionSourceIds": [
     "anthropic-news",
@@ -32,45 +32,45 @@
     "qwen-blog"
   ],
   "topicCounts": {
-    "data-platform": 2,
+    "data-platform": 3,
     "data-agent": 4,
     "semantic-layer": 3,
     "intelligent-lakehouse": 3,
-    "rag-eval": 10,
+    "rag-eval": 8,
     "metadata-governance": 3,
     "foundation-models": 20,
     "ai-products-agents": 21
   },
   "topicGaps": [],
   "visibleTopicCounts": {
-    "data-platform": 2,
+    "data-platform": 3,
     "data-agent": 4,
     "semantic-layer": 3,
     "intelligent-lakehouse": 3,
-    "rag-eval": 9,
+    "rag-eval": 8,
     "metadata-governance": 3,
-    "foundation-models": 17,
-    "ai-products-agents": 17
+    "foundation-models": 16,
+    "ai-products-agents": 18
   },
   "visibleTopicGaps": [],
   "keySignalEligibleCount": 0,
-  "highSignificanceEventCount": 0,
+  "highSignificanceEventCount": 1,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
     "adoption_momentum": 1,
     "capability_update": 1,
     "product_launch": 3,
-    "security_risk": 3,
-    "technical_breakthrough": 1
+    "security_risk": 2,
+    "technical_breakthrough": 2
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
   "recentArticleCount": 40,
   "recentChineseReadyCount": 35,
   "recentChineseGapCount": 5,
-  "visibleRecent24hCount": 2,
-  "visibleRecent48hCount": 2,
-  "latestVisiblePublishedAt": "2026-09-14T16:30:54Z",
+  "visibleRecent24hCount": 1,
+  "visibleRecent48hCount": 3,
+  "latestVisiblePublishedAt": "2026-09-15T16:27:45Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [],
   "issues": [
