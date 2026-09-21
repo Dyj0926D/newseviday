@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d",
-  "generatedAt": "2026-09-20T14:52:56.128766Z",
+  "snapshotId": "snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b",
+  "generatedAt": "2026-09-21T06:22:42.094152Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -34,22 +34,22 @@
   "topicCounts": {
     "data-platform": 2,
     "data-agent": 5,
-    "semantic-layer": 3,
+    "semantic-layer": 2,
     "intelligent-lakehouse": 4,
-    "rag-eval": 10,
+    "rag-eval": 11,
     "metadata-governance": 2,
-    "foundation-models": 19,
+    "foundation-models": 20,
     "ai-products-agents": 21
   },
   "topicGaps": [],
   "visibleTopicCounts": {
     "data-platform": 2,
     "data-agent": 3,
-    "semantic-layer": 3,
+    "semantic-layer": 2,
     "intelligent-lakehouse": 3,
-    "rag-eval": 7,
+    "rag-eval": 8,
     "metadata-governance": 2,
-    "foundation-models": 14,
+    "foundation-models": 15,
     "ai-products-agents": 15
   },
   "visibleTopicGaps": [],
@@ -61,7 +61,7 @@
     "capability_update": 1,
     "product_launch": 2,
     "security_risk": 2,
-    "technical_breakthrough": 2
+    "technical_breakthrough": 3
   },
   "highValueChineseGapCount": 0,
   "recentWindowDays": 30,
@@ -70,7 +70,7 @@
   "recentChineseGapCount": 10,
   "visibleRecent24hCount": 0,
   "visibleRecent48hCount": 0,
-  "latestVisiblePublishedAt": "2026-09-15T16:27:45Z",
+  "latestVisiblePublishedAt": "2026-09-18T14:54:44Z",
   "trendBriefCount": 1,
   "potentialStoryClusters": [],
   "issues": [
