@@ -1,7 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "updatedAt": "2026-09-20T14:52:54.638205Z",
+  "updatedAt": "2026-09-21T06:22:39.228358Z",
   "snapshots": [
+    {
+      "snapshotId": "snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b",
+      "generatedAt": "2026-09-21T06:22:39.228358Z",
+      "path": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json",
+      "articleCount": 40
+    },
     {
       "snapshotId": "snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d",
       "generatedAt": "2026-09-20T14:52:54.638205Z",
@@ -239,12 +245,20 @@
   ],
   "articles": [
     {
+      "id": "article-f8713e4d677e021d030e",
+      "title": "AutoRecLab：描述实验即可生成推荐系统代码",
+      "originalTitle": "AutoRecLab: Describe the Experiment, Get the Code!",
+      "sourceId": "arxiv-cs-ai",
+      "publishedAt": "2026-09-18T14:54:44Z",
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
+    },
+    {
       "id": "article-28a856bbd21f270c95fb",
       "title": "Database for AI Agents: 5 Evaluation Criteria",
       "originalTitle": "Database for AI Agents: 5 Evaluation Criteria",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-09-17T17:27:40Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-71ca52f40c8e50d8b84b",
@@ -252,7 +266,7 @@
       "originalTitle": "Migrating the GitHub Copilot runtime to Rust, using Copilot",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-09-17T00:26:43Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-b365401fd38a766d27b4",
@@ -260,7 +274,7 @@
       "originalTitle": "Claude Cowork and chat are now one Claude",
       "sourceId": "simon-willison-llms",
       "publishedAt": "2026-09-16T18:09:49Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-db8c4c3a69c9977c9ff6",
@@ -268,7 +282,7 @@
       "originalTitle": "Fivetran + dbt Labs Announces New Capabilities to Make Enterprise Data Agent-Ready at dbt Summit 2026",
       "sourceId": "dbt-labs-blog",
       "publishedAt": "2026-09-16T17:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-a1bc8087954f92f12be2",
@@ -276,7 +290,7 @@
       "originalTitle": "MLCommons Sets Participation Record with New MLPerf Inference v6.1 Benchmark Results",
       "sourceId": "mlcommons-news",
       "publishedAt": "2026-09-16T14:45:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-59f80a0835b79e2bc5e0",
@@ -284,7 +298,7 @@
       "originalTitle": "Building the materials foundation for AI",
       "sourceId": "mit-technology-review-ai",
       "publishedAt": "2026-09-16T12:47:34Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-27cd99b1dbe344203177",
@@ -292,7 +306,7 @@
       "originalTitle": "Hex turns complex analysis into visual reports with GPT‑6 Astra",
       "sourceId": "openai-news",
       "publishedAt": "2026-09-16T12:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-9da1736b8159c9ab0a15",
@@ -300,7 +314,7 @@
       "originalTitle": "Gemini Live audio",
       "sourceId": "simon-willison-llms",
       "publishedAt": "2026-09-15T22:47:07Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-a71773401049d364d570",
@@ -308,7 +322,7 @@
       "originalTitle": "FlashVector: Agent for Hierarchical Model Serving Stack Optimization",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-09-15T16:27:45Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-7aa1900ec86b227b56f0",
@@ -316,7 +330,7 @@
       "originalTitle": "CiteGuard-RAG: A Validation-Centered AI System for Evidence-Grounded Question Answering",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-09-14T16:30:54Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-876402fef721cf37c77f",
@@ -324,7 +338,7 @@
       "originalTitle": "AI agents blew the whistle on their cheating colleagues",
       "sourceId": "mit-technology-review-ai",
       "publishedAt": "2026-09-14T16:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-3e1dd1f8d6770e09e44a",
@@ -332,7 +346,7 @@
       "originalTitle": "How OpenAI Used Its Own LLMs to Design Its Jalapeño Chip",
       "sourceId": "ieee-spectrum-ai",
       "publishedAt": "2026-09-14T14:06:31Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-968c32634dc2a1cb83f0",
@@ -348,7 +362,7 @@
       "originalTitle": "Marketing ops as code: Automating events from planning to follow-up on GitHub",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-09-11T18:26:10Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-1514b7d9e6775ac96904",
@@ -372,7 +386,7 @@
       "originalTitle": "Rapidly scaling online storage to serve over 1 billion ChatGPT users",
       "sourceId": "openai-news",
       "publishedAt": "2026-09-11T10:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-cbffbbffa6fab47ebf98",
@@ -388,7 +402,7 @@
       "originalTitle": "Unifying governance across engines and catalogs in the Open Lakehouse",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-09-10T15:05:10Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-6a886414536a09e3da65",
@@ -396,7 +410,7 @@
       "originalTitle": "Now everyone can put data to work",
       "sourceId": "openai-news",
       "publishedAt": "2026-09-10T15:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-822302ddf98f243401f7",
@@ -404,7 +418,7 @@
       "originalTitle": "DeepSeek-V4.1-Flash Release",
       "sourceId": "deepseek-updates",
       "publishedAt": "2026-09-10T00:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-b8a75fb67d8179220690",
@@ -428,7 +442,7 @@
       "originalTitle": "Adaptive Instructed-Retriever: Frontier-Quality Search at 2x Lower Latency",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-09-09T13:30:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-3bfcc9ef73e9cf9d71e9",
@@ -436,7 +450,7 @@
       "originalTitle": "Evaluation-First AI Agents: How Zepto Scales Customer Support on Databricks and MLflow",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-09-09T03:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-503e9c2326e78f3e5469",
@@ -444,7 +458,7 @@
       "originalTitle": "How GPT-5.6 Sol helps run quantum computing experiments",
       "sourceId": "openai-news",
       "publishedAt": "2026-09-08T17:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-cd0a8720a1d3203940b6",
@@ -452,7 +466,7 @@
       "originalTitle": "AI Slop Is Changing How Engineers Review Code",
       "sourceId": "ieee-spectrum-ai",
       "publishedAt": "2026-09-08T16:16:49Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-65f0c7f8c10de5a2d16e",
@@ -460,7 +474,7 @@
       "originalTitle": "Latest open artifacts (#24): Motif-3, GLM-5.3, Hy4-preview and open model licenses",
       "sourceId": "interconnects",
       "publishedAt": "2026-09-08T14:15:25Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-1dcea8b0f8acab144d94",
@@ -468,7 +482,7 @@
       "originalTitle": "Introducing ChatGPT Images 2.5",
       "sourceId": "openai-news",
       "publishedAt": "2026-09-08T11:30:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-904ea86174aa4acc4bec",
@@ -484,7 +498,7 @@
       "originalTitle": "Research acceleration: The view inside OpenAI",
       "sourceId": "openai-news",
       "publishedAt": "2026-09-06T08:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-8011b5c7a765c26277ae",
@@ -492,7 +506,7 @@
       "originalTitle": "Building Trustworthy Graph-Agentic RAG for Social Good: Architectures, Failure Propagation, and Assurance by Construction",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-09-06T05:04:06Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-ae6b695c91ba14573c02",
@@ -508,7 +522,7 @@
       "originalTitle": "Architecting memory and storage in the AI era",
       "sourceId": "mit-technology-review-ai",
       "publishedAt": "2026-09-04T18:39:19Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-2ff277e441a4b0dab8ec",
@@ -516,7 +530,7 @@
       "originalTitle": "Project HydraFusion: Frontier quality via multi-model orchestration",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-09-04T16:04:14Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-45df2e1f3aab23f9fb2a",
@@ -524,7 +538,7 @@
       "originalTitle": "Governance beyond security: knowledge, context & ontology on the lakehouse",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-09-03T20:20:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-c24e45e869c7b353ed20",
@@ -532,7 +546,7 @@
       "originalTitle": "GitHub Copilot app for Beginners: Run several agents at once",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-09-03T16:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-a4a0601f1f87b20e4be1",
@@ -540,7 +554,7 @@
       "originalTitle": "Decoding the new AI lingo: Loops, harnesses, squads, hill climbing… oh my!",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-09-02T21:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-fbfd060b861c994281af",
@@ -548,7 +562,7 @@
       "originalTitle": "How we make AI coding more cost efficient without sacrificing task quality",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-09-02T18:00:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-0e71ce2ffcabb4c1d666",
@@ -556,7 +570,7 @@
       "originalTitle": "MLCommons Releases New MLPerf Storage v3.0 Benchmark Results",
       "sourceId": "mlcommons-news",
       "publishedAt": "2026-09-01T14:53:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-1a67cf9fc56a8187f32c",
@@ -596,7 +610,7 @@
       "originalTitle": "GitHub Copilot app for Beginners: Automate Dependabot pull request triage",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-26T20:12:53Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-74f0fb40a0bd4261845a",
@@ -604,7 +618,7 @@
       "originalTitle": "Trace Integrity for LLM Data Agents: A Vision for Auditable Structured Reasoning in Real-World Systems",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-26T17:15:24Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-f79c5348879621cc8def",
@@ -612,7 +626,7 @@
       "originalTitle": "Introducing the MLPerf End-to-End RAG Inference Benchmark",
       "sourceId": "mlcommons-news",
       "publishedAt": "2026-08-26T14:50:00Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-c075cd6b7534fee8da4f",
@@ -636,7 +650,7 @@
       "originalTitle": "How to evaluate LLMs before production",
       "sourceId": "github-ai-ml",
       "publishedAt": "2026-08-25T21:35:11Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-31306ee0ff96ccca4ab2",
@@ -644,7 +658,7 @@
       "originalTitle": "A Dual-Dimensional LLM Framework for Automated Item Incidental Content Similarity Analysis in Large-Scale Assessments",
       "sourceId": "arxiv-cs-ai",
       "publishedAt": "2026-08-25T17:07:16Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-41aae00944844630ceca",
@@ -660,7 +674,7 @@
       "originalTitle": "Data Mesh vs. Data Fabric: Key Differences and How the Lakehouse Resolves the Debate",
       "sourceId": "databricks-blog",
       "publishedAt": "2026-08-25T16:05:34Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-9054647ed85ebc2ee434",
@@ -692,7 +706,7 @@
       "originalTitle": "Anthropic’s best AI model struggles to attract users as cheaper tools thrive",
       "sourceId": "simon-willison-llms",
       "publishedAt": "2026-08-23T20:24:52Z",
-      "snapshotPath": "versions/snapshot-20260920T145250Z-479f0308-rolling-7688bb52-ai-45bcc84d.json"
+      "snapshotPath": "versions/snapshot-20260921T062235Z-667da89a-rolling-4ebb8ec5-ai-4d01154b.json"
     },
     {
       "id": "article-cb79535dc95043aaeff8",
