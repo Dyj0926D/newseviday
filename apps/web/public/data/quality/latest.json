@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "snapshotId": "snapshot-20260921T171227Z-7a4da53c-rolling-d18dad62-ai-49d45a1e",
-  "generatedAt": "2026-09-21T17:12:35.342230Z",
+  "snapshotId": "snapshot-20260923T055928Z-98d61796-rolling-d6c1a026-ai-ab8b3c82",
+  "generatedAt": "2026-09-23T05:59:36.585838Z",
   "gate": "observe",
   "articleCount": 40,
   "configuredSourceCount": 15,
@@ -18,12 +18,12 @@
     "dbt-labs-blog": 1,
     "deepseek-updates": 1,
     "github-ai-ml": 8,
-    "ieee-spectrum-ai": 2,
-    "interconnects": 1,
-    "mit-technology-review-ai": 3,
-    "mlcommons-news": 3,
+    "ieee-spectrum-ai": 4,
+    "interconnects": 2,
+    "mit-technology-review-ai": 2,
+    "mlcommons-news": 2,
     "openai-news": 7,
-    "simon-willison-llms": 3
+    "simon-willison-llms": 2
   },
   "zeroContributionSourceIds": [
     "anthropic-news",
@@ -33,13 +33,13 @@
   ],
   "topicCounts": {
     "data-platform": 2,
-    "data-agent": 5,
+    "data-agent": 4,
     "semantic-layer": 2,
     "intelligent-lakehouse": 4,
-    "rag-eval": 10,
+    "rag-eval": 13,
     "metadata-governance": 2,
     "foundation-models": 21,
-    "ai-products-agents": 22
+    "ai-products-agents": 20
   },
   "topicGaps": [],
   "visibleTopicCounts": {
@@ -49,18 +49,17 @@
     "intelligent-lakehouse": 3,
     "rag-eval": 8,
     "metadata-governance": 2,
-    "foundation-models": 16,
-    "ai-products-agents": 16
+    "foundation-models": 15,
+    "ai-products-agents": 17
   },
   "visibleTopicGaps": [],
   "keySignalEligibleCount": 0,
-  "highSignificanceEventCount": 1,
+  "highSignificanceEventCount": 0,
   "highSignificanceChineseGapCount": 0,
   "eventTypeCounts": {
-    "adoption_momentum": 1,
     "capability_update": 1,
     "product_launch": 2,
-    "security_risk": 2,
+    "security_risk": 3,
     "technical_breakthrough": 3
   },
   "highValueChineseGapCount": 0,
@@ -69,10 +68,24 @@
   "recentChineseReadyCount": 31,
   "recentChineseGapCount": 9,
   "visibleRecent24hCount": 1,
-  "visibleRecent48hCount": 1,
-  "latestVisiblePublishedAt": "2026-09-21T11:56:56Z",
+  "visibleRecent48hCount": 2,
+  "latestVisiblePublishedAt": "2026-09-22T15:00:05Z",
   "trendBriefCount": 1,
-  "potentialStoryClusters": [],
+  "potentialStoryClusters": [
+    {
+      "id": "story-001",
+      "articleIds": [
+        "article-5b206843ef211175e25c",
+        "article-73461b3e97af0d93277a"
+      ],
+      "sourceCount": 2,
+      "sharedTerms": [
+        "gpt",
+        "luna",
+        "sol"
+      ]
+    }
+  ],
   "issues": [
     "近 30 天有 9 条外文内容待中文整理"
   ]
